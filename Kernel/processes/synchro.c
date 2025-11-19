@@ -169,13 +169,13 @@ int64_t sem_wait(char *name)
 		return ERROR;
 	}
 
-	_cli();
+	// _cli();
 
 	release_lock(&sem->lock);
 
 	scheduler_block_process(pid);
 
-	_sti();
+	// _sti();
 
 	return 0;
 }

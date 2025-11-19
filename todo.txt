@@ -1,12 +1,20 @@
 completar bien los md
 
-ordenar el todo
+syscalls a otro asm
 
-registros en struct
+
+
+piano
 
 no desbloquar al que esta bloqueado en un semaforo
 
-prio 0 en fg
+prio 0 en fg si es uno solo
+
+registros en struct
+
+poner gdb
+
+rework mm
 
 rework driver de video y que solo el de fg pueda dibujar
 
@@ -18,7 +26,4 @@ jueguito con delta t
 
 ver cleanup resources (leaks en bg)
 
-poner gdb
-
-rework mm
 

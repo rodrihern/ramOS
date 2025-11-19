@@ -448,11 +448,6 @@ int scheduler_get_current_pid(void)
 	return -1;
 }
 
-void scheduler_yield(void)
-{
-	scheduler_force_reschedule();
-}
-
 int scheduler_kill_process(pid_t pid)
 {
 	if (!scheduler_initialized) {
@@ -510,7 +505,7 @@ int scheduler_kill_process(pid_t pid)
 		}
 	}
 	if (pid == current_pid) {
-		scheduler_yield();
+		scheduler_force_reschedule();
 	}
 	return 0;
 }
@@ -686,7 +681,7 @@ void scheduler_exit_process(int64_t ret_value)
 			scheduler_unblock_process(parent->pid);
 		}
 	}
-	scheduler_yield();
+	scheduler_force_reschedule();
 }
 
 // Bloquea al proceso actual hasta que el hijo indicado termine. Devuelve el status del hijo si ya

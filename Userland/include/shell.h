@@ -10,13 +10,13 @@ typedef struct {
 	char             *description;
 	command_handler_t handler;
 
-} BuiltinCommand;
+} builtin_command_t;
 
 typedef struct {
 	char           *name;
 	char           *description;
 	process_entry_t entry;
-} ExternalProgram;
+} external_program_t;
 
 #define INPUT_MAX 128
 #define PROMPT "> "

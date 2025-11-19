@@ -16,21 +16,21 @@ static void username_cmd(int argc, char *argv[]);
 
 static bool is_cmd_background(char *line);
 
-static BuiltinCommand builtins[] = {
+static builtin_command_t builtins[] = {
         {"clear", "clears the screen", &cls},
         {"help", "provides information about available commands", &help},
         {"username", "changes the shell username", &username_cmd},
 
         {NULL, NULL, NULL}};
 
-static ExternalProgram programs[] = {
+static external_program_t programs[] = {
         {"ps", "prints to STDOUT information about current processes", &ps_main},
         {"mem", "prints to STDOUT memory usage information", &mem_main},
         {"pipes", "prints to STDOUT information about open pipes", &pipes_main},
         {"time", "prints system time to STDOUT", &time_main},
         {"date", "prints system date to STDOUT", &date_main},
         {"echo", "prints to STDOUT its params", &echo_main},
-        {"print", "prints a string to STDOUT with a delay indefinately", &print_main},
+        {"print", "prints a string to STDOUT and yields indefinately", &print_main},
         {"cat", "reads from STDIN and prints it to STDOUT", &cat_main},
         {"red", "reads from STDIN and prints it to STDERR", &red_main},
         {"rainbow", "reads from STDIN and prints one char to each color fd", &rainbow_main},

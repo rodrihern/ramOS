@@ -11,6 +11,7 @@
 #include "memory_manager.h"
 #include "scheduler.h"
 #include "synchro.h"
+#include "interrupts.h"
 
 #define MIN_CHAR 0
 #define MAX_CHAR 256
@@ -331,7 +332,8 @@ static int64_t sys_nice(int pid, int new_prio)
 
 static void sys_yield()
 {
-	scheduler_yield();
+	// _hlt();
+	scheduler_force_reschedule();
 }
 
 static int sys_processes_info(process_info_t *buf, int max_count)

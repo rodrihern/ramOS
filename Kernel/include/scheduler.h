@@ -29,7 +29,6 @@ int scheduler_add_process(
 int  scheduler_remove_process(pid_t pid);
 int  scheduler_set_priority(pid_t pid, uint8_t priority);
 int  scheduler_get_priority(pid_t pid);
-void scheduler_yield(void);
 int  scheduler_kill_process(pid_t pid);
 PCB *scheduler_get_process(pid_t pid);
 void scheduler_exit_process(int64_t retValue);
