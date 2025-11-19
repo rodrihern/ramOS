@@ -50,9 +50,6 @@ int open_fd(int fd);
 // si ambos counts llegan a 0, destruye el pipe automáticamente
 int close_fd(int fd);
 
-// para matar el foreground gruop
-void pipe_on_process_killed(pid_t victim);
-
 // llena el buffer con información de los pipes activos
 // retorna el número de pipes copiados, o -1 si hay error
 int pipes_info(pipe_info_t *buf, int max_count);

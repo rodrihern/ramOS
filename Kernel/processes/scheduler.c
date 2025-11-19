@@ -473,8 +473,6 @@ int scheduler_kill_process(pid_t pid)
 
 	if (pid == foreground_process_pid) {
 		foreground_process_pid = SHELL_PID;
-		pipe_on_process_killed(
-		        killed_process->pid); // matamos el foreground group si estaba pipeado
 	}
 
 	killed_process->status       = PS_TERMINATED;

@@ -6,8 +6,6 @@ piano
 
 no desbloquar al que esta bloqueado en un semaforo
 
-ver si anda ok matar solo al de fg con los pipes
-
 ver en scheduler si en lugar de hacer un timer_tick directamente llamamos a schedule
 
 registros en struct
