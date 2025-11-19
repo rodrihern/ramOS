@@ -12,7 +12,7 @@ extern void  *setup_initial_stack(void *caller, int pid, void *stack_pointer, vo
 static char **duplicate_argv(const char **argv, int argc, memory_manager_ADT mm);
 static void   process_caller(int pid);
 static void
-init_pcb_base_fields(PCB *p, int pid, process_entry_t entry, const char *name, bool killable);
+init_pcb_base_fields(PCB *p, int pid, process_entry_t entry, const char *name, uint8_t killable);
 static int  init_pcb_stack(PCB *p, memory_manager_ADT mm);
 static int  init_pcb_argv(PCB *p, int argc, const char **argv, memory_manager_ADT mm);
 static void init_pcb_file_descriptors(PCB *p, int fds[2]);
@@ -20,7 +20,7 @@ static void free_pcb_argv(PCB *p, memory_manager_ADT mm);
 static void free_pcb_stack(PCB *p, memory_manager_ADT mm);
 
 static void
-init_pcb_base_fields(PCB *p, int pid, process_entry_t entry, const char *name, bool killable)
+init_pcb_base_fields(PCB *p, int pid, process_entry_t entry, const char *name, uint8_t killable)
 {
 	p->pid        = pid;
 	p->parent_pid = scheduler_get_current_pid();
@@ -84,7 +84,7 @@ PCB *proc_create(int             pid,
                  int             argc,
                  const char    **argv,
                  const char     *name,
-                 bool            killable,
+                 uint8_t            killable,
                  int             fds[2])
 {
 	if (!entry || !name || argc < 0) {
@@ -205,7 +205,7 @@ static char **duplicate_argv(const char **argv, int argc, memory_manager_ADT mm)
 // check
 static void process_caller(int pid)
 {
-	PCB *p = scheduler_get_process(pid);
+	PCB *p = scheduler_get_pcb(pid);
 	if (p == NULL || p->entry == NULL) {
 		scheduler_exit_process(-1);
 		return;

@@ -22,21 +22,21 @@ static queue_t ready_queue[PRIORITY_COUNT] = {0};
 static pid_t    current_pid            = NO_PID;
 static uint8_t  process_count          = 0;
 static uint64_t total_cpu_ticks        = 0;
-static bool     force_reschedule       = false;
-static bool     scheduler_initialized  = false;
+static uint8_t     force_reschedule       = false;
+static uint8_t     scheduler_initialized  = false;
 static pid_t    foreground_process_pid = NO_PID;
 
 static PCB        *pick_next_process(void);
 static void        reparent_children_to_init(pid_t pid);
 static int         init(int argc, char **argv);
 static int         scheduler_add_init();
-static inline bool pid_is_valid(pid_t pid);
+static inline uint8_t pid_is_valid(pid_t pid);
 static void        cleanup_all_processes(void);
 static int         create_shell();
 static void        close_open_fds(PCB *p);
 static void        apply_aging(void);
 
-static inline bool pid_is_valid(pid_t pid)
+static inline uint8_t pid_is_valid(pid_t pid)
 {
 	return pid >= 0 && pid <= MAX_PID;
 }
@@ -604,7 +604,7 @@ void scheduler_destroy(void)
 }
 
 // En scheduler.c
-PCB *scheduler_get_process(pid_t pid)
+PCB *scheduler_get_pcb(pid_t pid)
 {
 	if (!scheduler_initialized || !pid_is_valid(pid)) {
 		return NULL;

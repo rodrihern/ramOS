@@ -222,7 +222,7 @@ int remove_process_from_all_semaphore_queues(uint32_t pid)
 		}
 
 		if (sem->owner_pids[pid] == OCCUPIED) {
-			if (scheduler_get_process(pid)->status == PS_BLOCKED) {
+			if (scheduler_get_pcb(pid)->status == PS_BLOCKED) {
 				acquire_lock(&sem->lock);
 				remove_process_from_queue(sem, pid);
 				release_lock(&sem->lock);

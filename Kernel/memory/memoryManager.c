@@ -15,7 +15,7 @@ typedef struct mem_block {
 	size_t            size; // Tamaño del bloque (sin incluir header)
 	struct mem_block *next; // Siguiente bloque en la lista
 	struct mem_block *prev; // Bloque anterior
-	bool              free; // true si está libre, false si está ocupado
+	uint8_t              free; // true si está libre, false si está ocupado
 	uint32_t magic; // Número mágico para verificación.  Al liberar (free_memory) se verifica
 	                // que block->magic == MAGIC_NUMBER antes de confiar en el puntero; si
 	                // alguien pasó una dirección que no proviene del gestor (o fue

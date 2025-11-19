@@ -141,7 +141,7 @@ void handle_pressed_key() {
     if (is_letter && raw == 'd' && control) {
       if (!pressed_keys['d' - 'a']) { // para que solo se llame una vez
         pid_t fg_pid = scheduler_get_foreground_pid();
-        PCB *fg_process = scheduler_get_process(fg_pid);
+        PCB *fg_process = scheduler_get_pcb(fg_pid);
         if (fg_process) {
           if (fg_process->read_fd == STDIN) {
             write_buffer(EOF);

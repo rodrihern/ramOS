@@ -1,9 +1,5 @@
 completar bien los md
 
-uint8_t los bool
-
-el de fg siempre prio 0, no hacer desde la shell
-
 openfds que sean un array
 
 que el videodriver se llame video y sus funciones empiecen video_

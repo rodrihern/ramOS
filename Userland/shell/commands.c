@@ -14,7 +14,7 @@ static void cls(int argc, char *argv[]);
 static void help(int argc, char *argv[]);
 static void username_cmd(int argc, char *argv[]);
 
-static bool is_cmd_background(char *line);
+static uint8_t is_cmd_background(char *line);
 
 static builtin_command_t builtins[] = {
         {"clear", "clears the screen", &cls},
@@ -124,7 +124,7 @@ static process_entry_t find_program_entry(char *name)
 	return NULL;
 }
 
-static int try_external_program(char *name, int argc, char **argv, bool background)
+static int try_external_program(char *name, int argc, char **argv, uint8_t background)
 {
 	process_entry_t entry = find_program_entry(name);
 
@@ -155,7 +155,7 @@ static int try_external_program(char *name, int argc, char **argv, bool backgrou
 
 // Ejecuta dos comandos conectados por pipe: left_cmd | right_cmd
 static int execute_piped_commands(
-        char **left_tokens, int left_count, char **right_tokens, int right_count, bool background)
+        char **left_tokens, int left_count, char **right_tokens, int right_count, uint8_t background)
 {
 	// Validar que ambos comandos existen
 	char *left_cmd  = left_tokens[0];
@@ -226,8 +226,10 @@ static int execute_piped_commands(
 		return 1;
 	}
 
-	// Foreground: establecer el último proceso como foreground para poder matarlo con Ctrl+C
+	// foreground el de la izquierda para que pueda leer de teclado
 	sys_set_foreground_process(pid_left);
+	sys_nice(pid_left, MAX_PRIORITY);
+	sys_nice(pid_right, MAX_PRIORITY);
 
 	// Esperar a que terminen ambos procesos
 	sys_wait(pid_left);
@@ -240,9 +242,9 @@ static int execute_piped_commands(
 	return 1;
 }
 
-static bool is_cmd_background(char *line)
+static uint8_t is_cmd_background(char *line)
 {
-	bool background = false;
+	uint8_t background = false;
 
 	int len = strlen(line);
 	int i   = len - 1;
@@ -260,7 +262,7 @@ static bool is_cmd_background(char *line)
 
 void process_line(char *line)
 {
-	bool background = is_cmd_background(line);
+	uint8_t background = is_cmd_background(line);
 
 	char *tokens[MAX_ARGS];
 	int   token_count = parse_input(line, tokens);
