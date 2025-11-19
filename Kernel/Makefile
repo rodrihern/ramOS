@@ -4,13 +4,6 @@ include Makefile.inc
 GCCFLAGS += -Wall
 
 KERNEL=kernel.bin
-SOURCES=$(wildcard *.c)
-SOURCES_IDT=$(wildcard idt/*.c)
-SOURCES_DRIVERS=$(wildcard drivers/*.c)
-SOURCES_ASM=$(wildcard asm/*.asm)
-SOURCES_ASM_IDT=$(wildcard idt/*.asm)
-SOURCES_PROCESSES=$(wildcard processes/*.c)
-SOURCES_UTILS=$(wildcard utils/*.c)
 
 # ============================================
 #  SELECCIÓN CONDICIONAL DEL MEMORY MANAGER
@@ -32,22 +25,32 @@ endif
 
 OBJDIR := obj
 
-OBJECTS=$(SOURCES:%.c=$(OBJDIR)/%.o) \
-        $(SOURCES_IDT:%.c=$(OBJDIR)/%.o) \
-        $(SOURCES_DRIVERS:%.c=$(OBJDIR)/%.o) \
-        $(SOURCES_MEMORY:%.c=$(OBJDIR)/%.o) \
-        $(SOURCES_PROCESSES:%.c=$(OBJDIR)/%.o) \
-        $(SOURCES_UTILS:%.c=$(OBJDIR)/%.o)
-OBJECTS_ASM=$(SOURCES_ASM:%.asm=$(OBJDIR)/%.o) $(SOURCES_ASM_IDT:%.asm=$(OBJDIR)/%.o)
+src_to_obj = $(OBJDIR)/$(subst /,_,$(basename $(1))).o
+
+C_SOURCES=$(wildcard *.c) \
+          $(wildcard drivers/*.c) \
+          $(wildcard idt/*.c) \
+          $(wildcard processes/*.c) \
+          $(wildcard utils/*.c)
+
+C_SOURCES+=$(SOURCES_MEMORY)
+
+ASM_SOURCES=$(wildcard asm/*.asm) $(wildcard idt/*.asm)
 
 LOADERSRC=loader.asm
-LOADEROBJECT=$(OBJDIR)/loader.o
+LOADEROBJECT=$(call src_to_obj,$(LOADERSRC))
 STATICLIBS=
+
+C_OBJECTS=$(foreach src,$(C_SOURCES),$(call src_to_obj,$(src)))
+ASM_OBJECTS=$(foreach src,$(ASM_SOURCES) $(LOADERSRC),$(call src_to_obj,$(src)))
+ASM_OBJECTS_NO_LOADER=$(filter-out $(LOADEROBJECT),$(ASM_OBJECTS))
 
 all: $(KERNEL)
 
-$(KERNEL): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM)
-	$(LD) $(LDFLAGS) -T kernel.ld -o $(KERNEL) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS)
+ALL_OBJECTS=$(sort $(C_OBJECTS) $(ASM_OBJECTS_NO_LOADER))
+
+$(KERNEL): $(LOADEROBJECT) $(ALL_OBJECTS) $(STATICLIBS)
+	$(LD) $(LDFLAGS) -T kernel.ld -o $(KERNEL) $(LOADEROBJECT) $(ALL_OBJECTS) $(STATICLIBS)
 	@echo "========================================"
 	@echo "Kernel compiled successfully!"
 ifeq ($(MM),USE_BUDDY)
@@ -57,17 +60,20 @@ else
 endif
 	@echo "========================================"
 
-$(OBJDIR)/%.o: %.c
-	@mkdir -p $(dir $@)
-	$(GCC) $(GCCFLAGS) -I./include -c $< -o $@
+define make-c-rule
+$$(call src_to_obj,$(1)): $(1)
+	@mkdir -p $(OBJDIR)
+	$(GCC) $(GCCFLAGS) -I./include -c $$< -o $$@
+endef
 
-$(OBJDIR)/%.o: %.asm
-	@mkdir -p $(dir $@)
-	$(ASM) $(ASMFLAGS) $< -o $@
+define make-asm-rule
+$$(call src_to_obj,$(1)): $(1)
+	@mkdir -p $(OBJDIR)
+	$(ASM) $(ASMFLAGS) $$< -o $$@
+endef
 
-$(LOADEROBJECT): $(LOADERSRC)
-	@mkdir -p $(dir $@)
-	$(ASM) $(ASMFLAGS) $(LOADERSRC) -o $(LOADEROBJECT)
+$(foreach src,$(C_SOURCES),$(eval $(call make-c-rule,$(src))))
+$(foreach src,$(ASM_SOURCES) $(LOADERSRC),$(eval $(call make-asm-rule,$(src))))
 
 clean:
 	rm -rf $(OBJDIR) *.bin

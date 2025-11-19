@@ -8,32 +8,23 @@ SAMPLE_DATA=0001-sampleDataModule.bin
 
 OBJDIR := obj
 
-# ============================================
-# AGREGAR tests/ aquí
-# ============================================
-SOURCES=$(wildcard *.c)
-SOURCES_SHELL=$(wildcard shell/*.c)
-SOURCES_USRLIB=$(wildcard usrlib/*.c)
 # Recursive wildcard helper for nested program sources (returns files + dirs)
 rwildcard = $(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 
-# Recursively include all C sources under programs/ (filter to keep only *.c, avoid dirs getting into OBJECTS and being rm -rf'ed)
-SOURCES_PROGRAMS := $(filter %.c,$(call rwildcard, programs/, *.c))
-SOURCES_TESTS=$(wildcard tests/*.c)
-SOURCES_ASM=$(wildcard asm/*.asm)
+src_to_obj = $(OBJDIR)/$(subst /,_,$(basename $(1))).o
 
-OBJECTS=$(SOURCES:%.c=$(OBJDIR)/%.o)
-OBJECTS_SHELL=$(SOURCES_SHELL:%.c=$(OBJDIR)/%.o)
-OBJECTS_USRLIB=$(SOURCES_USRLIB:%.c=$(OBJDIR)/%.o)
-OBJECTS_PROGRAMS=$(SOURCES_PROGRAMS:%.c=$(OBJDIR)/%.o)
-OBJECTS_TESTS=$(SOURCES_TESTS:%.c=$(OBJDIR)/%.o)
-OBJECTS_ASM=$(SOURCES_ASM:%.asm=$(OBJDIR)/%.o)
+C_SOURCES=$(wildcard *.c) \
+          $(wildcard shell/*.c) \
+          $(wildcard usrlib/*.c) \
+          $(wildcard tests/*.c)
 
-# Unified deduplicated object list (avoids multiple inclusion of the same .o in link)
-ALL_OBJECTS := $(sort $(OBJECTS) $(OBJECTS_SHELL) $(OBJECTS_USRLIB) $(OBJECTS_PROGRAMS) $(OBJECTS_TESTS) $(OBJECTS_ASM))
+C_SOURCES+=$(filter %.c,$(call rwildcard, programs/, *.c))
 
-# Dynamically find any leftover objects inside programs/ (covers removed sources)
-PROGRAMS_ORPHAN_OBJECTS := $(shell find programs -name '*.o' 2>/dev/null)
+ASM_SOURCES=$(wildcard asm/*.asm)
+
+C_OBJECTS=$(foreach src,$(C_SOURCES),$(call src_to_obj,$(src)))
+ASM_OBJECTS=$(foreach src,$(ASM_SOURCES),$(call src_to_obj,$(src)))
+ALL_OBJECTS=$(sort $(C_OBJECTS) $(ASM_OBJECTS))
 
 # ============================================
 # AGREGAR OBJECTS_TESTS aquí
@@ -44,19 +35,25 @@ rebuild: clean all
 $(MODULE): $(ALL_OBJECTS)
 	$(LD) $(LDFLAGS) -T sampleCodeModule.ld -o $(MODULE) $(ALL_OBJECTS)
 
-$(OBJDIR)/%.o: %.c
-	@mkdir -p $(dir $@)
-	$(GCC) $(GCCFLAGS) -I. -Iinclude -c $< -o $@
+define make-c-rule
+$$(call src_to_obj,$(1)): $(1)
+	@mkdir -p $(OBJDIR)
+	$(GCC) $(GCCFLAGS) -I. -Iinclude -c $$< -o $$@
+endef
 
-$(OBJDIR)/%.o: %.asm
-	@mkdir -p $(dir $@)
-	$(ASM) $(ASMFLAGS) $< -o $@
+define make-asm-rule
+$$(call src_to_obj,$(1)): $(1)
+	@mkdir -p $(OBJDIR)
+	$(ASM) $(ASMFLAGS) $$< -o $$@
+endef
+
+$(foreach src,$(C_SOURCES),$(eval $(call make-c-rule,$(src))))
+$(foreach src,$(ASM_SOURCES),$(eval $(call make-asm-rule,$(src))))
 
 # ============================================
 # AGREGAR tests/*.o aquí
 # ============================================
 clean:
-	find programs -name '*.o' -delete 2>/dev/null || true
 	rm -rf $(OBJDIR) $(MODULE) $(SAMPLE_DATA)
 
 sampleDataModule:

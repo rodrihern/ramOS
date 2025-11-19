@@ -1,14 +1,14 @@
-completar bien los md
+hacer el readme con referencias a los otros repos
 
 sacarle marca de final a los arrays de la shell
 
 openfds que sean un array
 
-que el videodriver se llame video y sus funciones empiecen video_
-
 piano
 
-que las syscalls que devuelven info en un struct lo hagan con un parametro de salida (no es lo mas prolijo pero ya que va a ser desprolijo en un lugar qeu sea desprolijo en todos no?)
+que el videodriver se llame video y sus funciones empiecen video_
+
+que las syscalls que devuelven info en un struct lo hagan con un parametro de salida (no es lo mas prolijo pero ya que va a ser desprolijo en un lugar que sea desprolijo en todos no?)
 
 registros en struct y cambiar tecla de snapshot
 
