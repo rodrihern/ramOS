@@ -1,12 +1,12 @@
 completar bien los md
 
-syscalls a otro asm
-
-piano
+syscalls a otro asm en userland
 
 no desbloquar al que esta bloqueado en un semaforo
 
-ver en scheduler si en lugar de hacer un timer_tick directamente llamamos a schedule
+ordenar archivos a carpetas como me gusten en kernel
+
+piano
 
 registros en struct
 
