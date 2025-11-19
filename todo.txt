@@ -4,7 +4,13 @@ sacarle marca de final a los arrays de la shell
 
 openfds que sean un array
 
+ordenar mejor el todo.txt
+
 piano
+
+refactor timer tick handler para que sea directamente el del scheduler
+
+que time no cuente ticks ya que lo va a hacer el scheduler, que provea funcion para los ms elapsed y refactorizar el sleep con force reschedule
 
 que el videodriver se llame video y sus funciones empiecen video_
 
