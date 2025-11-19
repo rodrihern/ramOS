@@ -1,5 +1,5 @@
-
 all:  bootloader kernel userland image
+rebuild: clean all
 
 bootloader:
 	cd Bootloader; $(MAKE) all
@@ -19,4 +19,4 @@ clean:
 	cd Kernel; $(MAKE) clean
 	cd Userland; $(MAKE) clean
 
-.PHONY: bootloader image collections kernel userland all clean
+.PHONY: bootloader image collections kernel userland all clean rebuild

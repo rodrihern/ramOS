@@ -30,11 +30,18 @@ else
     $(info ========================================)
 endif
 
-OBJECTS=$(SOURCES:.c=.o) $(SOURCES_IDT:.c=.o) $(SOURCES_DRIVERS:.c=.o) $(SOURCES_MEMORY:.c=.o) $(SOURCES_PROCESSES:.c=.o) $(SOURCES_UTILS:.c=.o)
-OBJECTS_ASM=$(SOURCES_ASM:.asm=.o) $(SOURCES_ASM_IDT:.asm=.o)
+OBJDIR := obj
+
+OBJECTS=$(SOURCES:%.c=$(OBJDIR)/%.o) \
+        $(SOURCES_IDT:%.c=$(OBJDIR)/%.o) \
+        $(SOURCES_DRIVERS:%.c=$(OBJDIR)/%.o) \
+        $(SOURCES_MEMORY:%.c=$(OBJDIR)/%.o) \
+        $(SOURCES_PROCESSES:%.c=$(OBJDIR)/%.o) \
+        $(SOURCES_UTILS:%.c=$(OBJDIR)/%.o)
+OBJECTS_ASM=$(SOURCES_ASM:%.asm=$(OBJDIR)/%.o) $(SOURCES_ASM_IDT:%.asm=$(OBJDIR)/%.o)
 
 LOADERSRC=loader.asm
-LOADEROBJECT=$(LOADERSRC:.asm=.o)
+LOADEROBJECT=$(OBJDIR)/loader.o
 STATICLIBS=
 
 all: $(KERNEL)
@@ -50,16 +57,19 @@ else
 endif
 	@echo "========================================"
 
-%.o: %.c
+$(OBJDIR)/%.o: %.c
+	@mkdir -p $(dir $@)
 	$(GCC) $(GCCFLAGS) -I./include -c $< -o $@
 
-%.o: %.asm
+$(OBJDIR)/%.o: %.asm
+	@mkdir -p $(dir $@)
 	$(ASM) $(ASMFLAGS) $< -o $@
 
-$(LOADEROBJECT):
+$(LOADEROBJECT): $(LOADERSRC)
+	@mkdir -p $(dir $@)
 	$(ASM) $(ASMFLAGS) $(LOADERSRC) -o $(LOADEROBJECT)
 
 clean:
-	rm -rf asm/*.o *.o drivers/*.o idt/*.o memory/*.o processes/*.o utils/*.o *.bin
+	rm -rf $(OBJDIR) *.bin
 
 .PHONY: all clean
