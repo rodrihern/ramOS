@@ -53,7 +53,8 @@ typedef struct PCB {
 	// file descriptors
 	int  read_fd;
 	int  write_fd;
-	bool killable; // si false, el proceso no puede ser matado (init/shell)
+	uint8_t killable; // si false, el proceso no puede ser matado (init/shell)
+	uint8_t unblockable;  
 
 	// queues
 	queue_t open_fds; // lista de fds abiertos

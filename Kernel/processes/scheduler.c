@@ -562,6 +562,8 @@ int scheduler_unblock_process(pid_t pid)
 		return -1;
 	}
 
+	process->unblockable = 0;
+
 	return 0;
 }
 

@@ -308,13 +308,22 @@ static int64_t sys_kill(int pid)
 
 // Bloquea un proceso por PID
 static int64_t sys_block(int pid)
-{
-	return (int64_t)scheduler_block_process(pid);
+{	
+	if (scheduler_block_process(pid) < 0) {
+		return -1;
+	}
+	PCB * p = scheduler_get_process(pid);
+	p->unblockable = 1;
+	return 0;
 }
 
 // Desbloquea un proceso por PID
 static int64_t sys_unblock(int pid)
 {
+	PCB * p = scheduler_get_process(pid);
+	if (p == NULL || !p->unblockable) {
+		return -1;
+	}
 	return (int64_t)scheduler_unblock_process(pid);
 }
 

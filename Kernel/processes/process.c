@@ -30,6 +30,7 @@ init_pcb_base_fields(PCB *p, int pid, process_entry_t entry, const char *name, b
 	p->return_value                      = 0;
 	p->waiting_on                        = NO_PID;
 	p->killable                          = killable;
+	p->unblockable = 0;
 }
 
 static int init_pcb_stack(PCB *p, memory_manager_ADT mm)

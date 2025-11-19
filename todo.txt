@@ -1,12 +1,20 @@
 completar bien los md
 
-solo poder desbloquear un proceso si fue bloqueado manualmente
+uint8_t los bool
 
-ordenar archivos a carpetas como me gusten en kernel
+el de fg siempre prio 0, no hacer desde la shell
+
+openfds que sean un array
+
+que el videodriver se llame video y sus funciones empiecen video_
 
 piano
 
-registros en struct (conlleva cambios en syscalls)
+registros en struct y cambiar tecla de snapshot
+
+pantalla de inicio
+
+ordenar archivos a carpetas como me gusten en kernel
 
 --------
 
