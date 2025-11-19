@@ -12,7 +12,11 @@ SAMPLE_DATA=0001-sampleDataModule.bin
 SOURCES=$(wildcard *.c)
 SOURCES_SHELL=$(wildcard shell/*.c)
 SOURCES_USRLIB=$(wildcard usrlib/*.c)
-SOURCES_PROGRAMS=$(wildcard programs/*.c)
+# Recursive wildcard helper for nested program sources
+rwildcard = $(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
+
+# Recursively include all C sources under programs/
+SOURCES_PROGRAMS=$(call rwildcard, programs/, *.c)
 SOURCES_TESTS=$(wildcard tests/*.c)
 SOURCES_ASM=$(wildcard asm/*.asm)
 
@@ -32,7 +36,7 @@ $(MODULE): $(OBJECTS) $(OBJECTS_SHELL) $(OBJECTS_USRLIB) $(OBJECTS_PROGRAMS) $(O
 	$(LD) $(LDFLAGS) -T sampleCodeModule.ld -o $(MODULE) $(OBJECTS) $(OBJECTS_SHELL) $(OBJECTS_USRLIB) $(OBJECTS_PROGRAMS) $(OBJECTS_TESTS) $(OBJECTS_ASM)
 
 %.o: %.c
-	$(GCC) $(GCCFLAGS) -I. -Iinclude -Ishell -Iusrlib -Itests -c $< -o $@
+	$(GCC) $(GCCFLAGS) -I. -Iinclude -c $< -o $@
 
 %.o: %.asm
 	$(ASM) $(ASMFLAGS) $< -o $@

@@ -1,14 +1,20 @@
 completar bien los md
 
+sacarle marca de final a los arrays de la shell
+
 openfds que sean un array
 
 que el videodriver se llame video y sus funciones empiecen video_
 
 piano
 
+que las syscalls que devuelven info en un struct lo hagan con un parametro de salida (no es lo mas prolijo pero ya que va a ser desprolijo en un lugar qeu sea desprolijo en todos no?)
+
 registros en struct y cambiar tecla de snapshot
 
 pantalla de inicio
+
+constante de validacion para numero de syscalls?
 
 ordenar archivos a carpetas como me gusten en kernel
 
@@ -28,7 +34,7 @@ ver que es necesario y que no del scheduler
 
 refactor semaforos para usar queue_t
 
-rework driver de video y que solo el de fg pueda dibujar
+rework driver de video y que solo el de fg pueda dibujar, mas prolijo las funciones para dibujar strings tambien, con el tema de la region
 
 rework driver de teclado -> flechitas y lo del keystatus con scancode
 
