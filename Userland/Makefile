@@ -13,14 +13,15 @@ rwildcard = $(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2
 
 src_to_obj = $(OBJDIR)/$(subst /,_,$(basename $(1))).o
 
-C_SOURCES=$(wildcard *.c) \
-          $(wildcard shell/*.c) \
-          $(wildcard usrlib/*.c) \
-          $(wildcard tests/*.c)
+C_SOURCES := $(wildcard *.c)
+C_SOURCES += $(wildcard shell/*.c)
+C_SOURCES += $(wildcard usrlib/*.c)
+C_SOURCES += $(wildcard tests/*.c)
+C_SOURCES += $(filter %.c,$(call rwildcard, programs/, *.c))
+C_SOURCES := $(sort $(C_SOURCES))
 
-C_SOURCES+=$(filter %.c,$(call rwildcard, programs/, *.c))
-
-ASM_SOURCES=$(wildcard asm/*.asm)
+ASM_SOURCES := $(wildcard asm/*.asm)
+ASM_SOURCES := $(sort $(ASM_SOURCES))
 
 C_OBJECTS=$(foreach src,$(C_SOURCES),$(call src_to_obj,$(src)))
 ASM_OBJECTS=$(foreach src,$(ASM_SOURCES),$(call src_to_obj,$(src)))
