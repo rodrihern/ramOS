@@ -9,8 +9,7 @@ int pipes_main(int argc, char *argv[]);
 int time_main(int argc, char *argv[]);
 int date_main(int argc, char *argv[]);
 int echo_main(int argc, char *argv[]);
-int print_a_main(int argc, char *argv[]);
-int print_b_main(int argc, char *argv[]);
+int print_main(int argc, char *argv[]);
 
 int cat_main(int argc, char *argv[]);
 int red_main(int argc, char *argv[]);

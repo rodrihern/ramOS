@@ -6,10 +6,14 @@ else
 fi
 
 # Name of the Docker container
-CONTAINER_NAME="tpe_so_2q2025"
+CONTAINER_NAME="ramOS"
 
 # Start the Docker container
 docker start $CONTAINER_NAME
+
+# Clean and build the project in the specified directories
+docker exec -it $CONTAINER_NAME make -C /root/Image clean
+docker exec -it $CONTAINER_NAME make -C /root/Image all
 
 # Clean and build the project in the specified directories
 docker exec -it $CONTAINER_NAME make -C /root/Toolchain clean

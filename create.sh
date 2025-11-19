@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Script para crear la imagen Docker y el container para TPE SO
-echo "=== Creando imagen Docker y container para TPE SO ==="
+# Script para crear la imagen Docker y el container
+echo "=== Creando imagen Docker y container para ramOS ==="
 
 # Nombre de la imagen y del container
 IMAGE_NAME="agodio/itba-so-multi-platform:3.0"
-CONTAINER_NAME="tpe_so_2q2025"
+CONTAINER_NAME="ramOS"
 
 # Verificar si Docker está corriendo
 if ! docker info > /dev/null 2>&1; then

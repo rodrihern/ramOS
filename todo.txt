@@ -1,0 +1,24 @@
+completar bien los md
+
+ordenar el todo
+
+registros en struct
+
+no desbloquar al que esta bloqueado en un semaforo
+
+prio 0 en fg
+
+rework driver de video y que solo el de fg pueda dibujar
+
+rework driver de teclado -> flechitas y lo del keystatus con scancode
+
+historial de comandos en la shell
+
+jueguito con delta t
+
+ver cleanup resources (leaks en bg)
+
+poner gdb
+
+rework mm
+
