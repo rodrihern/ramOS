@@ -2,7 +2,7 @@
 
 ![logo](./ramOS_logo.png)
 
-ramOS is a 64-bit educational kernel featuring:
+ramOS is a 64-bit educational kernel based on [x64BareBones](https://github.com/alejoaquili/x64BareBones) featuring:
 - Priority scheduler with aging (foreground/background processes)
 - Dynamic memory manager (single free‑list allocator with coalescing & guard checks)
 - Named semaphores
@@ -103,8 +103,8 @@ Disk image used: Image/x64BareBonesImage.qcow2 (512 MB).
 Name origin: ramOS = our initials (Rodrigo, Azul, Magali) and all data lives in RAM (no filesystem). Logo: bouquet (ramos in Spanish = bouquets).
 
 History:
-- Started as a computer architecture project (link al repo).
-- Extended for Operating Systems course (link al repo).
+- Started as a computer architecture course project at ITBA ([link to the repo](https://github.com/rodrihern/TPE-Arqui)).
+- Extended for an Operating Systems course project at ITBA ([link to the repo](https://github.com/maguiGPorzio/TP2-SO)).
 - Continued for learning and experimentation.
 
 Enjoy exploring the code.

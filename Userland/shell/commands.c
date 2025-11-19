@@ -17,36 +17,38 @@ static void username_cmd(int argc, char *argv[]);
 static uint8_t is_cmd_background(char *line);
 
 static builtin_command_t builtins[] = {
-        {"clear", "clears the screen", &cls},
-        {"help", "provides information about available commands", &help},
-        {"username", "changes the shell username", &username_cmd},
-
-        {NULL, NULL, NULL}};
+	{"clear", "clears the screen", &cls},
+	{"help", "provides information about available commands", &help},
+	{"username", "changes the shell username", &username_cmd},
+};
 
 static external_program_t programs[] = {
-        {"ps", "prints to STDOUT information about current processes", &ps_main},
-        {"mem", "prints to STDOUT memory usage information", &mem_main},
-        {"pipes", "prints to STDOUT information about open pipes", &pipes_main},
-        {"time", "prints system time to STDOUT", &time_main},
-        {"date", "prints system date to STDOUT", &date_main},
-        {"echo", "prints to STDOUT its params", &echo_main},
-        {"print", "prints a string to STDOUT and yields indefinately", &print_main},
-        {"cat", "reads from STDIN and prints it to STDOUT", &cat_main},
-        {"red", "reads from STDIN and prints it to STDERR", &red_main},
-        {"rainbow", "reads from STDIN and prints one char to each color fd", &rainbow_main},
-        {"filter", "filters out vowels from input until '-' is encountered", &filter_main},
-        {"wc", "counts the number of lines, words and characters from STDIN", &wc_main},
-        {"mvar", "tests multi-variable synchronization", &mvar_main},
-        {"kill", "kills a process given its pid", &kill_main},
-        {"block", "blocks a process given its pid", &block_main},
-        {"unblock", "unblocks a blocked process given its pid", &unblock_main},
-        {"nice", "changes the priority of a process", &nice_main},
-        {"test_mm", "runs an mm test", &test_mm},
-        {"test_prio", "runs a priority test", &test_prio},
-        {"test_processes", "runs an process test", &test_processes},
-        {"test_sync", "runs a sync test with or without semaphores", &test_sync},
-        {"test_pipes", "runs a named pipes test", &test_pipes},
-        {NULL, NULL}};
+	{"ps", "prints to STDOUT information about current processes", &ps_main},
+	{"mem", "prints to STDOUT memory usage information", &mem_main},
+	{"pipes", "prints to STDOUT information about open pipes", &pipes_main},
+	{"time", "prints system time to STDOUT", &time_main},
+	{"date", "prints system date to STDOUT", &date_main},
+	{"echo", "prints to STDOUT its params", &echo_main},
+	{"print", "prints a string to STDOUT and yields indefinately", &print_main},
+	{"cat", "reads from STDIN and prints it to STDOUT", &cat_main},
+	{"red", "reads from STDIN and prints it to STDERR", &red_main},
+	{"rainbow", "reads from STDIN and prints one char to each color fd", &rainbow_main},
+	{"filter", "filters out vowels from input until '-' is encountered", &filter_main},
+	{"wc", "counts the number of lines, words and characters from STDIN", &wc_main},
+	{"mvar", "tests multi-variable synchronization", &mvar_main},
+	{"kill", "kills a process given its pid", &kill_main},
+	{"block", "blocks a process given its pid", &block_main},
+	{"unblock", "unblocks a blocked process given its pid", &unblock_main},
+	{"nice", "changes the priority of a process", &nice_main},
+	{"test_mm", "runs an mm test", &test_mm},
+	{"test_prio", "runs a priority test", &test_prio},
+	{"test_processes", "runs an process test", &test_processes},
+	{"test_sync", "runs a sync test with or without semaphores", &test_sync},
+	{"test_pipes", "runs a named pipes test", &test_pipes},
+};
+
+static int builtins_count = sizeof(builtins) / sizeof(builtin_command_t);
+static int programs_count = sizeof(programs) / sizeof(external_program_t);
 
 // Busca el operador '|' en los tokens y retorna su índice, o -1 si no existe
 static int find_pipe_operator(char **tokens, int token_count)
@@ -104,7 +106,7 @@ static int parse_input(char *input, char **tokens)
 
 static int try_builtin_command(char *name, int argc, char **argv)
 {
-	for (int i = 0; builtins[i].name != NULL; i++) {
+	for (int i = 0; i < builtins_count; i++) {
 		if (strcmp(name, builtins[i].name) == 0) {
 			builtins[i].handler(argc, argv);
 			return 1;
@@ -116,7 +118,7 @@ static int try_builtin_command(char *name, int argc, char **argv)
 // Encuentra el entry point de un programa externo. Retorna NULL si no existe.
 static process_entry_t find_program_entry(char *name)
 {
-	for (int i = 0; programs[i].name != NULL; i++) {
+	for (int i = 0; i < builtins_count; i++) {
 		if (strcmp(name, programs[i].name) == 0) {
 			return programs[i].entry;
 		}
@@ -333,7 +335,7 @@ static void help(int argc, char *argv[])
 	print("\nType '+' or '-' to change font size\n\n");
 
 	print("Builtin commands:\n");
-	for (int i = 0; builtins[i].name != NULL; i++) {
+	for (int i = 0; i < builtins_count; i++) {
 		print("  ");
 		print(builtins[i].name);
 		print(" - ");
@@ -345,7 +347,7 @@ static void help(int argc, char *argv[])
 	print("\nExternal programs:\n");
 	print("--Type <program_name> & to run in background, else it runs in foreground--\n");
 	print("--Type <program_1> | <program_2> to pipe 2 programs--\n\n");
-	for (int i = 0; programs[i].name != NULL; i++) {
+	for (int i = 0; i < programs_count; i++) {
 		print("  ");
 		print(programs[i].name);
 		print(" - ");

@@ -1,7 +1,3 @@
-hacer el readme con referencias a los otros repos
-
-sacarle marca de final a los arrays de la shell
-
 openfds que sean un array
 
 ordenar mejor el todo.txt
