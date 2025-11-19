@@ -1,6 +1,8 @@
-openfds que sean un array
+openfds que sean un array con el mapeo
 
-ordenar mejor el todo.txt
+processes con el inicializador para fds y prio
+
+refactor de los bpp
 
 piano y spotify(osea con algunas canciones ya puestas)
 
