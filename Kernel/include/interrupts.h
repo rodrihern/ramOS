@@ -1,10 +1,7 @@
 #ifndef INTERRUPS_H_
 #define INTERRUPTS_H_
 
-// Exposed by interrupts.asm
-extern void *current_kernel_rsp;
-extern void *switch_to_rsp;
-extern void *syscall_frame_ptr; // RSP of shell at time of syscall
+
 
 #endif /* INTERRUPS_H_ */
 

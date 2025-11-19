@@ -31,8 +31,6 @@ EXTERN SNAPSHOT_KEY
 EXTERN irq_dispatcher
 EXTERN exception_dispatcher
 EXTERN syscalls
-EXTERN current_kernel_rsp
-EXTERN switch_to_rsp
 EXTERN print_registers
 EXTERN getStackBase
 EXTERN main
@@ -264,5 +262,4 @@ SECTION .bss
 	aux resq 1
 	pressed_key resq 1
 	reg_array resq 20 ; 20 registros
-	syscall_frame_ptr resq 1
 	syscall_id_tmp   resq 1

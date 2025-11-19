@@ -2,19 +2,31 @@ completar bien los md
 
 syscalls a otro asm
 
-
-
 piano
 
 no desbloquar al que esta bloqueado en un semaforo
 
-prio 0 en fg si es uno solo
+ver si anda ok matar solo al de fg con los pipes
+
+ver en scheduler si en lugar de hacer un timer_tick directamente llamamos a schedule
 
 registros en struct
 
+--------
+
+correr un formatter mejor
+
 poner gdb
 
-rework mm
+-------
+
+rework mm -> tener uno solo, inicializarlo piola
+
+ver cleanup resources (leaks en bg)
+
+ver que es necesario y que no del scheduler
+
+refactor semaforos para usar queue_t
 
 rework driver de video y que solo el de fg pueda dibujar
 
@@ -24,6 +36,5 @@ historial de comandos en la shell
 
 jueguito con delta t
 
-ver cleanup resources (leaks en bg)
 
 

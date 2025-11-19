@@ -140,13 +140,13 @@ static int try_external_program(char *name, int argc, char **argv, bool backgrou
 	}
 
 	if (background) {
-		sys_adopt_init_as_parent(
-		        pid); // los hago huerfanos para que cuando terminen se liberen solos
+		sys_adopt_init_as_parent(pid); // los hago huerfanos para que cuando terminen se liberen solos
 		return 1;
 	}
 
 	// Sigue acá si es foreground
 	sys_set_foreground_process(pid);
+	sys_nice(pid, MAX_PRIORITY);
 	sys_wait(pid);
 	sys_clear_input_buffer(); // limpiar buffer de entrada por si quedó algo
 	putchar('\n');
