@@ -32,7 +32,7 @@ $(MODULE): $(OBJECTS) $(OBJECTS_SHELL) $(OBJECTS_USRLIB) $(OBJECTS_PROGRAMS) $(O
 	$(LD) $(LDFLAGS) -T sampleCodeModule.ld -o $(MODULE) $(OBJECTS) $(OBJECTS_SHELL) $(OBJECTS_USRLIB) $(OBJECTS_PROGRAMS) $(OBJECTS_TESTS) $(OBJECTS_ASM)
 
 %.o: %.c
-	$(GCC) $(GCCFLAGS) -I. -Iinclude -Ishell -Iusrlib -Igolf -Itests -c $< -o $@
+	$(GCC) $(GCCFLAGS) -I. -Iinclude -Ishell -Iusrlib -Itests -c $< -o $@
 
 %.o: %.asm
 	$(ASM) $(ASMFLAGS) $< -o $@

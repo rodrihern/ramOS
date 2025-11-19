@@ -1,14 +1,12 @@
 completar bien los md
 
-syscalls a otro asm en userland
-
 no desbloquar al que esta bloqueado en un semaforo
 
 ordenar archivos a carpetas como me gusten en kernel
 
 piano
 
-registros en struct
+registros en struct (conlleva cambios en syscalls)
 
 --------
 

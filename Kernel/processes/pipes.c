@@ -49,30 +49,6 @@ static int get_idx_from_fd(int fd)
 	return (idx < 0 || idx >= MAX_PIPES) ? -1 : idx;
 }
 
-static pid_t pipe_find_process_by_fd(int fd, bool match_read_fd)
-{
-	for (pid_t pid = 0; pid <= MAX_PID; pid++) {
-		PCB *process = scheduler_get_process(pid);
-		if (process == NULL || process->status == PS_TERMINATED) {
-			continue;
-		}
-
-		if (match_read_fd) {
-			if (process->read_fd == fd) {
-				return pid;
-			}
-		} else if (process->write_fd == fd) {
-			return pid;
-		}
-	}
-	return NO_PID;
-}
-
-static bool pipe_process_is_alive(pid_t pid)
-{
-	PCB *process = scheduler_get_process(pid);
-	return process != NULL && process->status != PS_TERMINATED;
-}
 
 int init_pipes()
 {
