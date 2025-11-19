@@ -6,7 +6,9 @@ openfds que sean un array
 
 ordenar mejor el todo.txt
 
-piano
+piano y spotify(osea con algunas canciones ya puestas)
+
+una implementacion de stack de ints con array con capacity
 
 refactor timer tick handler para que sea directamente el del scheduler
 
@@ -40,13 +42,35 @@ ver que es necesario y que no del scheduler
 
 refactor semaforos para usar queue_t
 
-rework driver de video y que solo el de fg pueda dibujar, mas prolijo las funciones para dibujar strings tambien, con el tema de la region
+---- video
+
+rework driver de video y que solo el de fg pueda dibujar
+
+todas las funciones de dibujo a graphics.c en userland (incluyendo las de strings)
+
+syscalls:
+    typedef region_t
+
+    habilitar y deshabilitar textmode
+
+    info de video
+
+    un get de un framebuffer
+
+    present
+
+    present_region
+
+    present_nregions
+----
 
 rework driver de teclado -> flechitas y lo del keystatus con scancode
 
 historial de comandos en la shell
 
 jueguito con delta t
+
+manejo de excepciones que rebootee la compu? calculadora para poder probar el div0
 
 
 
