@@ -1,6 +1,6 @@
 completar bien los md
 
-no desbloquar al que esta bloqueado en un semaforo
+solo poder desbloquear un proceso si fue bloqueado manualmente
 
 ordenar archivos a carpetas como me gusten en kernel
 
