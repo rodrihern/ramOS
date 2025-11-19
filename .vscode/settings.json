@@ -1,0 +1,23 @@
+{
+    "files.associations": {
+        "video_driver.h": "c",
+        "processes.h": "c",
+        "memory_manager.h": "c",
+        "shell.h": "c",
+        "usrlib.h": "c",
+        "test_mm.h": "c",
+        "stdint.h": "c",
+        "test_util.h": "c",
+        "commontypes.h": "c",
+        "queue.h": "c",
+        "scheduler.h": "c",
+        "ready_queue.h": "c",
+        "process.h": "c",
+        "syscalls.h": "c",
+        "fds.h": "c",
+        "variant": "c",
+        "stddef.h": "c",
+        "pipes.h": "c",
+        "time.h": "c"
+    }
+}
