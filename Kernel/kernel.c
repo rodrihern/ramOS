@@ -15,6 +15,7 @@
 #include "scheduler.h"
 #include "synchro.h"
 #include "pipes.h"
+#include "naiveConsole.h"
 
 extern void timer_tick();
 
@@ -67,7 +68,9 @@ int main()
 
 	init_keyboard_sem();
 
-	timer_tick();
+	enable_text_mode();
+
+	timer_tick(); // esto hace el salto a userland
 
 	return -1;
 }

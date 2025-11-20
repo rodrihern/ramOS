@@ -1,5 +1,5 @@
-all:  bootloader kernel userland image
-rebuild: clean all
+all:  clean bootloader kernel userland image
+
 
 bootloader:
 	cd Bootloader; $(MAKE) all
