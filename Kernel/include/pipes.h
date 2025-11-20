@@ -22,10 +22,6 @@ typedef struct pipe_info {
 	int  buffered;
 } pipe_info_t;
 
-int init_pipes();
-
-// returns the maximum possible fd
-int get_max_fd();
 
 // deja en fd[0] el read_fd y en fd[1] el write_fd
 // devuelve el id del pipe, -1 si no lo creo

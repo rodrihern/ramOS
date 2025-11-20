@@ -24,11 +24,17 @@ typedef struct pipe {
 } pipe_t;
 
 static pipe_t *pipes[MAX_PIPES] = {NULL};
-static queue_t free_indexes     = NULL;
+
 
 static int get_free_idx()
 {
-	return q_poll(free_indexes);
+	for (int i = 0; i < MAX_PIPES; i++) {
+		if (pipes[i] == NULL) {
+			return i;
+		}
+	}
+
+	return -1;
 }
 
 // devuelve el que seria el fd de read
@@ -48,21 +54,6 @@ static int get_idx_from_fd(int fd)
 	int idx = (fd_par - base) / 2;
 
 	return (idx < 0 || idx >= MAX_PIPES) ? -1 : idx;
-}
-
-
-int init_pipes()
-{
-	free_indexes = q_init();
-	if (!free_indexes) {
-		return 0;
-	}
-
-	for (int i = 0; i < MAX_PIPES; i++) {
-		q_add(free_indexes, i);
-	}
-
-	return 1;
 }
 
 int create_pipe(int fds[2])
@@ -325,9 +316,6 @@ void destroy_pipe(int idx)
 	sem_close(pipe->write_sem);
 	free_memory(mm, pipe);
 	pipes[idx] = NULL;
-
-	// Devolver el índice a la cola de libres
-	q_add(free_indexes, idx);
 }
 
 int pipes_info(pipe_info_t *buf, int max_count)

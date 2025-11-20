@@ -65,8 +65,6 @@ int main()
 
 	init_semaphore_manager();
 
-	init_pipes();
-
 	init_keyboard_sem();
 
 	timer_tick();
