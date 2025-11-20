@@ -12,6 +12,8 @@
 #define SEM_NAME_SIZE 32
 #define EOF -1
 
+#define MAX_FDS (MAX_PIPES * 2 + FIRST_FREE_FD + 1)
+
 typedef struct pipe_info {
 	int  id;
 	char name[MAX_PIPE_NAME_LENGTH];
@@ -23,6 +25,9 @@ typedef struct pipe_info {
 } pipe_info_t;
 
 int init_pipes();
+
+// returns the maximum possible fd
+int get_max_fd();
 
 // deja en fd[0] el read_fd y en fd[1] el write_fd
 // devuelve el id del pipe, -1 si no lo creo
@@ -53,5 +58,7 @@ int close_fd(int fd);
 // llena el buffer con información de los pipes activos
 // retorna el número de pipes copiados, o -1 si hay error
 int pipes_info(pipe_info_t *buf, int max_count);
+
+
 
 #endif

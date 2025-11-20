@@ -12,15 +12,15 @@ extern void  *setup_initial_stack(void *caller, int pid, void *stack_pointer, vo
 static char **duplicate_argv(const char **argv, int argc, memory_manager_ADT mm);
 static void   process_caller(int pid);
 static void
-init_pcb_base_fields(PCB *p, int pid, process_entry_t entry, const char *name, uint8_t killable);
-static int  init_pcb_stack(PCB *p, memory_manager_ADT mm);
-static int  init_pcb_argv(PCB *p, int argc, const char **argv, memory_manager_ADT mm);
-static void init_pcb_file_descriptors(PCB *p, int fds[2]);
-static void free_pcb_argv(PCB *p, memory_manager_ADT mm);
-static void free_pcb_stack(PCB *p, memory_manager_ADT mm);
+init_pcb_base_fields(pcb_t *p, int pid, process_entry_t entry, const char *name, uint8_t killable);
+static int  init_pcb_stack(pcb_t *p, memory_manager_ADT mm);
+static int  init_pcb_argv(pcb_t *p, int argc, const char **argv, memory_manager_ADT mm);
+static void init_pcb_file_descriptors(pcb_t *p, int fds[2]);
+static void free_pcb_argv(pcb_t *p, memory_manager_ADT mm);
+static void free_pcb_stack(pcb_t *p, memory_manager_ADT mm);
 
 static void
-init_pcb_base_fields(PCB *p, int pid, process_entry_t entry, const char *name, uint8_t killable)
+init_pcb_base_fields(pcb_t *p, int pid, process_entry_t entry, const char *name, uint8_t killable)
 {
 	p->pid        = pid;
 	p->parent_pid = scheduler_get_current_pid();
@@ -33,7 +33,7 @@ init_pcb_base_fields(PCB *p, int pid, process_entry_t entry, const char *name, u
 	p->unblockable = 0;
 }
 
-static int init_pcb_stack(PCB *p, memory_manager_ADT mm)
+static int init_pcb_stack(pcb_t *p, memory_manager_ADT mm)
 {
 	p->stack_base = alloc_memory(mm, PROCESS_STACK_SIZE);
 	if (p->stack_base == NULL) {
@@ -44,7 +44,7 @@ static int init_pcb_stack(PCB *p, memory_manager_ADT mm)
 	return OK;
 }
 
-static int init_pcb_argv(PCB *p, int argc, const char **argv, memory_manager_ADT mm)
+static int init_pcb_argv(pcb_t *p, int argc, const char **argv, memory_manager_ADT mm)
 {
 	p->argc = argc;
 	if (argc > 0 && argv != NULL) {
@@ -58,7 +58,7 @@ static int init_pcb_argv(PCB *p, int argc, const char **argv, memory_manager_ADT
 	return OK;
 }
 
-static void init_pcb_file_descriptors(PCB *p, int fds[2])
+static void init_pcb_file_descriptors(pcb_t *p, int fds[2])
 {
 	p->open_fds = q_init();
 
@@ -79,7 +79,7 @@ static void init_pcb_file_descriptors(PCB *p, int fds[2])
 	}
 }
 
-PCB *proc_create(int             pid,
+pcb_t *proc_create(int             pid,
                  process_entry_t entry,
                  int             argc,
                  const char    **argv,
@@ -93,7 +93,7 @@ PCB *proc_create(int             pid,
 
 	memory_manager_ADT mm = get_kernel_memory_manager();
 
-	PCB *p = alloc_memory(mm, sizeof(PCB));
+	pcb_t *p = alloc_memory(mm, sizeof(pcb_t));
 	if (!p) {
 		return NULL;
 	}
@@ -116,7 +116,7 @@ PCB *proc_create(int             pid,
 	return p;
 }
 
-static void free_pcb_argv(PCB *p, memory_manager_ADT mm)
+static void free_pcb_argv(pcb_t *p, memory_manager_ADT mm)
 {
 	if (p->argv != NULL) {
 		for (int i = 0; i < p->argc; i++) {
@@ -129,7 +129,7 @@ static void free_pcb_argv(PCB *p, memory_manager_ADT mm)
 	}
 }
 
-static void free_pcb_stack(PCB *p, memory_manager_ADT mm)
+static void free_pcb_stack(pcb_t *p, memory_manager_ADT mm)
 {
 	if (p->stack_base != NULL) {
 		free_memory(mm, p->stack_base);
@@ -138,7 +138,7 @@ static void free_pcb_stack(PCB *p, memory_manager_ADT mm)
 	}
 }
 
-void free_process_resources(PCB *p)
+void free_process_resources(pcb_t *p)
 {
 	if (p == NULL) {
 		return;
@@ -152,7 +152,7 @@ void free_process_resources(PCB *p)
 	q_destroy(p->open_fds);
 	p->open_fds = NULL;
 
-	// Liberar PCB
+	// Liberar pcb_t
 	free_memory(mm, p);
 }
 
@@ -205,7 +205,7 @@ static char **duplicate_argv(const char **argv, int argc, memory_manager_ADT mm)
 // check
 static void process_caller(int pid)
 {
-	PCB *p = scheduler_get_pcb(pid);
+	pcb_t *p = scheduler_get_pcb(pid);
 	if (p == NULL || p->entry == NULL) {
 		scheduler_exit_process(-1);
 		return;

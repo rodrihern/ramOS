@@ -87,7 +87,7 @@ static uint64_t sys_regs(char *buffer)
 static int sys_write(uint64_t fd, const char *buffer, uint64_t count)
 {
 	int  pid = scheduler_get_current_pid();
-	PCB *p   = scheduler_get_pcb(pid);
+	pcb_t *p   = scheduler_get_pcb(pid);
 
 	if (fd == STDOUT) { // que es para este tipo stdout?
 		fd = p->write_fd;
@@ -117,7 +117,7 @@ static int sys_write(uint64_t fd, const char *buffer, uint64_t count)
 static int sys_read(int fd, char *buffer, uint64_t count)
 {
 	int  pid = scheduler_get_current_pid();
-	PCB *p   = scheduler_get_pcb(pid);
+	pcb_t *p   = scheduler_get_pcb(pid);
 
 	if (fd == STDIN) { // que es para este tipo stdin?
 		fd = p->read_fd;
@@ -312,7 +312,7 @@ static int64_t sys_block(int pid)
 	if (scheduler_block_process(pid) < 0) {
 		return -1;
 	}
-	PCB * p = scheduler_get_pcb(pid);
+	pcb_t * p = scheduler_get_pcb(pid);
 	p->unblockable = 1;
 	return 0;
 }
@@ -320,7 +320,7 @@ static int64_t sys_block(int pid)
 // Desbloquea un proceso por PID
 static int64_t sys_unblock(int pid)
 {
-	PCB * p = scheduler_get_pcb(pid);
+	pcb_t * p = scheduler_get_pcb(pid);
 	if (p == NULL || !p->unblockable) {
 		return -1;
 	}
@@ -376,7 +376,7 @@ static int sys_create_pipe(int fds[2])
 	}
 
 	pid_t pid = scheduler_get_current_pid();
-	PCB  *p   = scheduler_get_pcb(pid);
+	pcb_t  *p   = scheduler_get_pcb(pid);
 	q_add(p->open_fds, fds[0]);
 	q_add(p->open_fds, fds[1]);
 	return pipe_id;
@@ -412,7 +412,7 @@ static int sys_open_named_pipe(char *name, int fds[2])
 	}
 
 	pid_t pid = scheduler_get_current_pid();
-	PCB  *p   = scheduler_get_pcb(pid);
+	pcb_t  *p   = scheduler_get_pcb(pid);
 
 	// Agregar ambos FDs a la lista de open_fds del proceso
 	if (!q_contains(p->open_fds, fds[0])) {
@@ -428,7 +428,7 @@ static int sys_open_named_pipe(char *name, int fds[2])
 static int sys_close_fd(int fd)
 {
 	pid_t pid = scheduler_get_current_pid();
-	PCB  *p   = scheduler_get_pcb(pid);
+	pcb_t  *p   = scheduler_get_pcb(pid);
 	if (q_remove(p->open_fds, fd)) {
 		return close_fd(fd);
 	}

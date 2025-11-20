@@ -16,7 +16,7 @@ extern void timer_tick();
 
 #define SHELL_ADDRESS ((void *)0x400000)
 
-static PCB    *processes[MAX_PROCESSES];
+static pcb_t    *processes[MAX_PROCESSES];
 static queue_t ready_queue[PRIORITY_COUNT] = {0};
 
 static pid_t    current_pid            = NO_PID;
@@ -26,14 +26,14 @@ static uint8_t     force_reschedule       = false;
 static uint8_t     scheduler_initialized  = false;
 static pid_t    foreground_process_pid = NO_PID;
 
-static PCB        *pick_next_process(void);
+static pcb_t        *pick_next_process(void);
 static void        reparent_children_to_init(pid_t pid);
 static int         init(int argc, char **argv);
 static int         scheduler_add_init();
 static inline uint8_t pid_is_valid(pid_t pid);
 static void        cleanup_all_processes(void);
 static int         create_shell();
-static void        close_open_fds(PCB *p);
+static void        close_open_fds(pcb_t *p);
 static void        apply_aging(void);
 
 static inline uint8_t pid_is_valid(pid_t pid)
@@ -41,7 +41,7 @@ static inline uint8_t pid_is_valid(pid_t pid)
 	return pid >= 0 && pid <= MAX_PID;
 }
 
-static void close_open_fds(PCB *p)
+static void close_open_fds(pcb_t *p)
 {
 	while (!q_is_empty(p->open_fds)) {
 		int fd = q_poll(p->open_fds);
@@ -88,7 +88,7 @@ int scheduler_set_foreground_process(pid_t pid)
 
 static int create_shell()
 {
-	PCB *pcb_shell = proc_create(
+	pcb_t *pcb_shell = proc_create(
 	        SHELL_PID, (process_entry_t)SHELL_ADDRESS, 0, NULL, "shell", false, NULL);
 	if (pcb_shell == NULL) {
 		return -1;
@@ -115,7 +115,7 @@ static int scheduler_add_init()
 		return -1;
 	}
 
-	PCB *pcb_init = proc_create(INIT_PID, (process_entry_t)init, 0, NULL, "init", false, NULL);
+	pcb_t *pcb_init = proc_create(INIT_PID, (process_entry_t)init, 0, NULL, "init", false, NULL);
 	if (pcb_init == NULL) {
 		return -1;
 	}
@@ -176,7 +176,7 @@ void *schedule(void *prev_rsp)
 		return prev_rsp;
 	}
 
-	PCB *current = (pid_is_valid(current_pid)) ? processes[current_pid] : NULL;
+	pcb_t *current = (pid_is_valid(current_pid)) ? processes[current_pid] : NULL;
 
 	if (current) {
 		current->stack_pointer = prev_rsp; // actualiza el rsp del proceso que estuvo
@@ -217,7 +217,7 @@ void *schedule(void *prev_rsp)
 	}
 
 	// Si el proceso actual tiene que cambiar:
-	PCB *next = pick_next_process();
+	pcb_t *next = pick_next_process();
 
 	// Si no hay otro proceso listo, usar el proceso init como fallback
 	if (!next) {
@@ -236,7 +236,7 @@ void *schedule(void *prev_rsp)
 
 // Devuelve null si no hay proceso listo para correr en ninguna cola
 // Recorre las colas de mayor prioridad (0) a menor (PRIORITY_COUNT-1)
-static PCB *pick_next_process(void)
+static pcb_t *pick_next_process(void)
 {
 	if (!scheduler_initialized || process_count == 0) {
 		return NULL;
@@ -254,7 +254,7 @@ static PCB *pick_next_process(void)
 			if (!pid_is_valid(next_pid)) {
 				continue;
 			}
-			PCB *candidate = processes[next_pid];
+			pcb_t *candidate = processes[next_pid];
 			if (candidate != NULL && candidate->status == PS_READY) {
 				return candidate;
 			}
@@ -277,7 +277,7 @@ static void apply_aging(void)
 		q_to_begin(ready_queue[i]);
 		while (q_has_next(ready_queue[i])) {
 			pid_t pid = q_next(ready_queue[i]);
-			PCB  *p   = processes[pid];
+			pcb_t  *p   = processes[pid];
 
 			// Si el proceso no existe o no cumple el threshold, continuar
 			if (p == NULL) {
@@ -317,7 +317,7 @@ int scheduler_add_process(
 		return -1;
 	}
 
-	PCB *process = proc_create(pid, entry, argc, argv, name, true, fds);
+	pcb_t *process = proc_create(pid, entry, argc, argv, name, true, fds);
 	if (process == NULL) {
 		return -1;
 	}
@@ -348,7 +348,7 @@ int scheduler_remove_process(pid_t pid)
 		return -1;
 	}
 
-	PCB *process = processes[pid];
+	pcb_t *process = processes[pid];
 	if (!process) {
 		return -1;
 	}
@@ -383,7 +383,7 @@ int scheduler_set_priority(pid_t pid, uint8_t new_priority)
 		return -1;
 	}
 
-	PCB    *process                = processes[pid];
+	pcb_t    *process                = processes[pid];
 	uint8_t old_priority           = process->priority;
 	uint8_t old_effective_priority = process->effective_priority;
 
@@ -428,7 +428,7 @@ int scheduler_get_priority(pid_t pid)
 	if (!scheduler_initialized || !pid_is_valid(pid) || processes[pid] == NULL) {
 		return -1;
 	}
-	PCB *process = processes[pid];
+	pcb_t *process = processes[pid];
 	return process->priority;
 }
 
@@ -458,7 +458,7 @@ int scheduler_kill_process(pid_t pid)
 		return -2; // Invalid PID
 	}
 
-	PCB *killed_process = processes[pid];
+	pcb_t *killed_process = processes[pid];
 	if (!killed_process) {
 		return -3; // No process found with this PID
 	}
@@ -495,7 +495,7 @@ int scheduler_kill_process(pid_t pid)
 		        PS_TERMINATED; // Le cambio el estado despues de hacer el dequeue o sino no
 		                       // va a entrar en la condición del if
 		killed_process->return_value = KILLED_RET_VALUE;
-		PCB *parent                  = processes[killed_process->parent_pid];
+		pcb_t *parent                  = processes[killed_process->parent_pid];
 
 		if (parent != NULL && parent->status == PS_BLOCKED &&
 		    parent->waiting_on == killed_process->pid) {
@@ -515,7 +515,7 @@ int scheduler_block_process(pid_t pid)
 		return -1;
 	}
 
-	PCB *process = processes[pid];
+	pcb_t *process = processes[pid];
 	if (process == NULL) {
 		return -1;
 	}
@@ -541,7 +541,7 @@ int scheduler_unblock_process(pid_t pid)
 		return -1;
 	}
 
-	PCB *process = processes[pid];
+	pcb_t *process = processes[pid];
 	if (!process || process->status != PS_BLOCKED) {
 		return -1;
 	}
@@ -574,7 +574,7 @@ static void cleanup_all_processes(void)
 	}
 
 	for (int i = 0; i < MAX_PROCESSES; i++) {
-		PCB *p = processes[i];
+		pcb_t *p = processes[i];
 		if (p) {
 			free_process_resources(p);
 			processes[i] = NULL;
@@ -604,7 +604,7 @@ void scheduler_destroy(void)
 }
 
 // En scheduler.c
-PCB *scheduler_get_pcb(pid_t pid)
+pcb_t *scheduler_get_pcb(pid_t pid)
 {
 	if (!scheduler_initialized || !pid_is_valid(pid)) {
 		return NULL;
@@ -621,7 +621,7 @@ int scheduler_get_processes(process_info_t *buffer, int max_count)
 
 	int count = 0;
 	for (int i = 0; i < MAX_PROCESSES && count < max_count; i++) {
-		PCB *p = processes[i];
+		pcb_t *p = processes[i];
 		if (p) {
 			buffer[count].pid = p->pid;
 			strncpy(buffer[count].name, p->name, MAX_PROCESS_NAME_LENGTH);
@@ -646,7 +646,7 @@ void scheduler_exit_process(int64_t ret_value)
 		return;
 	}
 
-	PCB *current_process = processes[current_pid];
+	pcb_t *current_process = processes[current_pid];
 
 	reparent_children_to_init(current_process->pid);
 
@@ -674,7 +674,7 @@ void scheduler_exit_process(int64_t ret_value)
 		        PS_TERMINATED; // Le cambio el estado despues de hacer el dequeue o sino no
 		                       // va a entrar en la condición del if
 		current_process->return_value = ret_value;
-		PCB *parent                   = processes[current_process->parent_pid];
+		pcb_t *parent                   = processes[current_process->parent_pid];
 
 		// Si el padre estaba bloqueado haciendo waitpid, lo desbloqueamos
 		if (parent->status == PS_BLOCKED && parent->waiting_on == current_process->pid) {
@@ -713,12 +713,12 @@ int adopt_init_as_parent(pid_t pid)
 	if (!scheduler_initialized || !pid_is_valid(pid)) {
 		return -1;
 	}
-	PCB *init_process = processes[INIT_PID];
+	pcb_t *init_process = processes[INIT_PID];
 	if (init_process == NULL) {
 		return -1;
 	}
 
-	PCB *orphan_process = processes[pid];
+	pcb_t *orphan_process = processes[pid];
 	if (orphan_process == NULL) {
 		return -1;
 	}

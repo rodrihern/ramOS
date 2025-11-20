@@ -20,33 +20,31 @@
 
 typedef int (*process_entry_t)(int argc, char **argv);
 
-// Estados de proceso
+
 typedef enum { PS_READY = 0, PS_RUNNING, PS_BLOCKED, PS_TERMINATED } process_status_t;
 
 // Process Control Block
-typedef struct PCB {
-	// Identificación
+typedef struct pcb_t {
 	int  pid;
 	int  parent_pid; // PID del proceso padre (-1 si no tiene)
 	char name[MAX_PROCESS_NAME_LENGTH];
 
-	// Estado y scheduling
+	
 	process_status_t status;
 	uint8_t          priority;           // Prioridad base (0-2, 0 = mayor prioridad)
-	uint8_t          effective_priority; // Prioridad efectiva (puede ser promovida por aging)
+	uint8_t          effective_priority; // prioridad de aging
 	uint64_t         last_tick;
 
-	// Contexto de ejecución
+	
 	void *stack_base;    // Base del stack
 	void *stack_pointer; // RSP actual (apunta al contexto guardado)
 
-	// Función de entrada
+	
 	process_entry_t entry;
 	int             argc;
 	char          **argv;
 
 	// Estadísticas
-	uint64_t cpu_ticks;    // Total de ticks de CPU usados
 	int      return_value; // Valor de retorno (para exit)
 	int      waiting_on;   // PID que está esperando (-1 si ninguno)
 
@@ -58,7 +56,7 @@ typedef struct PCB {
 
 	// queues
 	queue_t open_fds; // lista de fds abiertos
-} PCB;
+} pcb_t;
 
 // Estructura para exponer información de procesos a userland
 typedef struct process_info {
@@ -74,13 +72,13 @@ typedef struct process_info {
 } process_info_t;
 
 // Creación y limpieza (usadas por scheduler)
-PCB *proc_create(int             pid,
+pcb_t *proc_create(int             pid,
                  process_entry_t entry,
                  int             argc,
                  const char    **argv,
                  const char     *name,
                  uint8_t            killable,
                  int             fds[2]);
-void free_process_resources(PCB *p);
+void free_process_resources(pcb_t *p);
 
 #endif 

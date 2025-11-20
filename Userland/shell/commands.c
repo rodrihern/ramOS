@@ -1,7 +1,7 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
-#include "../include/shell.h"
+#include "shell.h"
 #include "programs.h"
 #include "tests.h"
 #include <stdbool.h>
@@ -15,6 +15,7 @@ static void help(int argc, char *argv[]);
 static void username_cmd(int argc, char *argv[]);
 
 static uint8_t is_cmd_background(char *line);
+
 
 static builtin_command_t builtins[] = {
 	{"clear", "clears the screen", &cls},
@@ -44,11 +45,11 @@ static external_program_t programs[] = {
 	{"test_prio", "runs a priority test", &test_prio},
 	{"test_processes", "runs an process test", &test_processes},
 	{"test_sync", "runs a sync test with or without semaphores", &test_sync},
-	{"test_pipes", "runs a named pipes test", &test_pipes},
+	{"test_pipes", "runs a named pipes test", &test_pipes}
 };
 
-static int builtins_count = sizeof(builtins) / sizeof(builtin_command_t);
-static int programs_count = sizeof(programs) / sizeof(external_program_t);
+static int builtins_count = sizeof(builtins) / sizeof(builtins[0]);
+static int programs_count = sizeof(programs) / sizeof(programs[0]);
 
 // Busca el operador '|' en los tokens y retorna su índice, o -1 si no existe
 static int find_pipe_operator(char **tokens, int token_count)
@@ -118,7 +119,7 @@ static int try_builtin_command(char *name, int argc, char **argv)
 // Encuentra el entry point de un programa externo. Retorna NULL si no existe.
 static process_entry_t find_program_entry(char *name)
 {
-	for (int i = 0; i < builtins_count; i++) {
+	for (int i = 0; i < programs_count; i++) {
 		if (strcmp(name, programs[i].name) == 0) {
 			return programs[i].entry;
 		}
