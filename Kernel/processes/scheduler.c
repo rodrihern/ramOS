@@ -96,7 +96,6 @@ static int create_shell()
 	pcb_shell->priority           = MAX_PRIORITY;
 	pcb_shell->effective_priority = MAX_PRIORITY;
 	pcb_shell->status             = PS_READY;
-	pcb_shell->cpu_ticks          = 0;
 	pcb_shell->last_tick          = ticks_elapsed();
 	processes[SHELL_PID]          = pcb_shell;
 	process_count++;
@@ -123,7 +122,6 @@ static int scheduler_add_init()
 	pcb_init->priority           = MIN_PRIORITY;
 	pcb_init->effective_priority = MIN_PRIORITY;
 	pcb_init->status             = PS_READY;
-	pcb_init->cpu_ticks          = 0;
 	pcb_init->last_tick          = 0;
 
 	processes[INIT_PID] = pcb_init;
@@ -182,7 +180,6 @@ void *schedule(void *prev_rsp)
 		current->stack_pointer = prev_rsp; // actualiza el rsp del proceso que estuvo
 		                                   // corriendo hasta ahora en su pcb
 
-		current->cpu_ticks++;
 		total_cpu_ticks++;
 
 		// Cuando un proceso deja de correr (por cualquier razón), vuelve a su prioridad
@@ -326,7 +323,6 @@ int scheduler_add_process(
 	process->priority           = DEFAULT_PRIORITY; // Asignar prioridad por defecto
 	process->effective_priority = DEFAULT_PRIORITY; // Inicialmente igual a priority
 	process->status             = PS_READY;
-	process->cpu_ticks          = 0;
 	process->last_tick          = total_cpu_ticks;
 
 	processes[pid] = process;
