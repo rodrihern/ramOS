@@ -118,7 +118,7 @@ static int try_builtin_command(char *name, int argc, char **argv)
 // Encuentra el entry point de un programa externo. Retorna NULL si no existe.
 static process_entry_t find_program_entry(char *name)
 {
-	for (int i = 0; i < builtins_count; i++) {
+	for (int i = 0; i < programs_count; i++) {
 		if (strcmp(name, programs[i].name) == 0) {
 			return programs[i].entry;
 		}
