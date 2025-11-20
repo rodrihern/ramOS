@@ -1,5 +1,3 @@
-openfds que sean un array con el mapeo
-
 processes con el inicializador para fds y prio
 
 refactor de los bpp

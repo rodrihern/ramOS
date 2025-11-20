@@ -76,8 +76,7 @@ void put_pixel(uint32_t hex_color, uint64_t x, uint64_t y) {
     return;
   }
   uint8_t *framebuffer = (uint8_t *)(uintptr_t)VBE_mode_info->framebuffer;
-  uint64_t offset =
-      (x * ((VBE_mode_info->bpp) / 8)) + (y * VBE_mode_info->pitch);
+  uint64_t offset = (x * ((VBE_mode_info->bpp) / 8)) + (y * VBE_mode_info->pitch);
   framebuffer[offset] = (hex_color) & 0xFF;
   framebuffer[offset + 1] = (hex_color >> 8) & 0xFF;
   framebuffer[offset + 2] = (hex_color >> 16) & 0xFF;
