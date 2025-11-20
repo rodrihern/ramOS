@@ -56,7 +56,7 @@ extern uint64_t sys_regs(char *buf);
 extern void     sys_time(uint8_t *buf);
 extern void     sys_date(uint8_t *buf);
 extern int      sys_read(int fd, char *buf, uint64_t count);
-extern int      sys_write(uint64_t fd, const char *buf, uint64_t count);
+extern int      sys_write(int fd, const char *buf, uint64_t count);
 extern void     sys_increase_fontsize();
 extern void     sys_decrease_fontsize();
 extern void     sys_beep(uint32_t freq_hz, uint64_t duration_ms);

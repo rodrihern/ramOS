@@ -140,16 +140,7 @@ void handle_pressed_key() {
 
     if (is_letter && raw == 'd' && control) {
       if (!pressed_keys['d' - 'a']) { // para que solo se llame una vez
-        pid_t fg_pid = scheduler_get_foreground_pid();
-        pcb_t *fg_process = scheduler_get_pcb(fg_pid);
-        if (fg_process) {
-          if (fg_process->read_fd == STDIN) {
-            write_buffer(EOF);
-          } else {
-            char c = EOF;
-            write_pipe(fg_process->read_fd + 1, &c, 1);
-          }
-        }
+        write_buffer(EOF);
       }
       pressed_keys['d' - 'a'] = 1; // marcamos como presionada
       return;                      // para no meter la 'd' en el buffer

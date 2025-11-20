@@ -60,33 +60,35 @@ static int init_pcb_argv(pcb_t *p, int argc, const char **argv, memory_manager_A
 
 static void init_pcb_file_descriptors(pcb_t *p, int fds[2])
 {
-	p->open_fds = q_init();
 
 	if (fds == NULL) {
-		p->read_fd  = STDIN;
-		p->write_fd = STDOUT;
+		p->fd_table[STDIN] = STDIN;
+		p->fd_table[STDOUT] = STDOUT;
 	} else {
-		p->read_fd = fds[0];
+		p->fd_table[STDIN] = fds[0];
 		if (fds[0] >= FIRST_FREE_FD) {
 			open_fd(fds[0]);
-			q_add(p->open_fds, fds[0]);
 		}
-		p->write_fd = fds[1];
+		p->fd_table[STDOUT] = fds[1];
 		if (fds[1] >= FIRST_FREE_FD) {
 			open_fd(fds[1]);
-			q_add(p->open_fds, fds[1]);
 		}
+	}
+
+	// builtin fds
+	for (int i = STDERR; i < FIRST_FREE_FD; i++) {
+		p->fd_table[i] = i;
+	}
+
+	// the rest are closed
+	for (int i = FIRST_FREE_FD; i < MAX_FDS; i++) {
+		p->fd_table[i] = -1;
 	}
 }
 
-pcb_t *proc_create(int             pid,
-                 process_entry_t entry,
-                 int             argc,
-                 const char    **argv,
-                 const char     *name,
-                 uint8_t            killable,
-                 int             fds[2])
-{
+pcb_t *proc_create(int pid, process_entry_t entry, int argc, const char **argv,
+	const char *name, uint8_t killable, int fds[2]) {
+
 	if (!entry || !name || argc < 0) {
 		return NULL;
 	}
@@ -148,9 +150,6 @@ void free_process_resources(pcb_t *p)
 
 	free_pcb_argv(p, mm);
 	free_pcb_stack(p, mm);
-
-	q_destroy(p->open_fds);
-	p->open_fds = NULL;
 
 	// Liberar pcb_t
 	free_memory(mm, p);

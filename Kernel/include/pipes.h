@@ -2,9 +2,7 @@
 #define PIPES_H
 
 #include <stdint.h>
-#include "memory_manager.h"
 #include "fds.h"
-#include "scheduler.h"
 
 #define PIPE_BUFFER_SIZE 1024
 #define MAX_PIPES 32

@@ -43,7 +43,7 @@ $(KERNEL): $(LOADEROBJECT) $(ALL_OBJECTS) $(STATICLIBS)
 define make-c-rule
 $$(call src_to_obj,$(1)): $(1)
 	@mkdir -p $(OBJDIR)
-	$(GCC) $(GCCFLAGS) -I./include -c $$< -o $$@
+	$(GCC) $(GCCFLAGS) -Iinclude -c $$< -o $$@
 endef
 
 define make-asm-rule

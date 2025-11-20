@@ -43,9 +43,11 @@ static inline uint8_t pid_is_valid(pid_t pid)
 
 static void close_open_fds(pcb_t *p)
 {
-	while (!q_is_empty(p->open_fds)) {
-		int fd = q_poll(p->open_fds);
-		close_fd(fd);
+	for (int i = 0; i < MAX_FDS; i++) {
+		int fd = p->fd_table[i];
+		if (fd >= FIRST_FREE_FD) {
+			close_fd(fd);
+		}
 	}
 }
 
@@ -624,8 +626,8 @@ int scheduler_get_processes(process_info_t *buffer, int max_count)
 			buffer[count].status        = p->status;
 			buffer[count].priority      = p->priority;
 			buffer[count].parent_pid    = p->parent_pid;
-			buffer[count].read_fd       = p->read_fd;
-			buffer[count].write_fd      = p->write_fd;
+			buffer[count].read_fd       = p->fd_table[STDIN];
+			buffer[count].write_fd      = p->fd_table[STDOUT];
 			buffer[count].stack_base    = (uint64_t)p->stack_base;
 			buffer[count].stack_pointer = (uint64_t)p->stack_pointer;
 

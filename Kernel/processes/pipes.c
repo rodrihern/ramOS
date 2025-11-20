@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include "pipes.h"
+#include "memory_manager.h"
 #include "scheduler.h"
 #include "lib.h"
 #include "synchro.h"
@@ -216,7 +217,7 @@ int close_fd(int fd)
 		if (pipe->reader_count == 0 && pipe->writer_count == 0) {
 			destroy_pipe(idx);
 		}
-		return 1;
+		return 0;
 	}
 
 	if (fd == pipe->write_fd) {
@@ -236,10 +237,10 @@ int close_fd(int fd)
 		if (pipe->reader_count == 0 && pipe->writer_count == 0) {
 			destroy_pipe(idx);
 		}
-		return 1;
+		return 0;
 	}
 
-	return 0;
+	return -1;
 }
 
 int read_pipe(int fd, char *buf, int count)

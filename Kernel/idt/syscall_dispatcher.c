@@ -84,18 +84,20 @@ static uint64_t sys_regs(char *buffer)
 }
 
 // devuelve cuantos chars escribió
-static int sys_write(uint64_t fd, const char *buffer, uint64_t count)
+static int sys_write(int fd, const char *buffer, uint64_t count)
 {
+	if (fd < 0 || fd >= MAX_FDS) {
+		return -1;
+	}
 	int  pid = scheduler_get_current_pid();
 	pcb_t *p   = scheduler_get_pcb(pid);
 
-	if (fd == STDOUT) { // que es para este tipo stdout?
-		fd = p->write_fd;
-	}
+	fd = p->fd_table[fd];
 
-	if (fd == STDIN) { // no se puede escribir en STDIN
+	if (fd <= STDIN) {
 		return -1;
 	}
+
 	if (fd < FIRST_FREE_FD) {
 		uint32_t color = fd_colors[fd];
 		for (int i = 0; i < count; i++) {
@@ -106,39 +108,34 @@ static int sys_write(uint64_t fd, const char *buffer, uint64_t count)
 	}
 
 	// es un pipe
-	if (!q_contains(p->open_fds, fd)) {
-		return -1;
-	}
-
 	return write_pipe(fd, buffer, count);
 }
 
 // leo hasta count
 static int sys_read(int fd, char *buffer, uint64_t count)
 {
-	int  pid = scheduler_get_current_pid();
-	pcb_t *p   = scheduler_get_pcb(pid);
-
-	if (fd == STDIN) { // que es para este tipo stdin?
-		fd = p->read_fd;
+	if (fd < 0 || fd >= MAX_FDS) {
+		return -1;
 	}
-	if (fd == STDOUT || fd == STDERR) { // no puede leer de ahi
+
+	int pid = scheduler_get_current_pid();
+	pcb_t *p = scheduler_get_pcb(pid);
+
+	fd = p->fd_table[fd];
+
+	if (fd < 0 || (STDOUT <= fd && fd < FIRST_FREE_FD)) {
 		return -1;
 	}
 
 	if (fd == STDIN) { // quiere leer de teclado
 		int foreground_pid = scheduler_get_foreground_pid();
 		if (pid != foreground_pid) {
-			return EOF; // solo el proceso de foreground puede leer del teclado
+			return -1; // solo el proceso de foreground puede leer del teclado
 		}
 		return read_keyboard_buffer(buffer, count);
 	}
 
 	// es un pipe
-	if (!q_contains(p->open_fds, fd)) {
-		return -1;
-	}
-
 	return read_pipe(fd, buffer, count);
 }
 
@@ -376,9 +373,11 @@ static int sys_create_pipe(int fds[2])
 	}
 
 	pid_t pid = scheduler_get_current_pid();
-	pcb_t  *p   = scheduler_get_pcb(pid);
-	q_add(p->open_fds, fds[0]);
-	q_add(p->open_fds, fds[1]);
+	pcb_t *p   = scheduler_get_pcb(pid);
+
+	p->fd_table[fds[0]] = fds[0];
+	p->fd_table[fds[1]] = fds[1];
+
 	return pipe_id;
 }
 
@@ -411,29 +410,30 @@ static int sys_open_named_pipe(char *name, int fds[2])
 		return pipe_id;
 	}
 
+	// Agregar ambos FDs a la lista de open_fds del proceso
 	pid_t pid = scheduler_get_current_pid();
 	pcb_t  *p   = scheduler_get_pcb(pid);
 
-	// Agregar ambos FDs a la lista de open_fds del proceso
-	if (!q_contains(p->open_fds, fds[0])) {
-		q_add(p->open_fds, fds[0]);
-	}
-	if (!q_contains(p->open_fds, fds[1])) {
-		q_add(p->open_fds, fds[1]);
-	}
+	p->fd_table[fds[0]] = fds[0];
+	p->fd_table[fds[1]] = fds[1];
 
 	return pipe_id;
 }
 
 static int sys_close_fd(int fd)
 {
+	if (fd < 0 || fd >= MAX_FDS) {
+		return -1;
+	}
+	
 	pid_t pid = scheduler_get_current_pid();
 	pcb_t  *p   = scheduler_get_pcb(pid);
-	if (q_remove(p->open_fds, fd)) {
-		return close_fd(fd);
+	fd = p->fd_table[fd];
+	if (fd < FIRST_FREE_FD) {
+		return -1;
 	}
 
-	return 0; // no lo tenia abierto
+	return close_fd(fd);
 }
 
 static int sys_pipes_info(pipe_info_t *buf, int max_count)

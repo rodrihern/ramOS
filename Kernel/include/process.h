@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "queue.h"
+#include "pipes.h"
 
 #define MAX_PROCESSES 64
 #define MAX_PROCESS_NAME_LENGTH 32
@@ -24,7 +24,7 @@ typedef int (*process_entry_t)(int argc, char **argv);
 typedef enum { PS_READY = 0, PS_RUNNING, PS_BLOCKED, PS_TERMINATED } process_status_t;
 
 // Process Control Block
-typedef struct pcb_t {
+typedef struct pcb {
 	int  pid;
 	int  parent_pid; // PID del proceso padre (-1 si no tiene)
 	char name[MAX_PROCESS_NAME_LENGTH];
@@ -48,14 +48,10 @@ typedef struct pcb_t {
 	int      return_value; // Valor de retorno (para exit)
 	int      waiting_on;   // PID que está esperando (-1 si ninguno)
 
-	// file descriptors
-	int  read_fd;
-	int  write_fd;
 	uint8_t killable; // si false, el proceso no puede ser matado (init/shell)
 	uint8_t unblockable;  
 
-	// queues
-	queue_t open_fds; // lista de fds abiertos
+	uint8_t fd_table[MAX_FDS]; // -1 si no lo tiene abierto, sino el numero al que esta mapeado
 } pcb_t;
 
 // Estructura para exponer información de procesos a userland
@@ -81,4 +77,4 @@ pcb_t *proc_create(int             pid,
                  int             fds[2]);
 void free_process_resources(pcb_t *p);
 
-#endif 
+#endif
