@@ -16,57 +16,56 @@ void *syscalls[] = {
 	&sys_time_info,          // 3
 	&sys_increase_fontsize,  // 4
 	&sys_decrease_fontsize,  // 5
-	&sys_beep,               // 6
-	&sys_screensize,         // 7
-	&sys_circle,             // 8
-	&sys_rectangle,          // 9
-	&sys_draw_line,          // 10
-	&sys_draw_string,        // 11
-	&sys_clear,              // 12
-	&sys_speaker_start,      // 13
-	&sys_speaker_stop,       // 14
-	&sys_textmode,           // 15
-	&sys_videomode,          // 16
-	&sys_put_pixel,          // 17
-	&sys_key_status,         // 18
-	&sys_sleep,              // 19
-	&sys_clear_input_buffer, // 20
-	&sys_ms_elapsed,              // 21
+	&sys_screensize,         // 6
+	&sys_circle,             // 7
+	&sys_rectangle,          // 8
+	&sys_draw_line,          // 9
+	&sys_draw_string,        // 10
+	&sys_clear,              // 11
+	&sys_speaker_start,      // 12
+	&sys_speaker_stop,       // 13
+	&sys_textmode,           // 14
+	&sys_videomode,          // 15
+	&sys_put_pixel,          // 16
+	&sys_key_status,         // 17
+	&sys_sleep,              // 18
+	&sys_clear_input_buffer, // 19
+	&sys_ms_elapsed,         // 20
 
 	// syscalls de memoria
-	&sys_malloc,   // 22
-	&sys_free,     // 23
-	&sys_mem_info, // 24
+	&sys_malloc,   // 21
+	&sys_free,     // 22
+	&sys_mem_info, // 23
 
 	// syscalls de procesos
-	&sys_create_process, // 25
-	&sys_exit,           // 26
-	&sys_getpid,         // 27
-	&sys_kill,           // 28
-	&sys_block,          // 29
-	&sys_unblock,        // 30
-	&sys_wait,           // 31
-	&sys_nice,           // 32
-	&sys_yield,          // 33
-	&sys_processes_info, // 34
+	&sys_create_process, // 24
+	&sys_exit,           // 25
+	&sys_getpid,         // 26
+	&sys_kill,           // 27
+	&sys_block,          // 28
+	&sys_unblock,        // 29
+	&sys_wait,           // 30
+	&sys_nice,           // 31
+	&sys_yield,          // 32
+	&sys_processes_info, // 33
 
 	// syscalls de semaforos
-	&sys_sem_open,  // 35
-	&sys_sem_close, // 36
-	&sys_sem_wait,  // 37
-	&sys_sem_post,  // 38
+	&sys_sem_open,  // 34
+	&sys_sem_close, // 35
+	&sys_sem_wait,  // 36
+	&sys_sem_post,  // 37
 
 	// syscalls de pipes
-	&sys_create_pipe,  // 49
-	&sys_destroy_pipe, // 40
+	&sys_create_pipe,  // 38
+	&sys_destroy_pipe, // 39
 
-	&sys_set_foreground_process, // 41
-	&sys_adopt_init_as_parent,   // 42
-	&sys_get_foreground_process, // 43
+	&sys_set_foreground_process, // 40
+	&sys_adopt_init_as_parent,   // 41
+	&sys_get_foreground_process, // 42
 
-	&sys_open_named_pipe, // 44
-	&sys_close_fd,        // 45
-	&sys_pipes_info,      // 46
+	&sys_open_named_pipe, // 43
+	&sys_close_fd,        // 44
+	&sys_pipes_info,      // 45
 };
 
 uint64_t syscall_count = sizeof(syscalls) / sizeof(syscalls[0]);
@@ -154,12 +153,6 @@ static void sys_decrease_fontsize()
 	vd_decrease_text_size();
 }
 
-// Ruido para el juego
-static void sys_beep(uint32_t freq_hz, uint64_t duration)
-{
-	beep(freq_hz, duration);
-}
-
 // devuelve la info del tamaño de la pantalla
 static void sys_screensize(uint32_t *width, uint32_t *height)
 {
@@ -229,9 +222,11 @@ static uint64_t sys_key_status(char c)
 	return is_pressed_key(c);
 }
 
-static void sys_sleep(uint64_t miliseconds)
-{
-	sleep(miliseconds);
+static void sys_sleep(uint64_t miliseconds) {
+	uint64_t start_ms = get_timer_ms();
+	while (get_timer_ms() - start_ms < miliseconds) {
+		scheduler_force_reschedule();
+	}
 }
 
 static void sys_clear_input_buffer()

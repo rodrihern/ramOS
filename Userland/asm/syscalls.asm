@@ -1,5 +1,5 @@
 global  sys_write, sys_read, sys_time, sys_regs, sys_clear
-global  sys_increase_fontsize, sys_decrease_fontsize, sys_beep
+global  sys_increase_fontsize, sys_decrease_fontsize
 global  sys_screensize, sys_circle, sys_rectangle, sys_draw_line, sys_draw_string
 global  sys_textmode, sys_videomode, sys_put_pixel, sys_key_status
 global  sys_sleep, sys_clear_input_buffer, sys_ms_elapsed
@@ -36,126 +36,123 @@ sys_increase_fontsize:
 sys_decrease_fontsize:
 	SYSCALL 5
 
-sys_beep:
+sys_screensize:
 	SYSCALL 6
 
-sys_screensize:
+sys_circle:
 	SYSCALL 7
 
-sys_circle:
+sys_rectangle:
 	SYSCALL 8
 
-sys_rectangle:
+sys_draw_line:
 	SYSCALL 9
 
-sys_draw_line:
+sys_draw_string:
 	SYSCALL 10
 
-sys_draw_string:
+sys_clear:
 	SYSCALL 11
 
-sys_clear:
+sys_speaker_start:
 	SYSCALL 12
 
-sys_speaker_start:
+sys_speaker_stop:
 	SYSCALL 13
 
-sys_speaker_stop:
+sys_textmode:
 	SYSCALL 14
 
-sys_textmode:
+sys_videomode:
 	SYSCALL 15
 
-sys_videomode:
+sys_put_pixel:
 	SYSCALL 16
 
-sys_put_pixel:
+sys_key_status:
 	SYSCALL 17
 
-sys_key_status:
+sys_sleep:
 	SYSCALL 18
 
-sys_sleep:
+sys_clear_input_buffer:
 	SYSCALL 19
 
-sys_clear_input_buffer:
+sys_ms_elapsed:
 	SYSCALL 20
 
-sys_ms_elapsed:
-	SYSCALL 21
-
 sys_malloc:
-    SYSCALL 22
+    SYSCALL 21
 
 sys_free:
-    SYSCALL 23
+    SYSCALL 22
 
 sys_mem_info:
-    SYSCALL 24
+    SYSCALL 23
 
 sys_create_process:
-    SYSCALL 25
+    SYSCALL 24
 
 sys_exit:
-    SYSCALL 26
+    SYSCALL 25
 
 sys_getpid:
-    SYSCALL 27
+    SYSCALL 26
 
 sys_kill:
-    SYSCALL 28
+    SYSCALL 27
 
 sys_block:
-    SYSCALL 29
+    SYSCALL 28
 
 sys_unblock:
-    SYSCALL 30
+    SYSCALL 29
 
 sys_wait:
-    SYSCALL 31
+    SYSCALL 30
 
 sys_nice:
-    SYSCALL 32
+    SYSCALL 31
 
 sys_yield:
-    SYSCALL 33
+    SYSCALL 32
 
 sys_processes_info:
-    SYSCALL 34
+    SYSCALL 33
 
 sys_sem_open:
-    SYSCALL 35
+    SYSCALL 34
 
 sys_sem_close:
-    SYSCALL 36
+    SYSCALL 35
 
 sys_sem_wait:
-    SYSCALL 37
+    SYSCALL 36
 
 sys_sem_post:
-    SYSCALL 38
+    SYSCALL 37
 
 sys_create_pipe:
-    SYSCALL 39
+    SYSCALL 38
 
 sys_destroy_pipe:
-    SYSCALL 40
+    SYSCALL 39
 
 sys_set_foreground_process:
-    SYSCALL 41
+    SYSCALL 40
 
 sys_adopt_init_as_parent:
-    SYSCALL 42
+    SYSCALL 41
 
 sys_get_foreground_process:
-    SYSCALL 43
+    SYSCALL 42
 
 sys_open_named_pipe: 
-    SYSCALL 44
+    SYSCALL 43
 
 sys_close_fd:
-    SYSCALL 45
+    SYSCALL 44
 
 sys_pipes_info:
-    SYSCALL 46
+    SYSCALL 45
 

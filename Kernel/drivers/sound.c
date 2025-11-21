@@ -48,9 +48,3 @@ void speaker_start_tone(uint32_t freq_hz) {
                                             // speaker (hace un or con 00000011)
   }
 }
-
-void beep(uint32_t freq_hz, uint64_t duration) {
-  speaker_start_tone(freq_hz);
-  sleep(duration);
-  speaker_off();
-}

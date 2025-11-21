@@ -78,27 +78,6 @@ uint64_t timer_handler(uint64_t rsp) {
 	return rsp;
 }
 
-uint64_t ticks_elapsed() { return ticks; }
-
-int seconds_elapsed() { return ticks / 100; }
-
-// refactorizar
-void sleep(int miliseconds) { // normaliza a 10 ms
-	unsigned long start_ticks = ticks;
-	unsigned long target_ticks =
-		miliseconds / 10; // convertir ms a ticks (100 ticks/seg)
-
-	while ((ticks - start_ticks) < target_ticks) {
-		_hlt();
-	}
-}
-
-void get_date(uint8_t *buffer) {
-  buffer[0] = get_day();
-  buffer[1] = get_month();
-  buffer[2] = get_year();
-}
-
 void get_time(time_info_t * buf) {
 	uint8_t hour_bcd = get_hour();
 	uint8_t minutes_bcd = get_minutes();

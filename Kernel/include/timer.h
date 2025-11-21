@@ -16,10 +16,6 @@ typedef struct time_info {
 void init_timer(void);
 uint64_t get_timer_ms(void);
 uint64_t timer_handler(uint64_t rsp);
-uint64_t ticks_elapsed();
-int      seconds_elapsed();
-void     sleep(int seconds);
-void get_date(uint8_t *buffer);
 void get_time(time_info_t * buf);
 
 // Import from interrupts.h
