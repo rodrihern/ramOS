@@ -93,7 +93,7 @@ extern void     sys_put_pixel(uint32_t color, uint64_t x, uint64_t y);
 extern uint64_t sys_key_status(char key);
 extern void     sys_sleep(uint64_t miliseconds);
 extern void     sys_clear_input_buffer();
-extern uint64_t sys_ticks();
+extern uint64_t sys_ms_elapsed();
 
 // syscalls de memory management
 extern void *sys_malloc(uint64_t size);

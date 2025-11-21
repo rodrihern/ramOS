@@ -31,7 +31,7 @@ void *syscalls[] = {
 	&sys_key_status,         // 18
 	&sys_sleep,              // 19
 	&sys_clear_input_buffer, // 20
-	&sys_ticks,              // 21
+	&sys_ms_elapsed,              // 21
 
 	// syscalls de memoria
 	&sys_malloc,   // 22
@@ -239,7 +239,7 @@ static void sys_clear_input_buffer()
 	clear_buffer();
 }
 
-static uint64_t sys_ticks()
+static uint64_t sys_ms_elapsed()
 {
 	return get_timer_ms();
 }

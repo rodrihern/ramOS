@@ -2,7 +2,7 @@ global  sys_write, sys_read, sys_time, sys_regs, sys_clear
 global  sys_increase_fontsize, sys_decrease_fontsize, sys_beep
 global  sys_screensize, sys_circle, sys_rectangle, sys_draw_line, sys_draw_string
 global  sys_textmode, sys_videomode, sys_put_pixel, sys_key_status
-global  sys_sleep, sys_clear_input_buffer, sys_ticks
+global  sys_sleep, sys_clear_input_buffer, sys_ms_elapsed
 global  sys_malloc, sys_free, sys_mem_info
 global  sys_create_process, sys_exit_current, sys_getpid, sys_kill, sys_block, sys_unblock, sys_wait, sys_nice, sys_processes_info, sys_yield
 global sys_sem_open,sys_sem_close,sys_sem_wait,sys_sem_post
@@ -81,7 +81,7 @@ sys_sleep:
 sys_clear_input_buffer:
 	SYSCALL 20
 
-sys_ticks:
+sys_ms_elapsed:
 	SYSCALL 21
 
 sys_malloc:

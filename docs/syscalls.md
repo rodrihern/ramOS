@@ -241,4 +241,4 @@ sys_X:
 
 ---
 
-This mirrors existing patterns (see sys_write, sys_ticks, sys_create_process for argument variety). Keep consistency to reduce errors.
+This mirrors existing patterns (see sys_write, sys_ms_elapsed, sys_create_process for argument variety). Keep consistency to reduce errors.
