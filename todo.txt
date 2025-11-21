@@ -1,11 +1,11 @@
-ver lo del sleep en kernel (hacemos que no se use mejor no?)
+
 
 processes con el inicializador para fds y prio
 init y la shell no se pueden matar, sacar killable de pcb
 
 struct con info para las syscalls que devuelven info
 
-piano y spotify(osea con algunas canciones ya puestas)
+piano
 
 pantalla de inicio
 
@@ -46,7 +46,7 @@ rework mm -> tener uno solo, inicializarlo piola
 
 ver cleanup resources (leaks en bg)
 
-ver que es necesario y que no del scheduler
+ver que es necesario y que no del scheduler (force_reschedule?)
 
 refactor semaforos para usar queue_t
 

@@ -38,7 +38,7 @@ static void     sys_clear_input_buffer();
 static uint64_t sys_ms_elapsed();
 
 // syscalls de memory management
-static void      *sys_malloc(size_t size);
+static void      *sys_malloc(uint64_t size);
 static void       sys_free(void *ptr);
 static mem_info_t sys_mem_info(void);
 

@@ -1,8 +1,9 @@
-global  sys_write, sys_read, sys_time, sys_regs, sys_clear
+global  sys_write, sys_read, sys_time_info, sys_regs, sys_clear
 global  sys_increase_fontsize, sys_decrease_fontsize
 global  sys_screensize, sys_circle, sys_rectangle, sys_draw_line, sys_draw_string
 global  sys_textmode, sys_videomode, sys_put_pixel, sys_key_status
 global  sys_sleep, sys_clear_input_buffer, sys_ms_elapsed
+global  sys_speaker_start, sys_speaker_stop
 global  sys_malloc, sys_free, sys_mem_info
 global  sys_create_process, sys_exit_current, sys_getpid, sys_kill, sys_block, sys_unblock, sys_wait, sys_nice, sys_processes_info, sys_yield
 global sys_sem_open,sys_sem_close,sys_sem_wait,sys_sem_post
@@ -27,7 +28,7 @@ sys_write:
 sys_regs:
 	SYSCALL 2
 
-sys_time:
+sys_time_info:
 	SYSCALL 3
 
 sys_increase_fontsize:
@@ -155,4 +156,3 @@ sys_close_fd:
 
 sys_pipes_info:
     SYSCALL 45
-

@@ -6,7 +6,7 @@
 int time_main(int argc, char *argv[])
 {
 	time_info_t info;
-	sys_time(&info);
+	sys_time_info(&info);
 	
 
 	printf("%d:%d:%d %d/%d/%d\n", info.hour, info.minutes, info.seconds,

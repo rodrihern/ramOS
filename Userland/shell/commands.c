@@ -10,17 +10,19 @@
 #define NO_PID -1
 #define MAX_ARGS 16
 
-static void cls(int argc, char *argv[]);
-static void help(int argc, char *argv[]);
+static void cls_cmd(int argc, char *argv[]);
+static void help_cmd(int argc, char *argv[]);
 static void username_cmd(int argc, char *argv[]);
+static void mute_cmd(int argc, char *argv[]);
 
 static uint8_t is_cmd_background(char *line);
 
 
 static builtin_command_t builtins[] = {
-	{"clear", "clears the screen", &cls},
-	{"help", "provides information about available commands", &help},
+	{"clear", "clears the screen", &cls_cmd},
+	{"help", "provides information about available commands", &help_cmd},
 	{"username", "changes the shell username", &username_cmd},
+	{"mute", "stops the speaker", &mute_cmd},
 };
 
 static external_program_t programs[] = {
@@ -33,7 +35,7 @@ static external_program_t programs[] = {
 	{"color", "reads from STDIN and prints it to a color fd", &color_main},
 	{"filter", "filters out vowels from input until '-' is encountered", &filter_main},
 	{"wc", "counts the number of lines, words and characters from STDIN", &wc_main},
-	{"mvar", "tests multi-variable synchronization", &mvar_main},
+	{"spotify", "plays a song", &spotify_main},
 	{"kill", "kills a process given its pid", &kill_main},
 	{"block", "blocks a process given its pid", &block_main},
 	{"unblock", "unblocks a blocked process given its pid", &unblock_main},
@@ -323,12 +325,16 @@ void process_line(char *line)
 	print_err(ERROR_MSG);
 }
 
-static void cls(int argc, char *argv[])
+
+
+// BUILTIN COMMANDS
+
+static void cls_cmd(int argc, char *argv[])
 {
 	sys_clear();
 }
 
-static void help(int argc, char *argv[])
+static void help_cmd(int argc, char *argv[])
 {
 	print("\nType '+' or '-' to change font size\n\n");
 
@@ -383,4 +389,9 @@ static void username_cmd(int argc, char *argv[])
 	print("Username updated to: ");
 	print(new_name);
 	putchar('\n');
+}
+
+static void mute_cmd(int argc, char *argv[]) {
+	sys_speaker_stop();
+	print("Speaker stopped\n");
 }

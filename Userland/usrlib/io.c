@@ -11,6 +11,14 @@ static uint64_t print_oct(uint64_t value);
 static uint64_t print_bin(uint64_t value);
 static uint64_t print_float(double num);
 
+
+
+void play_note(uint32_t freq_hz, uint64_t duration_ms) {
+	sys_speaker_start(freq_hz);
+	sys_sleep(duration_ms);
+	sys_speaker_stop();
+}
+
 uint64_t fprint(uint64_t fd, char *str)
 {
 	if (str == 0) {

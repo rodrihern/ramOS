@@ -240,7 +240,7 @@ static uint64_t sys_ms_elapsed()
 }
 
 // Memory management syscalls
-static void *sys_malloc(size_t size)
+static void *sys_malloc(uint64_t size)
 {
 	return alloc_memory(get_kernel_memory_manager(), size);
 }

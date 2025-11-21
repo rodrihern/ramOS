@@ -10,12 +10,11 @@ int time_main(int argc, char *argv[]);
 int echo_main(int argc, char *argv[]);
 int print_main(int argc, char *argv[]);
 
-
-
 int color_main(int argc, char *argv[]);
 int filter_main(int argc, char *argv[]);
 int wc_main(int argc, char *argv[]);
-int mvar_main(int argc, char *argv[]);
+
+int spotify_main(int argc, char * argv[]);
 
 int kill_main(int argc, char *argv[]);
 int block_main(int argc, char *argv[]);

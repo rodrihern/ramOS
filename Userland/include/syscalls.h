@@ -75,7 +75,7 @@ typedef struct pipe_info {
 extern int      sys_read(int fd, char *buf, uint64_t count);
 extern int      sys_write(int fd, const char *buf, uint64_t count);
 extern uint64_t sys_regs(char *buf);
-extern void     sys_time(time_info_t *buffer);
+extern void     sys_time_info(time_info_t *buffer);
 extern void     sys_increase_fontsize();
 extern void     sys_decrease_fontsize();
 extern void     sys_screensize(uint32_t *width, uint32_t *height);
