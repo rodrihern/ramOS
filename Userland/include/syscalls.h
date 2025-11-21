@@ -16,7 +16,17 @@
 #define MAX_PIPES 32
 #define MAX_PIPE_NAME_LENGTH 32
 
-enum { STDIN = 0, STDOUT, STDERR, STDGREEN, STDBLUE, STDCYAN, STDMAGENTA, STDYELLOW, FDS_COUNT };
+enum { 
+	STDIN = 0,
+	STDOUT,
+	STDERR,
+	STDGREEN,
+	STDBLUE,
+	STDCYAN,
+	STDMAGENTA,
+	STDYELLOW,
+	FDS_COUNT
+};
 
 typedef struct time_info {
     uint8_t hour;
