@@ -11,7 +11,7 @@ static void print_initial_message();
 
 int main(void)
 {
-	sys_enable_textmode();
+	sys_textmode();
 
 	// Limpiar buffer de teclado y resetear semáforo antes de empezar
 	sys_clear_input_buffer();

@@ -28,7 +28,6 @@ static external_program_t programs[] = {
 	{"mem", "prints to STDOUT memory usage information", &mem_main},
 	{"pipes", "prints to STDOUT information about open pipes", &pipes_main},
 	{"time", "prints system time to STDOUT", &time_main},
-	{"date", "prints system date to STDOUT", &date_main},
 	{"echo", "prints to STDOUT its params", &echo_main},
 	{"print", "prints a string to STDOUT and yields indefinately", &print_main},
 	{"cat", "reads from STDIN and prints it to STDOUT", &cat_main},

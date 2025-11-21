@@ -9,65 +9,64 @@
 #define MAX_CHAR 256
 
 void *syscalls[] = {
-        // syscalls de arqui
-	&sys_regs,               // 0
-	&sys_time,               // 1
-	&sys_date,               // 2
-	&sys_read,               // 3
-	&sys_write,              // 4
-	&sys_increase_fontsize,  // 5
-	&sys_decrease_fontsize,  // 6
-	&sys_beep,               // 7
-	&sys_screensize,         // 8
-	&sys_circle,             // 9
-	&sys_rectangle,          // 10
-	&sys_draw_line,          // 11
-	&sys_draw_string,        // 12
-	&sys_clear,              // 13
-	&sys_speaker_start,      // 14
-	&sys_speaker_stop,       // 15
-	&sys_textmode,           // 16
-	&sys_videomode,          // 17
-	&sys_put_pixel,          // 18
-	&sys_key_status,         // 19
-	&sys_sleep,              // 20
-	&sys_clear_input_buffer, // 21
-	&sys_ticks,              // 22
+	// syscalls de arqui
+	&sys_read,               // 0
+	&sys_write,              // 1
+	&sys_regs,               // 2
+	&sys_time_info,          // 3
+	&sys_increase_fontsize,  // 4
+	&sys_decrease_fontsize,  // 5
+	&sys_beep,               // 6
+	&sys_screensize,         // 7
+	&sys_circle,             // 8
+	&sys_rectangle,          // 9
+	&sys_draw_line,          // 10
+	&sys_draw_string,        // 11
+	&sys_clear,              // 12
+	&sys_speaker_start,      // 13
+	&sys_speaker_stop,       // 14
+	&sys_textmode,           // 15
+	&sys_videomode,          // 16
+	&sys_put_pixel,          // 17
+	&sys_key_status,         // 18
+	&sys_sleep,              // 19
+	&sys_clear_input_buffer, // 20
+	&sys_ticks,              // 21
 
 	// syscalls de memoria
-	&sys_malloc,   // 23
-	&sys_free,     // 24
-	&sys_mem_info, // 25
+	&sys_malloc,   // 22
+	&sys_free,     // 23
+	&sys_mem_info, // 24
 
 	// syscalls de procesos
-	&sys_create_process, // 26
-	&sys_exit,           // 27
-	&sys_getpid,         // 28
-	&sys_kill,           // 29
-	&sys_block,          // 30
-	&sys_unblock,        // 31
-	&sys_wait,           // 32
-	&sys_nice,           // 33
-	&sys_yield,          // 34
-	&sys_processes_info, // 35
+	&sys_create_process, // 25
+	&sys_exit,           // 26
+	&sys_getpid,         // 27
+	&sys_kill,           // 28
+	&sys_block,          // 29
+	&sys_unblock,        // 30
+	&sys_wait,           // 31
+	&sys_nice,           // 32
+	&sys_yield,          // 33
+	&sys_processes_info, // 34
 
 	// syscalls de semaforos
-	&sys_sem_open,  // 36
-	&sys_sem_close, // 37
-	&sys_sem_wait,  // 38
-	&sys_sem_post,  // 39
+	&sys_sem_open,  // 35
+	&sys_sem_close, // 36
+	&sys_sem_wait,  // 37
+	&sys_sem_post,  // 38
 
 	// syscalls de pipes
-	&sys_create_pipe,  // 40
-	&sys_destroy_pipe, // 41
+	&sys_create_pipe,  // 49
+	&sys_destroy_pipe, // 40
 
-	&sys_set_foreground_process, // 42
-	&sys_adopt_init_as_parent,   // 43
-	&sys_get_foreground_process, // 44
+	&sys_set_foreground_process, // 41
+	&sys_adopt_init_as_parent,   // 42
+	&sys_get_foreground_process, // 43
 
-	&sys_open_named_pipe, // 45
-	&sys_close_fd,        // 46
-	&sys_pipes_info,      // 47
+	&sys_open_named_pipe, // 44
+	&sys_close_fd,        // 45
+	&sys_pipes_info,      // 46
 };
 
 uint64_t syscall_count = sizeof(syscalls) / sizeof(syscalls[0]);
@@ -133,12 +132,8 @@ static int sys_read(int fd, char *buffer, uint64_t count)
 	return read_pipe(fd, buffer, count);
 }
 
-static void sys_date(uint8_t *buffer)
-{
-	get_date(buffer);
-}
 
-static void sys_time(time_info_t *buffer)
+static void sys_time_info(time_info_t *buffer)
 {
 	get_time(buffer);
 }

@@ -36,5 +36,5 @@ void draw_string(char *str, uint64_t x, uint64_t y, uint64_t size, uint32_t colo
 void draw_line(uint64_t x0, uint64_t y0, uint64_t x1, uint64_t y1, uint32_t color)
 {
 	uint64_t info[] = {x0, y0, x1, y1};
-	sys_line(info, color);
+	sys_draw_line(info, color);
 }
