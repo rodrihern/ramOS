@@ -13,7 +13,8 @@ typedef struct time_info {
 } time_info_t;
 
 
-
+void init_timer(void);
+uint64_t get_timer_ms(void);
 uint64_t timer_handler(uint64_t rsp);
 uint64_t ticks_elapsed();
 int      seconds_elapsed();

@@ -4,10 +4,9 @@ processes con el inicializador para fds y prio
 
 struct con info para las syscalls que devuelven info
 
-
 piano y spotify(osea con algunas canciones ya puestas)
 
-quizas un programa por cada color? tipo como red
+pantalla de inicio
 
 ---- video
 
@@ -33,13 +32,6 @@ syscalls:
     present_nregions
 ----
 
-pantalla de inicio
-
-constante de validacion para numero de syscalls? variable global con sizeof
-
-
-
-ordenar archivos a carpetas como me gusten en kernel
 
 --------
 
@@ -61,7 +53,11 @@ refactor semaforos para usar queue_t
 
 rework driver de teclado -> flechitas y lo del keystatus con scancode
 
-historial de comandos en la shell
+-- shell
+
+historial de comandos
+
+--
 
 
 

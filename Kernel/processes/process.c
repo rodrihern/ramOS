@@ -82,7 +82,7 @@ static void init_pcb_file_descriptors(pcb_t *p, int fds[2])
 
 	// the rest are closed
 	for (int i = FIRST_FREE_FD; i < MAX_FDS; i++) {
-		p->fd_table[i] = -1;
+		p->fd_table[i] = NO_FD;
 	}
 }
 

@@ -14,6 +14,7 @@
 #define INIT_PID 0
 #define SHELL_PID 1
 #define NO_PID -1
+#define NO_FD -1
 
 #define OK 0
 #define ERROR -1
@@ -51,7 +52,7 @@ typedef struct pcb {
 	uint8_t killable; // si false, el proceso no puede ser matado (init/shell)
 	uint8_t unblockable;  
 
-	uint8_t fd_table[MAX_FDS]; // -1 si no lo tiene abierto, sino el numero al que esta mapeado
+	int8_t fd_table[MAX_FDS]; // -1 si no lo tiene abierto, sino el numero al que esta mapeado
 } pcb_t;
 
 // Estructura para exponer información de procesos a userland

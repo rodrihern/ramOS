@@ -13,9 +13,10 @@ int print_main(int argc, char *argv[])
 	}
 	
 	while (1) {
-		for (int i = 0; i < argc; i++) {
-			print(argv[i]);
-			putchar(' ');
-		}
+		print(argv[0]);
+		// for (int i = 0; i < argc; i++) {
+		// 	print(argv[i]);
+		// 	putchar(' ');
+		// }
 	}
 }

@@ -241,7 +241,7 @@ static void sys_clear_input_buffer()
 
 static uint64_t sys_ticks()
 {
-	return ticks_elapsed();
+	return get_timer_ms();
 }
 
 // Memory management syscalls

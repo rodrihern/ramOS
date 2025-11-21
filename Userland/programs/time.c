@@ -11,6 +11,7 @@ int time_main(int argc, char *argv[])
 
 	printf("%d:%d:%d %d/%d/%d\n", info.hour, info.minutes, info.seconds,
 		info.day, info.month, info.year);
+	printf("ms: %u", sys_ticks());
 
 	return OK;
 }

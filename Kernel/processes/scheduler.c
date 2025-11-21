@@ -21,7 +21,7 @@ static queue_t ready_queue[PRIORITY_COUNT] = {0};
 
 static pid_t    current_pid            = NO_PID;
 static uint8_t  process_count          = 0;
-static uint64_t total_cpu_ticks        = 0;
+static uint64_t ticks        = 0;
 static uint8_t     force_reschedule       = false;
 static uint8_t     scheduler_initialized  = false;
 static pid_t    foreground_process_pid = NO_PID;
@@ -98,7 +98,7 @@ static int create_shell()
 	pcb_shell->priority           = MAX_PRIORITY;
 	pcb_shell->effective_priority = MAX_PRIORITY;
 	pcb_shell->status             = PS_READY;
-	pcb_shell->last_tick          = total_cpu_ticks;
+	pcb_shell->last_tick          = ticks;
 	processes[SHELL_PID]          = pcb_shell;
 	process_count++;
 	if (!q_add(ready_queue[pcb_shell->effective_priority], SHELL_PID)) {
@@ -151,7 +151,7 @@ int init_scheduler(void)
 	}
 
 	process_count    = 0;
-	total_cpu_ticks  = 0;
+	ticks  = 0;
 	force_reschedule = false;
 	current_pid      = NO_PID; // NO le pongo INIT_PID porque el que lo tiene que elegir es el
 	                           // schedule la primera vez que se llama.
@@ -182,7 +182,7 @@ void *schedule(void *prev_rsp)
 		current->stack_pointer = prev_rsp; // actualiza el rsp del proceso que estuvo
 		                                   // corriendo hasta ahora en su pcb
 
-		total_cpu_ticks++;
+		ticks++;
 
 		// Cuando un proceso deja de correr (por cualquier razón), vuelve a su prioridad
 		// base (pierde cualquier promoción temporal por aging)
@@ -211,7 +211,7 @@ void *schedule(void *prev_rsp)
 	}
 
 	// Aplicar aging cada N ticks
-	if (total_cpu_ticks % AGING_CHECK_INTERVAL == 0) {
+	if (ticks % AGING_CHECK_INTERVAL == 0) {
 		apply_aging();
 	}
 
@@ -225,7 +225,7 @@ void *schedule(void *prev_rsp)
 
 	// Cuando un proceso va a correr:
 	// Actualizar su last_tick para el control de aging
-	next->last_tick = total_cpu_ticks;
+	next->last_tick = ticks;
 
 	current_pid      = next->pid;
 	next->status     = PS_RUNNING;
@@ -283,12 +283,12 @@ static void apply_aging(void)
 				continue;
 			}
 
-			// Verificar si hace mucho que no corre (comparar con total_cpu_ticks)
-			if (total_cpu_ticks - p->last_tick >= AGING_THRESHOLD) {
+			// Verificar si hace mucho que no corre (comparar con ticks)
+			if (ticks - p->last_tick >= AGING_THRESHOLD) {
 				// Promover: remover de esta cola y agregar a la de mayor prioridad
 				q_remove_current(ready_queue[i]);
 				p->effective_priority = i - 1;  // Subir un nivel de prioridad
-				p->last_tick = total_cpu_ticks; // Actualizar last_tick para evitar
+				p->last_tick = ticks; // Actualizar last_tick para evitar
 				                                // promociones repetidas
 				q_add(ready_queue[i - 1], pid);
 			}
@@ -325,7 +325,7 @@ int scheduler_add_process(
 	process->priority           = DEFAULT_PRIORITY; // Asignar prioridad por defecto
 	process->effective_priority = DEFAULT_PRIORITY; // Inicialmente igual a priority
 	process->status             = PS_READY;
-	process->last_tick          = total_cpu_ticks;
+	process->last_tick          = ticks;
 
 	processes[pid] = process;
 	process_count++;
@@ -401,7 +401,7 @@ int scheduler_set_priority(pid_t pid, uint8_t new_priority)
 
 		// Actualizar last_tick: el cambio manual de prioridad cuenta como "atención" del
 		// scheduler
-		process->last_tick = total_cpu_ticks;
+		process->last_tick = ticks;
 
 		// Agregar a la nueva cola
 		if (!q_add(ready_queue[new_priority], pid)) {
@@ -552,7 +552,7 @@ int scheduler_unblock_process(pid_t pid)
 
 	// Actualizar last_tick: el tiempo bloqueado no cuenta para aging
 	// El proceso debe esperar en READY para acumular tiempo y ser promovido
-	process->last_tick = total_cpu_ticks;
+	process->last_tick = ticks;
 
 	// Agregar a la cola correspondiente a su prioridad efectiva
 	if (!q_add(ready_queue[process->effective_priority], pid)) {
@@ -595,7 +595,7 @@ void scheduler_destroy(void)
 	cleanup_all_processes();
 
 	process_count         = 0;
-	total_cpu_ticks       = 0;
+	ticks       = 0;
 	force_reschedule      = false;
 	current_pid           = NO_PID;
 	scheduler_initialized = false;

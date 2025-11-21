@@ -6,7 +6,7 @@
 #include <moduleLoader.h>
 #include "keyboard.h"
 #include "idt_loader.h"
-#include "time.h"
+#include "timer.h"
 #include "video_driver.h"
 #include "sound.h"
 #include "interrupts.h"
@@ -69,6 +69,8 @@ int main()
 	init_keyboard_sem();
 
 	enable_text_mode();
+
+	init_timer();
 
 	timer_tick(); // esto hace el salto a userland
 

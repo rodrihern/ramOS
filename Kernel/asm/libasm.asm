@@ -11,6 +11,7 @@ GLOBAL get_seconds
 GLOBAL get_minutes
 GLOBAL get_hour
 GLOBAL set_timer_freq
+GLOBAL tsc_read
 
 extern store_snapshot
 
@@ -55,6 +56,12 @@ set_timer_freq:
     out 0x40, al    ; enviar hibyte al canal 0
     
     pop rbp
+    ret
+
+tsc_read:
+    rdtsc               ; EDX:EAX = TSC
+    shl     rdx, 32
+    or      rax, rdx
     ret
 
 get_seconds:

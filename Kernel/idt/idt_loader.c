@@ -23,12 +23,10 @@ DESCR_INT *idt = (DESCR_INT *)0; // IDT de 255 entradas
 
 static void setup_IDT_entry(int index, uint64_t offset);
 
-extern void set_timer_freq(uint64_t number);
 
 void load_idt()
 {
-	// Ejemplo: 100 Hz = 1193182 / 11932
-	set_timer_freq(11932); // ~100 Hz
+	
 
 	// Interrupciones de software
 	setup_IDT_entry(0x80, (uint64_t)&_irq128Handler);
