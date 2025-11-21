@@ -9,9 +9,7 @@
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 #define ENABLED 1
 #define DISABLED 0
-#define BKG_COLOR                                                              \
-0x000000 // cuidado si lo cambiamos hay que cambiar el clear implementando un
-		// memset custom
+#define BKG_COLOR 0x000000
 #define MAX_SIZE 4
 #define WIDTH (VBE_mode_info->width)
 #define HEIGHT (VBE_mode_info->height)
@@ -39,7 +37,7 @@ void put_pixel(uint32_t hex_color, uint64_t x, uint64_t y) {
 	uint8_t *framebuffer = (uint8_t *)(uintptr_t)VBE_mode_info->framebuffer;
 	uint64_t offset = (x * (BPP / 8)) + (y * PITCH);
 	if (BPP == 32) {
-		uint32_t * pixel = framebuffer + offset;
+		uint32_t *pixel = (uint32_t *)(framebuffer + offset);
 		*pixel = hex_color;
 	} else {
 		framebuffer[offset] = (hex_color) & 0xFF;
@@ -65,11 +63,11 @@ static uint32_t cursor_y;
 static uint8_t text_size = 1;
 
 void enable_text_mode() {
-if (text_mode) {
-	return;
-}
-text_mode = ENABLED;
-vd_clear();
+	if (text_mode) {
+		return;
+	}
+	text_mode = ENABLED;
+	vd_clear();
 }
 
 void disable_text_mode() {
@@ -153,65 +151,64 @@ if (cursor_x >= step_x) {
 }
 
 static void delete_char() {
-move_cursor_left();
-for (int y = 0; y < FONT_HEIGHT * text_size; y++) {
-	for (int x = 0; x < FONT_WIDTH * text_size; x++) {
-	put_pixel(BKG_COLOR, cursor_x + x, cursor_y + y);
+	move_cursor_left();
+	for (int y = 0; y < FONT_HEIGHT * text_size; y++) {
+		for (int x = 0; x < FONT_WIDTH * text_size; x++) {
+		put_pixel(BKG_COLOR, cursor_x + x, cursor_y + y);
+		}
 	}
-}
 }
 
 void vd_put_char(uint8_t ch, uint32_t color) {
-if (!text_mode) {
-	return;
-}
-switch (ch) {
-case '\b':
-	delete_char();
-	break;
-case '\n':
-	newline();
-	break;
-default:
-	vd_draw_char(ch, cursor_x, cursor_y, color, text_size);
-	move_cursor_right();
-	break;
-}
+	if (!text_mode) {
+		return;
+	}
+	switch (ch) {
+	case '\b':
+		delete_char();
+		break;
+	case '\n':
+		newline();
+		break;
+	default:
+		vd_draw_char(ch, cursor_x, cursor_y, color, text_size);
+		move_cursor_right();
+		break;
+	}
 }
 
 void vd_print(const char *str, uint32_t color) {
-if (!text_mode) {
-	return;
-}
-for (int i = 0; str[i] != 0; i++) {
-	vd_put_char(str[i], color);
-}
+	if (!text_mode) {
+		return;
+	}
+	for (int i = 0; str[i] != 0; i++) {
+		vd_put_char(str[i], color);
+	}
 }
 
 void vd_increase_text_size() {
-if (text_size < MAX_SIZE && text_mode) {
-	text_size++;
-}
-update_cursor();
+	if (text_size < MAX_SIZE && text_mode) {
+		text_size++;
+	}
+	update_cursor();
 }
 
 void vd_decrease_text_size() {
-if (text_size > 1 && text_mode) {
-	text_size--;
-}
-update_cursor();
+	if (text_size > 1 && text_mode) {
+		text_size--;
+	}
+	update_cursor();
 }
 
 void vd_clear() {
-if (!text_mode) {
-	return;
-}
-uint64_t length =
-	get_screen_height() * get_screen_width() * BPP / 8;
-memset64((void *)(uintptr_t)VBE_mode_info->framebuffer, 0,
-		length); // hardcodeado que el background color es negro
-cursor_x = 0;
-cursor_y = 0;
+	if (!text_mode) {
+		return;
+	}
+	uint64_t length = HEIGHT * WIDTH * BPP / 8;
+	uint64_t color = BKG_COLOR | ((uint64_t)BKG_COLOR << 32);
+	memset64((void *)(uintptr_t)VBE_mode_info->framebuffer, color, length); // hardcodeado que el background color es negro
+	cursor_x = 0;
+	cursor_y = 0;
 }
 
 /*

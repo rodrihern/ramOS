@@ -77,7 +77,7 @@ extern void     sys_clear_input_buffer();
 extern uint64_t sys_ticks();
 
 // syscalls de memory management
-extern void      *sys_malloc(uint64_t size);
+extern void *sys_malloc(uint64_t size);
 extern void       sys_free(void *ptr);
 extern mem_info_t sys_mem_info(void);
 

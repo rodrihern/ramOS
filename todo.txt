@@ -1,24 +1,42 @@
 processes con el inicializador para fds y prio
 
-refactor de los bpp
+struct con info para las syscalls que devuelven info
+
+timer_handler -> schedule, time con ms, sleep
 
 piano y spotify(osea con algunas canciones ya puestas)
 
-una implementacion de stack de ints con array con capacity
+quizas un programa por cada color? tipo como red
 
-refactor timer tick handler para que sea directamente el del scheduler
+---- video
 
-que time no cuente ticks ya que lo va a hacer el scheduler, que provea funcion para los ms elapsed y refactorizar el sleep con force reschedule
+rework driver de video y que solo el de fg pueda dibujar
 
-que el videodriver se llame video y sus funciones empiecen video_
+todas las funciones de dibujo a graphics.c en userland (incluyendo algunas de strings con fonts)
 
-que las syscalls que devuelven info en un struct lo hagan con un parametro de salida (no es lo mas prolijo pero ya que va a ser desprolijo en un lugar que sea desprolijo en todos no?)
+syscalls:
+    typedef region_t
 
-registros en struct y cambiar tecla de snapshot
+    habilitar y deshabilitar textmode
+
+    cambiar background y text color
+
+    info de video
+
+    un get de un framebuffer
+
+    present
+
+    present_region
+
+    present_nregions
+----
 
 pantalla de inicio
 
-constante de validacion para numero de syscalls?
+constante de validacion para numero de syscalls? variable global con sizeof
+
+
 
 ordenar archivos a carpetas como me gusten en kernel
 
@@ -38,31 +56,14 @@ ver que es necesario y que no del scheduler
 
 refactor semaforos para usar queue_t
 
----- video
 
-rework driver de video y que solo el de fg pueda dibujar
-
-todas las funciones de dibujo a graphics.c en userland (incluyendo las de strings)
-
-syscalls:
-    typedef region_t
-
-    habilitar y deshabilitar textmode
-
-    info de video
-
-    un get de un framebuffer
-
-    present
-
-    present_region
-
-    present_nregions
-----
 
 rework driver de teclado -> flechitas y lo del keystatus con scancode
 
 historial de comandos en la shell
+
+
+
 
 jueguito con delta t
 

@@ -31,6 +31,7 @@ EXTERN SNAPSHOT_KEY
 EXTERN irq_dispatcher
 EXTERN exception_dispatcher
 EXTERN syscalls
+EXTERN syscall_count
 EXTERN print_registers
 EXTERN getStackBase
 EXTERN main
@@ -209,6 +210,11 @@ _irq05Handler:
 
 _irq128Handler:
 	pushState
+	cmp rax, [syscall_count]
+	jl  valid
+	mov rax, -1
+	iretq
+valid:	
     call [syscalls + rax * 8] ; llamamos a la syscall
     mov [aux], rax ; preservamos el valor de retorno de la syscall
     popState

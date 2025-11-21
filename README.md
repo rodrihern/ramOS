@@ -100,7 +100,7 @@ Disk image used: Image/x64BareBonesImage.qcow2 (512 MB).
 
 ## About US
 
-Name origin: ramOS = our initials (Rodrigo, Azul, Magali) and all data lives in RAM (no filesystem). Logo: bouquet (ramos in Spanish = bouquets).
+Name origin: ramOS = our initials (Rodri, Azu, Magui) and all data lives in RAM (no filesystem). Logo: bouquet (ramos in Spanish = bouquets).
 
 History:
 - Started as a computer architecture course project at ITBA ([link to the repo](https://github.com/rodrihern/TPE-Arqui)).

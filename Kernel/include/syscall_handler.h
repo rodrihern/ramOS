@@ -1,5 +1,5 @@
-#ifndef _SYSCALL_DISPATCHER_H_
-#define _SYSCALL_DISPATCHER_H_
+#ifndef _SYSCALL_HANDLER_H_
+#define _SYSCALL_HANDLER_H_
 
 #include <stdint.h>
 #include <stddef.h>

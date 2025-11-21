@@ -7,7 +7,7 @@
 #include "time.h"
 #include "keyboard.h"
 #include "sound.h"
-#include "syscall_dispatcher.h"
+#include "syscall_handler.h"
 #include "memory_manager.h"
 #include "scheduler.h"
 #include "synchro.h"
@@ -18,65 +18,67 @@
 
 void *syscalls[] = {
         // syscalls de arqui
-        &sys_regs,               // 0
-        &sys_time,               // 1
-        &sys_date,               // 2
-        &sys_read,               // 3
-        &sys_write,              // 4
-        &sys_increase_fontsize,  // 5
-        &sys_decrease_fontsize,  // 6
-        &sys_beep,               // 7
-        &sys_screensize,         // 8
-        &sys_circle,             // 9
-        &sys_rectangle,          // 10
-        &sys_draw_line,          // 11
-        &sys_draw_string,        // 12
-        &sys_clear,              // 13
-        &sys_speaker_start,      // 14
-        &sys_speaker_stop,       // 15
-        &sys_textmode,           // 16
-        &sys_videomode,          // 17
-        &sys_put_pixel,          // 18
-        &sys_key_status,         // 19
-        &sys_sleep,              // 20
-        &sys_clear_input_buffer, // 21
-        &sys_ticks,              // 22
+	&sys_regs,               // 0
+	&sys_time,               // 1
+	&sys_date,               // 2
+	&sys_read,               // 3
+	&sys_write,              // 4
+	&sys_increase_fontsize,  // 5
+	&sys_decrease_fontsize,  // 6
+	&sys_beep,               // 7
+	&sys_screensize,         // 8
+	&sys_circle,             // 9
+	&sys_rectangle,          // 10
+	&sys_draw_line,          // 11
+	&sys_draw_string,        // 12
+	&sys_clear,              // 13
+	&sys_speaker_start,      // 14
+	&sys_speaker_stop,       // 15
+	&sys_textmode,           // 16
+	&sys_videomode,          // 17
+	&sys_put_pixel,          // 18
+	&sys_key_status,         // 19
+	&sys_sleep,              // 20
+	&sys_clear_input_buffer, // 21
+	&sys_ticks,              // 22
 
-        // syscalls de memoria
-        &sys_malloc,   // 23
-        &sys_free,     // 24
-        &sys_mem_info, // 25
+	// syscalls de memoria
+	&sys_malloc,   // 23
+	&sys_free,     // 24
+	&sys_mem_info, // 25
 
-        // syscalls de procesos
-        &sys_create_process, // 26
-        &sys_exit,           // 27
-        &sys_getpid,         // 28
-        &sys_kill,           // 29
-        &sys_block,          // 30
-        &sys_unblock,        // 31
-        &sys_wait,           // 32
-        &sys_nice,           // 33
-        &sys_yield,          // 34
-        &sys_processes_info, // 35
+	// syscalls de procesos
+	&sys_create_process, // 26
+	&sys_exit,           // 27
+	&sys_getpid,         // 28
+	&sys_kill,           // 29
+	&sys_block,          // 30
+	&sys_unblock,        // 31
+	&sys_wait,           // 32
+	&sys_nice,           // 33
+	&sys_yield,          // 34
+	&sys_processes_info, // 35
 
-        // syscalls de semaforos
-        &sys_sem_open,  // 36
-        &sys_sem_close, // 37
-        &sys_sem_wait,  // 38
-        &sys_sem_post,  // 39
+	// syscalls de semaforos
+	&sys_sem_open,  // 36
+	&sys_sem_close, // 37
+	&sys_sem_wait,  // 38
+	&sys_sem_post,  // 39
 
-        // syscalls de pipes
-        &sys_create_pipe,  // 40
-        &sys_destroy_pipe, // 41
+	// syscalls de pipes
+	&sys_create_pipe,  // 40
+	&sys_destroy_pipe, // 41
 
-        &sys_set_foreground_process, // 42
-        &sys_adopt_init_as_parent,   // 43
-        &sys_get_foreground_process, // 44
+	&sys_set_foreground_process, // 42
+	&sys_adopt_init_as_parent,   // 43
+	&sys_get_foreground_process, // 44
 
-        &sys_open_named_pipe, // 45
-        &sys_close_fd,        // 46
-        &sys_pipes_info,      // 47
+	&sys_open_named_pipe, // 45
+	&sys_close_fd,        // 46
+	&sys_pipes_info,      // 47
 };
+
+uint64_t syscall_count = sizeof(syscalls) / sizeof(syscalls[0]);
 
 static uint64_t sys_regs(char *buffer)
 {

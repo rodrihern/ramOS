@@ -11,10 +11,11 @@ int print_main(int argc, char *argv[])
 		print_err("Use: print <string_to_print>");
 		return -1;
 	}
-
 	
 	while (1) {
-		print(argv[0]);
-		sys_yield();
+		for (int i = 0; i < argc; i++) {
+			print(argv[i]);
+			putchar(' ');
+		}
 	}
 }

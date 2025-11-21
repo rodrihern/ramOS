@@ -6,11 +6,11 @@ This guide explains how to add a new syscall to ramOS and make it accessible fro
 
 A syscall travels through these layers:
 
-1. Kernel header declaration (static in syscall_dispatcher.h)
-2. Implementation in syscall_dispatcher.c
-3. Added to the syscalls[] dispatch table with an ID
-4. Userland prototype (extern) in Userland/include/syscalls.h
-5. Assembly stub using the SYSCALL macro in Userland/asm/usrlib.asm
+1. Kernel header declaration (static in `syscall_handler.h`)
+2. Implementation in `syscall_handler.c`
+3. Added to the `syscalls[]` dispatch table with an ID
+4. Userland prototype (extern) in Userland/include/`syscalls.h`
+5. Assembly stub using the SYSCALL macro in Userland/asm/`syscalls.asm`
 6. Called by user programs via the C prototype
 
 Syscalls use a numeric ID (their index in the syscalls[] array). Registers are loaded by the asm stub and the kernel handler executes the function referenced at that index.
@@ -21,13 +21,13 @@ Syscalls use a numeric ID (their index in the syscalls[] array). Registers are l
 
 ### 1. Pick an ID
 
-Locate the last entry in Kernel/idt/syscall_dispatcher.c (array `syscalls[]`). Your new syscall ID is its index after you append your function pointer.
+Locate the last entry in Kernel/idt/`syscall_handler.c` (array `syscalls[]`). Your new syscall ID is its index after you append your function pointer.
 
 Example: If the last entry is ID 47, your new syscall becomes 48.
 
 ### 2. Declare the Kernel Static (Header)
 
-Add a static prototype in Kernel/include/syscall_dispatcher.h.
+Add a static prototype in Kernel/include/`syscall_handler.h`.
 
 Example (adding a syscall to return total processes):
 
@@ -39,7 +39,7 @@ static int sys_mysyscall();
 
 ### 3. Implement the Function
 
-In Kernel/idt/syscall_dispatcher.c:
+In Kernel/idt/`syscall_handler.c`:
 
 ```c
 // ...existing code...
@@ -51,7 +51,7 @@ static int sys_mysyscall(void) {
 
 ### 4. Register It in the Dispatch Table
 
-Insert pointer in the `syscalls[]` array (Kernel/idt/syscall_dispatcher.c):
+Insert pointer in the `syscalls[]` array (Kernel/idt/`syscall_handler.c`):
 
 ```c
 void *syscalls[] = {
@@ -65,7 +65,7 @@ Record the numeric ID (48 in this example).
 
 ### 5. Add Userland Prototype
 
-In Userland/include/syscalls.h add:
+In Userland/include/`syscalls.h` add:
 
 ```c
 // ...existing code...
@@ -75,7 +75,7 @@ extern int sys_total_processes(void);
 
 ### 6. Add Assembly Stub
 
-In Userland/asm/usrlib.asm append:
+In Userland/asm/`syscall.asm` append:
 
 ```asm
 ; 48 - int sys_total_processes(void)
@@ -222,21 +222,6 @@ int r = sys_add(7, 5); // r = 12
 - Validate inputs in kernel implementation; return -1 on error when appropriate.
 - Use fixed-size buffers responsibly (avoid overflow).
 
-## Troubleshooting
-
-Issue: Userland call returns garbage.
-Fix: Ensure prototype matches implementation signature exactly (types/order).
-
-Issue: Wrong syscall executes.
-Fix: Check dispatch table index matches asm stub SYSCALL ID.
-
-Issue: Build error: undefined reference.
-Fix: Added prototype but missed `global` + stub in usrlib.asm.
-
-Issue: Crash after call.
-Fix: Verify pointer arguments are valid (not userland stack freed or NULL).
-
----
 
 ## Quick Template
 
