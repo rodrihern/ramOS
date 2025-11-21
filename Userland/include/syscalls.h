@@ -18,6 +18,16 @@
 
 enum { STDIN = 0, STDOUT, STDERR, STDGREEN, STDBLUE, STDCYAN, STDMAGENTA, STDYELLOW, FDS_COUNT };
 
+typedef struct time_info {
+    uint8_t hour;
+    uint8_t minutes;
+    uint8_t seconds;
+    uint8_t day;
+    uint8_t month;
+    uint8_t year;
+} time_info_t;
+
+
 typedef struct mem_info {
 	size_t total_memory;
 	size_t used_memory;
@@ -53,7 +63,7 @@ typedef struct pipe_info {
 
 // syscalls de arqui
 extern uint64_t sys_regs(char *buf);
-extern void     sys_time(uint8_t *buf);
+extern void     sys_time(time_info_t *buffer);
 extern void     sys_date(uint8_t *buf);
 extern int      sys_read(int fd, char *buf, uint64_t count);
 extern int      sys_write(int fd, const char *buf, uint64_t count);

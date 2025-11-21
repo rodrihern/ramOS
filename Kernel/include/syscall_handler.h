@@ -3,7 +3,14 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "video_driver.h"
+#include "timer.h"
+#include "keyboard.h"
+#include "sound.h"
 #include "memory_manager.h"
+#include "scheduler.h"
+#include "synchro.h"
+#include "interrupts.h"
 #include "process.h"
 #include "pipes.h"
 
@@ -11,7 +18,7 @@
 static int      sys_write(int fd, const char *buf, uint64_t count);
 static int      sys_read(int fd, char *buf, uint64_t count);
 static void     sys_date(uint8_t *buffer);
-static void     sys_time(uint8_t *buffer);
+static void     sys_time(time_info_t *buffer);
 static uint64_t sys_regs(char *buffer);
 static void     sys_clear();
 static void     sys_increase_fontsize();

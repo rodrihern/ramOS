@@ -98,7 +98,7 @@ static int create_shell()
 	pcb_shell->priority           = MAX_PRIORITY;
 	pcb_shell->effective_priority = MAX_PRIORITY;
 	pcb_shell->status             = PS_READY;
-	pcb_shell->last_tick          = ticks_elapsed();
+	pcb_shell->last_tick          = total_cpu_ticks;
 	processes[SHELL_PID]          = pcb_shell;
 	process_count++;
 	if (!q_add(ready_queue[pcb_shell->effective_priority], SHELL_PID)) {

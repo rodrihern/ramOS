@@ -3,12 +3,23 @@
 
 #include <stdint.h>
 
+typedef struct time_info {
+    uint8_t hour;
+    uint8_t minutes;
+    uint8_t seconds;
+    uint8_t day;
+    uint8_t month;
+    uint8_t year;
+} time_info_t;
+
+
+
 uint64_t timer_handler(uint64_t rsp);
 uint64_t ticks_elapsed();
 int      seconds_elapsed();
 void     sleep(int seconds);
-void     get_date(uint8_t *buffer);
-void     get_time(uint8_t *buffer);
+void get_date(uint8_t *buffer);
+void get_time(time_info_t * buf);
 
 // Import from interrupts.h
 extern void _hlt(void);

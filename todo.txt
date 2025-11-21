@@ -1,8 +1,9 @@
+timer_handler -> schedule, time con ms, sleep
+
 processes con el inicializador para fds y prio
 
 struct con info para las syscalls que devuelven info
 
-timer_handler -> schedule, time con ms, sleep
 
 piano y spotify(osea con algunas canciones ya puestas)
 

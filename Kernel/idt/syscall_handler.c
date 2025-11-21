@@ -1,17 +1,9 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
-#include <stddef.h>
-#include <stdint.h>
-#include "video_driver.h"
-#include "time.h"
-#include "keyboard.h"
-#include "sound.h"
+
 #include "syscall_handler.h"
-#include "memory_manager.h"
-#include "scheduler.h"
-#include "synchro.h"
-#include "interrupts.h"
+
 
 #define MIN_CHAR 0
 #define MAX_CHAR 256
@@ -146,7 +138,7 @@ static void sys_date(uint8_t *buffer)
 	get_date(buffer);
 }
 
-static void sys_time(uint8_t *buffer)
+static void sys_time(time_info_t *buffer)
 {
 	get_time(buffer);
 }
