@@ -1,9 +1,11 @@
 
+refactor del keyboard
 
 processes con el inicializador para fds y prio
 init y la shell no se pueden matar, sacar killable de pcb
 
 struct con info para las syscalls que devuelven info
+
 
 pantalla de inicio
 
@@ -50,9 +52,10 @@ refactor semaforos para usar queue_t
 
 
 
-rework driver de teclado -> flechitas y lo del keystatus con scancode
 
 -- shell
+
+agregar support para las flechitas en el teclado
 
 historial de comandos
 

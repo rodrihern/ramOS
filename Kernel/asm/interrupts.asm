@@ -18,7 +18,7 @@ GLOBAL _exception0Handler
 GLOBAL _exception6Handler
 
 
-GLOBAL reg_array ; array donde se almacenan los registros cunado se toco ctrl
+GLOBAL reg_array 
 GLOBAL snapshot_saved
 GLOBAL pressed_key
 
@@ -106,10 +106,6 @@ SECTION .text
 	
 	iretq
 %endmacro
-
-; get_pressed_key:
-; 	mov rax, [pressed_key]
-; 	ret
 
 _hlt:
 	sti

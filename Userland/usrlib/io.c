@@ -230,10 +230,6 @@ static uint64_t print_float(double num)
 	return count;
 }
 
-uint64_t get_key_status(char key)
-{
-	return sys_key_status(key);
-}
 
 uint64_t scanf_aux(const char *fmt, uint64_t regPtr[], uint64_t stkPtr[])
 {
