@@ -2,6 +2,7 @@
 #include "music.h"
 
 int spotify_main(int argc, char * argv[]) {
+    print("Playing: Tetris song\n");
     play_note(1320, 500);
     play_note(990, 250);
     play_note(1056, 250);
