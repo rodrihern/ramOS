@@ -17,8 +17,10 @@ GLOBAL _irq128Handler
 GLOBAL _exception0Handler
 GLOBAL _exception6Handler
 
-GLOBAL get_pressed_key
+
 GLOBAL reg_array ; array donde se almacenan los registros cunado se toco ctrl
+GLOBAL snapshot_saved
+GLOBAL pressed_key
 
 GLOBAL setup_initial_stack 
 
@@ -27,7 +29,6 @@ GLOBAL timer_tick ; simula un tick del timer
 GLOBAL _cli
 GLOBAL _sti
 
-EXTERN SNAPSHOT_KEY
 EXTERN irq_dispatcher
 EXTERN exception_dispatcher
 EXTERN syscalls
@@ -106,9 +107,9 @@ SECTION .text
 	iretq
 %endmacro
 
-get_pressed_key:
-	mov rax, [pressed_key]
-	ret
+; get_pressed_key:
+; 	mov rax, [pressed_key]
+; 	ret
 
 _hlt:
 	sti
@@ -150,8 +151,8 @@ _irq01Handler:
 	push rax
 	xor rax, rax
 	in al, 0x60 ; guardo la tecla
-	mov [pressed_key], rax
-	cmp rax, [SNAPSHOT_KEY]
+	mov [pressed_key], al
+	cmp rax, 0x1D ; SNAPSHOT KEY (left control)
 	jne .doNotCapture
 
 	pop rax
@@ -180,6 +181,7 @@ _irq01Handler:
 	mov [reg_array + 18*8], rax
 	mov rax, [rsp+8*4] ; ss
 	mov [reg_array + 19*8], rax
+	mov byte[snapshot_saved], 1
 	jmp .continue
 
 .doNotCapture:
@@ -266,6 +268,7 @@ SECTION .data
 
 SECTION .bss
 	aux resq 1
-	pressed_key resq 1
+	pressed_key resb 1
+	snapshot_saved resb 1
 	reg_array resq 20 ; 20 registros
 	syscall_id_tmp   resq 1

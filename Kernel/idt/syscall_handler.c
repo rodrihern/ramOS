@@ -70,8 +70,12 @@ void *syscalls[] = {
 
 uint64_t syscall_count = sizeof(syscalls) / sizeof(syscalls[0]);
 
-static uint64_t sys_regs(char *buffer)
+static int sys_regs(register_info_t * buffer)
 {
+	if (buffer == NULL) {
+		return -1;
+	}
+
 	return copy_registers(buffer);
 }
 
@@ -132,9 +136,12 @@ static int sys_read(int fd, char *buffer, uint64_t count)
 }
 
 
-static void sys_time_info(time_info_t *buffer)
-{
+static int sys_time_info(time_info_t *buffer) {
+	if (buffer == NULL) {
+		return -1;
+	}
 	get_time(buffer);
+	return 0;
 }
 
 // limpia la shell y pone el cursor en el principio
@@ -250,7 +257,7 @@ static void sys_free(void *ptr)
 	free_memory(get_kernel_memory_manager(), ptr);
 }
 
-static mem_info_t sys_mem_info(void)
+static mem_info_t sys_mem_info(void) // TODO: cambiar
 {
 	return get_mem_status(get_kernel_memory_manager());
 }
@@ -326,9 +333,12 @@ static void sys_yield()
 	scheduler_force_reschedule();
 }
 
-static int sys_processes_info(process_info_t *buf, int max_count)
+static int sys_processes_info(process_info_t *buffer, int max_count)
 {
-	return scheduler_get_processes(buf, max_count);
+	if (buffer == NULL) {
+		return -1;
+	}
+	return scheduler_get_processes(buffer, max_count);
 }
 
 // SEMÁFOROS (API basada en nombre)
@@ -420,7 +430,10 @@ static int sys_close_fd(int fd)
 	return close_fd(fd);
 }
 
-static int sys_pipes_info(pipe_info_t *buf, int max_count)
+static int sys_pipes_info(pipe_info_t *buffer, int max_count)
 {
-	return pipes_info(buf, max_count);
+	if (buffer == NULL) {
+		return -1;
+	}
+	return pipes_info(buffer, max_count);
 }

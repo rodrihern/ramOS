@@ -11,12 +11,12 @@
 #include "video_driver.h"
 
 #define KEYBOARD_SEM_NAME "keyboard"
-const uint8_t SNAPSHOT_KEY = 0x3B; // TODO: cambiarlo por otra
 
 static int shift = 0;
 static int caps_lock = 0;
 static int control = 0;
-static int copied_registers = 0;
+extern uint8_t snapshot_saved;
+extern uint8_t pressed_key;
 
 uint16_t buffer_start = 0; // índice del buffer del próximo carácter a leer
 uint16_t buffer_end = 0; // índice del buffer donde se va a escribir el próximo
@@ -25,7 +25,6 @@ uint16_t buffer_current_size =
     0; // cantidad de caracteres en el buffer actual (listos para ser leídos)
 
 static uint8_t buffer[BUFFER_LENGTH];
-static char reg_buff[REG_BUFF_LENGTH];
 
 static void write_buffer(unsigned char c);
 
@@ -99,35 +98,30 @@ uint64_t read_keyboard_buffer(char *buff_copy, uint64_t count) {
 }
 
 void handle_pressed_key() {
-  unsigned char scancode = get_pressed_key();
 
-  if (scancode == LEFT_SHIFT || scancode == RIGHT_SHIFT) {
+  if (pressed_key == LEFT_SHIFT || pressed_key == RIGHT_SHIFT) {
     shift = 1;
-  } else if (scancode == LEFT_SHIFT + BREAKCODE_OFFSET ||
-             scancode == RIGHT_SHIFT + BREAKCODE_OFFSET) {
+  } else if (pressed_key == LEFT_SHIFT + BREAKCODE_OFFSET ||
+             pressed_key == RIGHT_SHIFT + BREAKCODE_OFFSET) {
     shift = 0;
-  } else if (scancode == LEFT_CONTROL) {
+  } else if (pressed_key == LEFT_CONTROL) {
     control = 1;
-  } else if (scancode == LEFT_CONTROL + BREAKCODE_OFFSET) {
+  } else if (pressed_key == LEFT_CONTROL + BREAKCODE_OFFSET) {
     control = 0;
-  } else if (scancode == SNAPSHOT_KEY) {
-    copied_registers = 1;
-    store_snapshot();
+  } else if (pressed_key == CAPS_LOCK) {
+    caps_lock = !caps_lock;
+  } else if (pressed_key == 0) {
     return;
-  } else if (scancode == CAPS_LOCK) {
-    caps_lock = (caps_lock + 1) % 2;
-  } else if (scancode == 0) {
-    return;
-  } else if (scancode > BREAKCODE_OFFSET) { // se soltó una tecla o es un
+  } else if (pressed_key > BREAKCODE_OFFSET) { // se soltó una tecla o es un
                                             // caracter no imprimible
-    char raw = lower_keys[scancode - BREAKCODE_OFFSET];
+    char raw = lower_keys[pressed_key - BREAKCODE_OFFSET];
     if (raw >= 'a' && raw <= 'z') {
       pressed_keys[raw - 'a'] = 0; // marcamos la tecla como no presionada
     }
     return;
   } else {
     int index;
-    char raw = lower_keys[scancode];
+    char raw = lower_keys[pressed_key];
     int is_letter = (raw >= 'a' && raw <= 'z');
 
     if (is_letter && raw == 'c' && control) {
@@ -153,7 +147,7 @@ void handle_pressed_key() {
       index = shift;
     }
 
-    write_buffer(scancode_to_ascii[index][scancode]);
+    write_buffer(scancode_to_ascii[index][pressed_key]);
   }
 
   return;
@@ -169,34 +163,9 @@ void write_string_in_buffer(const char *str) {
 uint8_t is_pressed_key(char c) {
   if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
     c = (c < 'a') ? c - 'A' + 'a' : c; // Convertir a minúscula si es mayúscula
-    return pressed_keys[c -
-                        'a']; // Devuelve 1 si la tecla está presionada, 0 si no
+    return pressed_keys[c - 'a']; // Devuelve 1 si la tecla está presionada, 0 si no
   }
   return 0; // Si el char es inválido, retornamos 0
-}
-
-void store_snapshot() {
-  char *reg_labels[] = {"RAX:    0x", "RBX:    0x", "RCX:    0x",
-                        "RDI:    0x", "RBP:    0x", "RDI:    0x",
-                        "RSI:    0x", "R8:     0x", "R9:     0x",
-                        "R10:    0x", "R11:    0x", "R12:    0x",
-                        "R13:    0x", "R14:    0x", "R15:    0x",
-                        "RIP:    0x", "CS:     0x", "RFLAGS: 0x",
-                        "RSP:    0x", "SS:     0x", 0};
-  uint32_t j = 0; // índice de reg_buff
-
-  for (int i = 0; reg_labels[i]; ++i) {
-    // Agregamos el string al buffer
-    for (int m = 0; reg_labels[i][m]; ++m) {
-      reg_buff[j++] = reg_labels[i][m];
-    }
-
-    // Agregamos el nro al buffer. Quiero que todos me queden con 16 dígitos
-    // hexadecimales
-    j += uint64_to_register_format(reg_array[i], reg_buff + j);
-    reg_buff[j++] = '\n';
-  }
-  reg_buff[j] = 0;
 }
 
 // devuelve la cantidad de caracteres escritos
@@ -225,17 +194,13 @@ uint32_t uint64_to_register_format(uint64_t value, char *dest) {
   return j;    // devuelve la cantidad de caracteres escritos
 }
 
-// devuelve 1 si ya se presionó la SNAPSHOT_KEY y 0 si todavia no se llamo
-// dejamos en copy un string con el nombre del registro y su valor (cada
-// registro separado por un n)
-uint64_t copy_registers(char *copy) {
-  if (!copied_registers) {
-    return 0;
-  }
-  int i;
-  for (i = 0; reg_buff[i]; i++) {
-    copy[i] = reg_buff[i];
-  }
-  copy[i] = 0;
-  return 1;
+
+// -1 si todavia no se saco snapshot
+int copy_registers(register_info_t * buffer)
+{
+	if (!snapshot_saved) {
+		return -1;
+	}
+	memcpy(buffer, reg_array, sizeof(register_info_t));
+	return 0;
 }

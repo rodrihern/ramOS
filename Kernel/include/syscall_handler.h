@@ -14,11 +14,12 @@
 #include "process.h"
 #include "pipes.h"
 
+
 // syscalls de arqui
 static int      sys_read(int fd, char *buf, uint64_t count);
 static int      sys_write(int fd, const char *buf, uint64_t count);
-static uint64_t sys_regs(char *buffer);
-static void     sys_time_info(time_info_t *buffer);
+static int sys_regs(register_info_t *buffer);
+static int     sys_time_info(time_info_t *buffer);
 static void     sys_clear();
 static void     sys_increase_fontsize();
 static void     sys_decrease_fontsize();

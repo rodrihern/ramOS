@@ -28,6 +28,29 @@ enum {
 	FDS_COUNT
 };
 
+typedef struct register_info {
+    uint64_t rax;
+    uint64_t rbx;
+    uint64_t rcx;
+    uint64_t rdx;
+    uint64_t rbp;
+    uint64_t rdi;
+    uint64_t rsi;
+    uint64_t r8;
+    uint64_t r9;
+    uint64_t r10;
+    uint64_t r11;
+    uint64_t r12;
+    uint64_t r13;
+    uint64_t r14;
+    uint64_t r15;
+    uint64_t rip;
+    uint64_t cs;
+    uint64_t rflags;
+    uint64_t rsp;
+    uint64_t ss;
+} register_info_t;
+
 typedef struct time_info {
     uint8_t hour;
     uint8_t minutes;
@@ -74,7 +97,7 @@ typedef struct pipe_info {
 // syscalls de io
 extern int      sys_read(int fd, char *buf, uint64_t count);
 extern int      sys_write(int fd, const char *buf, uint64_t count);
-extern uint64_t sys_regs(char *buf); // TODO: REFACTOR
+extern int sys_regs(register_info_t * buffer);
 extern void     sys_speaker_start(uint32_t freq_hz);
 extern void     sys_speaker_stop(void);
 extern uint64_t sys_key_status(char key);
@@ -94,7 +117,7 @@ extern void     sys_videomode();
 extern void     sys_put_pixel(uint32_t color, uint64_t x, uint64_t y);
 
 // syscalls de tiempo
-extern void     sys_time_info(time_info_t *buffer);
+extern int     sys_time_info(time_info_t *buffer);
 extern void     sys_sleep(uint64_t miliseconds);
 extern uint64_t sys_ms_elapsed();
 

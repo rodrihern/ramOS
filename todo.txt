@@ -5,8 +5,6 @@ init y la shell no se pueden matar, sacar killable de pcb
 
 struct con info para las syscalls que devuelven info
 
-piano
-
 pantalla de inicio
 
 ---- video
@@ -64,6 +62,10 @@ historial de comandos
 
 
 jueguito con delta t
+
+piano
+
+doom
 
 manejo de excepciones que rebootee la compu? calculadora para poder probar el div0
 
