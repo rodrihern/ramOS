@@ -443,5 +443,5 @@ static int sys_pipes_info(pipe_info_t *buffer, int max_count)
 	if (buffer == NULL) {
 		return -1;
 	}
-	return pipes_info(buffer, max_count);
+	return get_pipes_info(buffer, max_count);
 }

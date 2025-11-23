@@ -11,9 +11,9 @@
 #include "sound.h"
 #include "interrupts.h"
 #include "memory_manager.h"
-#include "process.h"
+#include "processes.h"
 #include "scheduler.h"
-#include "synchro.h"
+#include "semaphores.h"
 #include "pipes.h"
 #include "naiveConsole.h"
 

@@ -51,7 +51,7 @@ int close_fd(int fd);
 
 // llena el buffer con información de los pipes activos
 // retorna el número de pipes copiados, o -1 si hay error
-int pipes_info(pipe_info_t *buf, int max_count);
+int get_pipes_info(pipe_info_t *buf, int max_count);
 
 
 

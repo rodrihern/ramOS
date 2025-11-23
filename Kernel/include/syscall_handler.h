@@ -9,9 +9,9 @@
 #include "sound.h"
 #include "memory_manager.h"
 #include "scheduler.h"
-#include "synchro.h"
+#include "semaphores.h"
 #include "interrupts.h"
-#include "process.h"
+#include "processes.h"
 #include "pipes.h"
 
 

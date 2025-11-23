@@ -1,5 +1,6 @@
 processes con el inicializador para fds y prio
 init y la shell no se pueden matar, sacar killable de pcb
+que lo cree processes y que processes info sea de processes
 
 agregar un flush que sirva tanto para el teclado como para los pipes
 
@@ -57,7 +58,7 @@ piano
 
 doom
 
-manejo de excepciones que mate al proceso que la causo y desp todo lo demas siga bien
+refactor manejo de excepciones que mate al proceso que la causo y desp todo lo demas siga bien
 
 programa de calculador para probar lo de div 0
 

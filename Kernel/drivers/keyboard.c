@@ -7,7 +7,7 @@
 #include "naiveConsole.h"
 #include "pipes.h"
 #include "scheduler.h"
-#include "synchro.h"
+#include "semaphores.h"
 #include "video.h"
 
 #define KEYBOARD_SEM_NAME "keyboard"

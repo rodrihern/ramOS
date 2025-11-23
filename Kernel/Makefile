@@ -5,7 +5,7 @@ GCCFLAGS += -Wall
 
 KERNEL=kernel.bin
 
-SOURCES_MEMORY=memory/memoryManager.c
+
 
 OBJDIR := obj
 
@@ -14,9 +14,8 @@ src_to_obj = $(OBJDIR)/$(subst /,_,$(basename $(1))).o
 C_SOURCES := $(wildcard *.c)
 C_SOURCES += $(wildcard drivers/*.c)
 C_SOURCES += $(wildcard idt/*.c)
-C_SOURCES += $(wildcard processes/*.c)
+C_SOURCES += $(wildcard system/*.c)
 C_SOURCES += $(wildcard utils/*.c)
-C_SOURCES += $(SOURCES_MEMORY)
 C_SOURCES := $(sort $(C_SOURCES))
 
 ASM_SOURCES := $(wildcard asm/*.asm) $(wildcard idt/*.asm)

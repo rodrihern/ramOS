@@ -41,13 +41,12 @@ typedef struct register_info {
     uint64_t ss;
 } register_info_t;
 
+void     handle_pressed_key();
 
 void     init_keyboard_sem();
 void     kb_flush_buffer();
-
 uint64_t kb_read_buffer(char *buff_copy, uint64_t count);
 uint8_t kb_get_char_from_buffer();
-void     handle_pressed_key();
 uint8_t  kb_is_pressed(uint8_t scancode);
 
 void     print_registers();

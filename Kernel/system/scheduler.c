@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
 #include "scheduler.h"
-#include "process.h"
+#include "processes.h"
 #include "lib.h"
 #include "queue.h"
 #include "pipes.h"
@@ -10,7 +10,7 @@
 #include "video.h"
 #include "../include/time.h"
 #include <stddef.h>
-#include "synchro.h"
+#include "semaphores.h"
 
 extern void timer_tick();
 

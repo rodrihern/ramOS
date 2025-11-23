@@ -6,7 +6,7 @@
 #include "memory_manager.h"
 #include "scheduler.h"
 #include "lib.h"
-#include "synchro.h"
+#include "semaphores.h"
 #include "queue.h"
 #include "video.h"
 
@@ -318,7 +318,7 @@ void destroy_pipe(int idx)
 	pipes[idx] = NULL;
 }
 
-int pipes_info(pipe_info_t *buf, int max_count)
+int get_pipes_info(pipe_info_t *buf, int max_count)
 {
 	if (buf == NULL || max_count <= 0) {
 		return -1;

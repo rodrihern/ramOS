@@ -76,6 +76,7 @@ pcb_t *proc_create(int             pid,
                  const char     *name,
                  uint8_t            killable,
                  int             fds[2]);
+				 
 void free_process_resources(pcb_t *p);
 
 #endif

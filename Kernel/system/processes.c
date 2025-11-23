@@ -1,7 +1,7 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
-#include <process.h>
+#include <processes.h>
 #include <memory_manager.h>
 #include "lib.h"
 #include "scheduler.h"
