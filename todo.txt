@@ -21,9 +21,6 @@ refactor semaforos para usar queue_t
 
 
 
-
-
-
 ---- video
 
 pantalla de inicio
@@ -56,6 +53,8 @@ syscalls:
 correr un formatter mejor
 
 poner gdb
+
+makefile incremental
 
 -------
 

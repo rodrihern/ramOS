@@ -39,6 +39,9 @@ EXTERN main
 
 SECTION .text
 
+%define SNAPSHOT_KEY 0x3B   ; F1 
+
+
 %macro pushState 0
 	push rbx
 	push rcx
@@ -148,7 +151,7 @@ _irq01Handler:
 	xor rax, rax
 	in al, 0x60 ; guardo la tecla
 	mov [pressed_key], al
-	cmp rax, 0x1D ; SNAPSHOT KEY (left control)
+	cmp rax, SNAPSHOT_KEY
 	jne .doNotCapture
 
 	pop rax

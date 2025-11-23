@@ -3,7 +3,7 @@
 int registers_main(int argc, char * argv[]) {
     register_info_t regs;
     if (sys_regs(&regs) < 0) {
-        print_err("No register snapshot available, press LEFT CONTROL to take one\n");
+        print_err("No register snapshot available, press F1 to take one\n");
         return -1;
     }
 
