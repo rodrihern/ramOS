@@ -1,7 +1,7 @@
 global  sys_write, sys_read, sys_time_info, sys_regs, sys_clear
 global  sys_increase_fontsize, sys_decrease_fontsize
 global  sys_screensize, sys_circle, sys_rectangle, sys_draw_line, sys_draw_string
-global  sys_textmode, sys_videomode, sys_put_pixel, sys_key_status
+global  sys_textmode, sys_videomode, sys_put_pixel, sys_is_pressed
 global  sys_sleep, sys_clear_input_buffer, sys_ms_elapsed
 global  sys_speaker_start, sys_speaker_stop
 global  sys_malloc, sys_free, sys_mem_info
@@ -70,7 +70,7 @@ sys_videomode:
 sys_put_pixel:
 	SYSCALL 16
 
-sys_key_status:
+sys_is_pressed:
 	SYSCALL 17
 
 sys_sleep:

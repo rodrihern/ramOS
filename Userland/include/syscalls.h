@@ -100,7 +100,7 @@ extern int      sys_write(int fd, const char *buf, uint64_t count);
 extern int sys_regs(register_info_t * buffer);
 extern void     sys_speaker_start(uint32_t freq_hz);
 extern void     sys_speaker_stop(void);
-extern uint64_t sys_key_status(char key);
+extern uint64_t sys_is_pressed(char key);
 extern void     sys_clear_input_buffer();
 
 // syscalls de video

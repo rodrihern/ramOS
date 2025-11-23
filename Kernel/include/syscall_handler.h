@@ -33,7 +33,7 @@ static void     sys_speaker_stop();
 static void     sys_textmode();
 static void     sys_videomode();
 static void     sys_put_pixel(uint32_t hex_color, uint64_t x, uint64_t y);
-static uint64_t sys_key_status(char c);
+static uint64_t sys_is_pressed(uint8_t scancode);
 static void     sys_sleep(uint64_t miliseconds);
 static void     sys_clear_input_buffer();
 static uint64_t sys_ms_elapsed();

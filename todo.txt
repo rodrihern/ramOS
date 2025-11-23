@@ -1,6 +1,3 @@
-
-actualizar el key status
-
 agregar un flush que sirva tanto para el teclado como para los pipes
 
 processes con el inicializador para fds y prio

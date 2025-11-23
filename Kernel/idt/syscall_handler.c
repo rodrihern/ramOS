@@ -27,7 +27,7 @@ void *syscalls[] = {
 	&sys_textmode,           // 14
 	&sys_videomode,          // 15
 	&sys_put_pixel,          // 16
-	&sys_key_status,         // 17
+	&sys_is_pressed,         // 17
 	&sys_sleep,              // 18
 	&sys_clear_input_buffer, // 19
 	&sys_ms_elapsed,         // 20
@@ -224,9 +224,9 @@ static void sys_put_pixel(uint32_t hex_color, uint64_t x, uint64_t y)
 	put_pixel(hex_color, x, y);
 }
 
-static uint64_t sys_key_status(char c)
+static uint64_t sys_is_pressed(uint8_t scancode)
 {
-	return is_pressed_key(c);
+	return is_pressed_key(scancode);
 }
 
 static void sys_sleep(uint64_t miliseconds) {
