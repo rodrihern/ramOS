@@ -1,3 +1,5 @@
+cambiar nombre de la syscall de registros a sys_register_snapshot
+
 agregar un flush que sirva tanto para el teclado como para los pipes
 
 ---- scheduler
