@@ -10,15 +10,14 @@
 #define NO_PID -1
 #define MAX_ARGS 16
 
-static void cls_cmd(int argc, char *argv[]);
-static void help_cmd(int argc, char *argv[]);
-static void username_cmd(int argc, char *argv[]);
-static void mute_cmd(int argc, char *argv[]);
+
 
 static uint8_t is_cmd_background(char *line);
 
 
 static builtin_command_t builtins[] = {
+	{"+", "increase font size", &incfont_cmd},
+	{"-", "decrease font size", &decfont_cmd},
 	{"clear", "clears the screen", &cls_cmd},
 	{"help", "provides information about available commands", &help_cmd},
 	{"username", "changes the shell username", &username_cmd},
@@ -265,10 +264,14 @@ static uint8_t is_cmd_background(char *line)
 
 void process_line(char *line)
 {
-	uint8_t background = is_cmd_background(line);
+	// Hacer una copia para no modificar el historial
+	char line_copy[INPUT_MAX];
+	strcpy(line_copy, line);
+	
+	uint8_t background = is_cmd_background(line_copy);
 
 	char *tokens[MAX_ARGS];
-	int   token_count = parse_input(line, tokens);
+	int   token_count = parse_input(line_copy, tokens);
 
 	if (token_count == 0) {
 		return;
@@ -328,17 +331,9 @@ void process_line(char *line)
 
 
 
-// BUILTIN COMMANDS
-
-static void cls_cmd(int argc, char *argv[])
+// this one has to be here
+void help_cmd(int argc, char *argv[])
 {
-	sys_clear();
-}
-
-static void help_cmd(int argc, char *argv[])
-{
-	print("\nType '+' or '-' to change font size\n\n");
-
 	print("Builtin commands:\n");
 	for (int i = 0; i < builtins_count; i++) {
 		print("  ");
@@ -350,8 +345,8 @@ static void help_cmd(int argc, char *argv[])
 	putchar('\n');
 
 	print("\nExternal programs:\n");
-	print("--Type <program_name> & to run in background, else it runs in foreground--\n");
-	print("--Type <program_1> | <program_2> to pipe 2 programs--\n\n");
+	print("-- Type <program_name> & to run in background, else it runs in foreground --\n");
+	print("-- Type <program_1> | <program_2> to pipe 2 programs --\n\n");
 	for (int i = 0; i < programs_count; i++) {
 		print("  ");
 		print(programs[i].name);
@@ -363,36 +358,4 @@ static void help_cmd(int argc, char *argv[])
 	putchar('\n');
 }
 
-static void username_cmd(int argc, char *argv[])
-{
-	if (argc == 0) {
-		print("Usage: username <new_name>\n");
-		return;
-	}
 
-	// Concatenar todos los argumentos en un solo nombre
-	char new_name[USERNAME_MAX_LENGTH] = {0};
-	int  offset                        = 0;
-
-	for (int i = 0; i < argc && offset < USERNAME_MAX_LENGTH - 1; i++) {
-		if (i > 0) {
-			new_name[offset++] = ' ';
-		}
-
-		int j = 0;
-		while (argv[i][j] != '\0' && offset < USERNAME_MAX_LENGTH - 1) {
-			new_name[offset++] = argv[i][j++];
-		}
-	}
-	new_name[offset] = '\0';
-
-	set_username(new_name);
-	print("Username updated to: ");
-	print(new_name);
-	putchar('\n');
-}
-
-static void mute_cmd(int argc, char *argv[]) {
-	sys_speaker_stop();
-	print("Speaker stopped\n");
-}

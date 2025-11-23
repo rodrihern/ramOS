@@ -55,16 +55,6 @@ refactor semaforos para usar queue_t
 
 
 
--- shell
-
-agregar support para las flechitas en el teclado
-
-historial de comandos
-
---
-
-
-
 
 jueguito con delta t
 

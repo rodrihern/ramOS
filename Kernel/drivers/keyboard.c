@@ -121,6 +121,8 @@ void handle_pressed_key() {
 		} else if (pressed_key == KEY_D) {
 			write_buffer(EOF);
 		}
+
+		return;
 	}
 
 

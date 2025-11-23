@@ -30,7 +30,14 @@ typedef struct {
 // funciones de la shell
 void read_line(char *buf, uint64_t max);
 void process_line(char *line);
-void incfont();
-void decfont();
 void set_username(const char *new_name);
+
+// comandos builtin
+void cls_cmd(int argc, char *argv[]);
+void help_cmd(int argc, char *argv[]);
+void username_cmd(int argc, char *argv[]);
+void mute_cmd(int argc, char *argv[]);
+void incfont_cmd(int argc, char *argv[]);
+void decfont_cmd(int argc, char *argv[]);
+
 #endif
