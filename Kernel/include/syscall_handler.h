@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include "video_driver.h"
+#include "video.h"
 #include "timer.h"
 #include "keyboard.h"
 #include "sound.h"

@@ -6,7 +6,7 @@
 #include "memory_manager.h"
 #include "lib.h"
 #include "process.h"
-#include "video_driver.h"
+#include "video.h"
 
 typedef struct {
 	uint32_t pids[MAX_PROCESSES]; // Array de PIDs circular

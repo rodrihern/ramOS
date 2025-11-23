@@ -1,6 +1,6 @@
 {
     "files.associations": {
-        "video_driver.h": "c",
+        "video.h": "c",
         "processes.h": "c",
         "memory_manager.h": "c",
         "shell.h": "c",

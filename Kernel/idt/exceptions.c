@@ -3,7 +3,7 @@
 
 #include "exceptions.h"
 #include "keyboard.h"
-#include "video_driver.h"
+#include "video.h"
 
 static void zero_division();
 static void invalid_opcode();
@@ -26,7 +26,7 @@ void exception_dispatcher(int exception)
 static void excep_handler(char *msg)
 {
 	vd_print(msg, 0xff0000);
-	newline();
+	vd_new_line();
 	vd_print("Press enter to continue", 0xff0000);
 	int c;
 	_sti();

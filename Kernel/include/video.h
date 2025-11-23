@@ -71,8 +71,8 @@ void     put_pixel(uint32_t hex_color, uint64_t x, uint64_t y);
 
 
 /*  FUNCIONES DE MODO TEXTO  */
-void    enable_text_mode();
-void    disable_text_mode();
+void    vd_enable_textmode();
+void    vd_disable_text_mode();
 void    vd_set_text_size(uint8_t size);
 uint8_t vd_get_text_size();
 void    vd_increase_text_size();
@@ -80,7 +80,7 @@ void    vd_decrease_text_size();
 void    vd_put_char(uint8_t ch, uint32_t color);
 void    vd_print(const char *str, uint32_t color);
 void    vd_clear();
-void    newline();
+void    vd_new_line();
 
 /*  FUNCIONES DE DIBUJO */
 

@@ -2,7 +2,7 @@ GLOBAL print_registers
 GLOBAL return_to_userland
 EXTERN print
 EXTERN printRegisterFormat
-EXTERN newline
+EXTERN vd_new_line
 EXTERN main
 EXTERN getStackBase
 EXTERN vd_set_text_size
@@ -36,7 +36,7 @@ print_registers:
     call vd_print
 
 
-    call newline
+    call vd_new_line
 
     cmp r10, length
     jne .loop_registers

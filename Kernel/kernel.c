@@ -7,7 +7,7 @@
 #include "keyboard.h"
 #include "idt_loader.h"
 #include "timer.h"
-#include "video_driver.h"
+#include "video.h"
 #include "sound.h"
 #include "interrupts.h"
 #include "memory_manager.h"
@@ -68,7 +68,7 @@ int main()
 
 	init_keyboard_sem();
 
-	enable_text_mode();
+	vd_enable_textmode();
 
 	init_timer();
 

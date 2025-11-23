@@ -8,7 +8,7 @@
 #include "pipes.h"
 #include "scheduler.h"
 #include "synchro.h"
-#include "video_driver.h"
+#include "video.h"
 
 #define KEYBOARD_SEM_NAME "keyboard"
 

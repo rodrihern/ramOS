@@ -4,7 +4,7 @@
 
 #include "lib.h"
 #include <font.h>
-#include <video_driver.h>
+#include <video.h>
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 #define ENABLED 1
@@ -66,7 +66,7 @@ static uint64_t cursor_x;
 static uint32_t cursor_y;
 static uint8_t text_size = 1;
 
-void enable_text_mode() {
+void vd_enable_textmode() {
 	if (text_mode) {
 		return;
 	}
@@ -74,7 +74,7 @@ void enable_text_mode() {
 	vd_clear();
 }
 
-void disable_text_mode() {
+void vd_disable_text_mode() {
 if (!text_mode) {
 	return;
 }
@@ -109,7 +109,7 @@ fill_rectangle(0, last_line_start, WIDTH,
 				HEIGHT, BKG_COLOR);
 }
 
-void newline() {
+void vd_new_line() {
 cursor_x = 0;
 uint64_t step_y = text_size * FONT_HEIGHT;
 
@@ -128,7 +128,7 @@ if (cursor_y + step_y < HEIGHT) {
 static void update_cursor() {
 if (!is_within_screen_bounds(cursor_x + FONT_WIDTH * text_size,
 							cursor_y + FONT_HEIGHT * text_size)) {
-	newline();
+	vd_new_line();
 }
 }
 
@@ -137,7 +137,7 @@ uint64_t step_x = FONT_WIDTH * text_size;
 if (cursor_x + 2 * step_x <= WIDTH) {
 	cursor_x += step_x;
 } else {
-	newline();
+	vd_new_line();
 }
 }
 
@@ -172,7 +172,7 @@ void vd_put_char(uint8_t ch, uint32_t color) {
 		delete_char();
 		break;
 	case '\n':
-		newline();
+		vd_new_line();
 		break;
 	default:
 		vd_draw_char(ch, cursor_x, cursor_y, color, text_size);

@@ -7,7 +7,7 @@
 #include "queue.h"
 #include "pipes.h"
 #include "interrupts.h"
-#include "video_driver.h"
+#include "video.h"
 #include "../include/time.h"
 #include <stddef.h>
 #include "synchro.h"

@@ -4,7 +4,7 @@
 
 #include "timer.h"
 #include "scheduler.h"
-#include "video_driver.h"
+#include "video.h"
 
 #define CAL_TICKS 5
 #define TIMER_FREQ 100

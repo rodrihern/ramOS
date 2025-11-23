@@ -214,12 +214,12 @@ static void sys_speaker_stop()
 
 static void sys_textmode()
 {
-	enable_text_mode();
+	vd_enable_textmode();
 }
 
 static void sys_videomode()
 {
-	disable_text_mode();
+	vd_disable_text_mode();
 }
 
 static void sys_put_pixel(uint32_t hex_color, uint64_t x, uint64_t y)
