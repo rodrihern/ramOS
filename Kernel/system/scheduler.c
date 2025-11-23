@@ -297,7 +297,7 @@ static void apply_aging(void)
 }
 
 // Agrega el proceso al array de procesos y a la cola READY
-int scheduler_add_process(
+int sch_add_process(
         process_entry_t entry, int argc, const char **argv, const char *name, int fds[2])
 {
 	if (!scheduler_initialized || process_count >= MAX_PROCESSES) {
@@ -340,7 +340,7 @@ int scheduler_add_process(
 	return pid;
 }
 
-int scheduler_remove_process(pid_t pid)
+int sch_remove_process(pid_t pid)
 {
 	if (!scheduler_initialized || !pid_is_valid(pid)) {
 		return -1;
@@ -364,7 +364,7 @@ int scheduler_remove_process(pid_t pid)
 	// Si estábamos ejecutando este proceso, forzar reschedule
 	if (current_pid == pid) {
 		current_pid = -1;
-		scheduler_force_reschedule();
+		sch_force_reschedule();
 	}
 
 	// Liberar recursos del proceso
@@ -373,7 +373,7 @@ int scheduler_remove_process(pid_t pid)
 	return 0;
 }
 
-int scheduler_set_priority(pid_t pid, uint8_t new_priority)
+int sch_set_priority(pid_t pid, uint8_t new_priority)
 {
 	if (!scheduler_initialized || !pid_is_valid(pid) || processes[pid] == NULL ||
 	    new_priority < MAX_PRIORITY ||
@@ -421,7 +421,7 @@ int scheduler_set_priority(pid_t pid, uint8_t new_priority)
 	return 0;
 }
 
-int scheduler_get_priority(pid_t pid)
+int sch_get_priority(pid_t pid)
 {
 	if (!scheduler_initialized || !pid_is_valid(pid) || processes[pid] == NULL) {
 		return -1;
@@ -430,7 +430,7 @@ int scheduler_get_priority(pid_t pid)
 	return process->priority;
 }
 
-void scheduler_force_reschedule(void)
+void sch_force_reschedule(void)
 {
 	if (scheduler_initialized) {
 		force_reschedule = true;
@@ -438,7 +438,7 @@ void scheduler_force_reschedule(void)
 	}
 }
 
-int scheduler_get_current_pid(void)
+int sch_get_current_pid(void)
 {
 	if (scheduler_initialized) {
 		return current_pid;
@@ -446,7 +446,7 @@ int scheduler_get_current_pid(void)
 	return -1;
 }
 
-int scheduler_kill_process(pid_t pid)
+int sch_kill_process(pid_t pid)
 {
 	if (!scheduler_initialized) {
 		return -1; // Scheduler not initialized
@@ -480,7 +480,7 @@ int scheduler_kill_process(pid_t pid)
 	close_open_fds(killed_process);
 
 	if (killed_process->parent_pid == INIT_PID) {
-		scheduler_remove_process(killed_process->pid);
+		sch_remove_process(killed_process->pid);
 	} else { // si el padre no es init, no vamos a eliminarlo porque su padre podria hacerle un
 		 // wait
 		// Lo sacamos de la cola de procesos ready para que no vuelva a correr PERO NO  del
@@ -497,17 +497,17 @@ int scheduler_kill_process(pid_t pid)
 
 		if (parent != NULL && parent->status == PS_BLOCKED &&
 		    parent->waiting_on == killed_process->pid) {
-			scheduler_unblock_process(parent->pid);
+			sch_ublock_process(parent->pid);
 		}
 	}
 	if (pid == current_pid) {
-		scheduler_force_reschedule();
+		sch_force_reschedule();
 	}
 	return 0;
 }
 
 // Llamar desde proc_block() en processes.c
-int scheduler_block_process(pid_t pid)
+int sch_block_process(pid_t pid)
 {
 	if (!scheduler_initialized || !pid_is_valid(pid)) {
 		return -1;
@@ -527,13 +527,13 @@ int scheduler_block_process(pid_t pid)
 
 	// Si es el proceso actual, forzar reschedule
 	if (pid == current_pid) {
-		scheduler_force_reschedule();
+		sch_force_reschedule();
 	}
 
 	return 0;
 }
 
-int scheduler_unblock_process(pid_t pid)
+int sch_ublock_process(pid_t pid)
 {
 	if (!scheduler_initialized || !pid_is_valid(pid)) {
 		return -1;
@@ -602,7 +602,7 @@ void scheduler_destroy(void)
 }
 
 // En scheduler.c
-pcb_t *scheduler_get_pcb(pid_t pid)
+pcb_t *sch_get_pcb(pid_t pid)
 {
 	if (!scheduler_initialized || !pid_is_valid(pid)) {
 		return NULL;
@@ -611,7 +611,7 @@ pcb_t *scheduler_get_pcb(pid_t pid)
 	return processes[pid];
 }
 
-int scheduler_get_processes(process_info_t *buffer, int max_count)
+int get_processes_info(process_info_t *buffer, int max_count)
 {
 	if (!scheduler_initialized || buffer == NULL || max_count <= 0) {
 		return -1;
@@ -638,7 +638,7 @@ int scheduler_get_processes(process_info_t *buffer, int max_count)
 	return count;
 }
 
-void scheduler_exit_process(int64_t ret_value)
+void sch_exit_process(int64_t ret_value)
 {
 	if (!scheduler_initialized) {
 		return;
@@ -659,7 +659,7 @@ void scheduler_exit_process(int64_t ret_value)
 	if (current_process->parent_pid ==
 	    INIT_PID) { // si el padre es init, no hace falta mantener su pcb para guardarnos
 		        // ret_value pues nadie le va a hacer waitpid
-		scheduler_remove_process(current_process->pid);
+		sch_remove_process(current_process->pid);
 	} else { // si el padre no es init, no vamos a eliminarlo porque su padre podria hacerle un
 		 // wait
 		// Lo sacamos de la cola de procesos ready para que no vuelva a correr PERO NO  del
@@ -676,15 +676,15 @@ void scheduler_exit_process(int64_t ret_value)
 
 		// Si el padre estaba bloqueado haciendo waitpid, lo desbloqueamos
 		if (parent->status == PS_BLOCKED && parent->waiting_on == current_process->pid) {
-			scheduler_unblock_process(parent->pid);
+			sch_ublock_process(parent->pid);
 		}
 	}
-	scheduler_force_reschedule();
+	sch_force_reschedule();
 }
 
 // Bloquea al proceso actual hasta que el hijo indicado termine. Devuelve el status del hijo si ya
 // terminó o 0.
-int scheduler_waitpid(pid_t child_pid)
+int sch_waitpid(pid_t child_pid)
 {
 	if (!scheduler_initialized || !pid_is_valid(child_pid) || processes[child_pid] == NULL ||
 	    processes[child_pid]->parent_pid != current_pid) {
@@ -694,14 +694,14 @@ int scheduler_waitpid(pid_t child_pid)
 	// Si el proceso hijo no termino, bloqueamos el proceso actual hasta que termine
 	if (processes[child_pid]->status != PS_TERMINATED) {
 		processes[current_pid]->waiting_on = child_pid;
-		scheduler_block_process(current_pid);
+		sch_block_process(current_pid);
 	}
 
 	// Llega acá cuando el hijo terminó y lo desbloqueo o si el hijo ya había terminado
 
 	processes[current_pid]->waiting_on = NO_PID;
 	int ret_value                      = processes[child_pid]->return_value;
-	scheduler_remove_process(child_pid);
+	sch_remove_process(child_pid);
 
 	return ret_value;
 }
@@ -735,7 +735,7 @@ static void reparent_children_to_init(pid_t pid)
 			// Asignar el proceso huérfano al init
 			if (processes[i]->status == PS_TERMINATED) {
 				// Si el hijo ya estaba terminado, lo removemos directamente
-				scheduler_remove_process(processes[i]->pid);
+				sch_remove_process(processes[i]->pid);
 			} else {
 				processes[i]->parent_pid = INIT_PID;
 			}
@@ -755,7 +755,7 @@ int scheduler_kill_foreground_process(void)
 		return -1;
 	}
 
-	int result = scheduler_kill_process(foreground_process_pid);
+	int result = sch_kill_process(foreground_process_pid);
 	// Después de matar el proceso en foreground, establecer la shell como proceso en foreground
 	foreground_process_pid = SHELL_PID;
 

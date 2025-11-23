@@ -55,7 +55,7 @@ void init_semaphore_manager(void)
 	}
 
 	memory_manager_ADT mm = get_kernel_memory_manager();
-	sem_manager           = alloc_memory(mm, sizeof(semaphore_manager_t));
+	sem_manager           = mm_alloc(mm, sizeof(semaphore_manager_t));
 
 	if (sem_manager == NULL) {
 		return; // Error crítico
@@ -78,11 +78,11 @@ int64_t sem_open(char *name, int initial_value)
 	semaphore_t *sem = get_sem_by_name(name);
 	if (sem != NULL) {
 		// Ya existe, solo incrementar contador si no es un proceso que ya lo creo
-		if (pid_present_in_semaphore(sem, scheduler_get_current_pid())) {
+		if (pid_present_in_semaphore(sem, sch_get_current_pid())) {
 			return ERROR; // El proceso ya posee este semáforo
 		}
 		acquire_lock(&sem->lock);
-		sem->owner_pids[scheduler_get_current_pid()] = 1;
+		sem->owner_pids[sch_get_current_pid()] = 1;
 		sem->ref_count++;
 		release_lock(&sem->lock);
 		return OK;
@@ -96,12 +96,12 @@ int64_t sem_open(char *name, int initial_value)
 
 	// Crear nuevo semáforo
 	memory_manager_ADT mm = get_kernel_memory_manager();
-	sem                   = alloc_memory(mm, sizeof(semaphore_t));
+	sem                   = mm_alloc(mm, sizeof(semaphore_t));
 	if (sem == NULL) {
 		return ERROR;
 	}
 
-	init_semaphore_struct(sem, name, initial_value, scheduler_get_current_pid());
+	init_semaphore_struct(sem, name, initial_value, sch_get_current_pid());
 
 	sem_manager->semaphores[id] = sem;
 	sem_manager->semaphore_count++;
@@ -126,7 +126,7 @@ int64_t sem_close(char *name)
 
 	if (sem->ref_count > 1) {
 		sem->ref_count--;
-		sem->owner_pids[scheduler_get_current_pid()] = FREE;
+		sem->owner_pids[sch_get_current_pid()] = FREE;
 		release_lock(&sem->lock);
 		return OK;
 	}
@@ -135,7 +135,7 @@ int64_t sem_close(char *name)
 
 	// Último proceso usando el semáforo, destruirlo
 	memory_manager_ADT mm = get_kernel_memory_manager();
-	free_memory(mm, sem);
+	mm_free(mm, sem);
 	sem_manager->semaphores[idx] = NULL;
 	sem_manager->semaphore_count--;
 
@@ -162,7 +162,7 @@ int64_t sem_wait(char *name)
 	}
 
 	// No hay recursos disponibles, bloquear proceso
-	int pid = scheduler_get_current_pid();
+	int pid = sch_get_current_pid();
 
 	if (add_to_queue(sem, pid) == ERROR) {
 		release_lock(&sem->lock);
@@ -173,7 +173,7 @@ int64_t sem_wait(char *name)
 
 	release_lock(&sem->lock);
 
-	scheduler_block_process(pid);
+	sch_block_process(pid);
 
 	// _sti();
 
@@ -198,7 +198,7 @@ int64_t sem_post(char *name)
 		uint32_t pid = pop_from_queue(sem);
 		_cli(); // deshabilitar interrupciones
 		release_lock(&sem->lock);
-		scheduler_unblock_process(pid);
+		sch_ublock_process(pid);
 		_sti(); // habilitar interrupciones
 	} else {
 		// No hay procesos esperando, incrementar contador
@@ -222,7 +222,7 @@ int remove_process_from_all_semaphore_queues(uint32_t pid)
 		}
 
 		if (sem->owner_pids[pid] == OCCUPIED) {
-			if (scheduler_get_pcb(pid)->status == PS_BLOCKED) {
+			if (sch_get_pcb(pid)->status == PS_BLOCKED) {
 				acquire_lock(&sem->lock);
 				remove_process_from_queue(sem, pid);
 				release_lock(&sem->lock);
@@ -371,7 +371,7 @@ static int64_t sem_close_by_pid(char *name, uint32_t pid)
 
 	// Ultimo proceso usando el semaforo, destruirlo
 	memory_manager_ADT mm = get_kernel_memory_manager();
-	free_memory(mm, sem);
+	mm_free(mm, sem);
 	sem_manager->semaphores[idx] = NULL;
 	sem_manager->semaphore_count--;
 

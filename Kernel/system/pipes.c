@@ -1,7 +1,7 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
-#include <stdbool.h>
+
 #include "pipes.h"
 #include "memory_manager.h"
 #include "scheduler.h"
@@ -64,7 +64,7 @@ int create_pipe(int fds[2])
 	}
 
 	memory_manager_ADT mm   = get_kernel_memory_manager();
-	pipe_t            *pipe = alloc_memory(mm, sizeof(pipe_t));
+	pipe_t            *pipe = mm_alloc(mm, sizeof(pipe_t));
 	if (pipe == NULL) {
 		return -1;
 	}
@@ -87,7 +87,7 @@ int create_pipe(int fds[2])
 	strcat(pipe->read_sem, "r");
 	if (sem_open(pipe->read_sem, 0) < 0) {
 		pipes[idx] = NULL;
-		free_memory(mm, pipe);
+		mm_free(mm, pipe);
 		return -1;
 	}
 
@@ -97,7 +97,7 @@ int create_pipe(int fds[2])
 	if (sem_open(pipe->write_sem, PIPE_BUFFER_SIZE) < 0) {
 		sem_close(pipe->read_sem);
 		pipes[idx] = NULL;
-		free_memory(mm, pipe);
+		mm_free(mm, pipe);
 		return -1;
 	}
 
@@ -314,7 +314,7 @@ void destroy_pipe(int idx)
 
 	sem_close(pipe->read_sem);
 	sem_close(pipe->write_sem);
-	free_memory(mm, pipe);
+	mm_free(mm, pipe);
 	pipes[idx] = NULL;
 }
 

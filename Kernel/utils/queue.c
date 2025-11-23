@@ -19,7 +19,7 @@ typedef struct queue_cdt {
 queue_t q_init()
 {
 	memory_manager_ADT mm = get_kernel_memory_manager();
-	queue_t            q  = alloc_memory(mm, sizeof(queue_cdt));
+	queue_t            q  = mm_alloc(mm, sizeof(queue_cdt));
 	if (q == NULL) {
 		return NULL;
 	}
@@ -34,7 +34,7 @@ queue_t q_init()
 int q_add(queue_t q, int value)
 {
 	memory_manager_ADT mm       = get_kernel_memory_manager();
-	node_t            *new_node = alloc_memory(mm, sizeof(node_t));
+	node_t            *new_node = mm_alloc(mm, sizeof(node_t));
 	if (new_node == NULL) {
 		return 0;
 	}
@@ -62,7 +62,7 @@ int q_poll(queue_t q)
 	int                res     = q->first->value;
 	node_t            *to_free = q->first;
 	q->first                   = to_free->next;
-	free_memory(mm, to_free);
+	mm_free(mm, to_free);
 	if (q->first == NULL) {
 		q->last = NULL;
 	}
@@ -80,7 +80,7 @@ int q_remove(queue_t q, int value)
 	if (q->first->value == value) {
 		node_t *to_free = q->first;
 		q->first        = q->first->next;
-		free_memory(mm, to_free);
+		mm_free(mm, to_free);
 		if (q_is_empty(q)) {
 			q->last = NULL;
 		}
@@ -91,7 +91,7 @@ int q_remove(queue_t q, int value)
 	while (current != NULL) {
 		if (current->value == value) {
 			prev->next = current->next;
-			free_memory(mm, current);
+			mm_free(mm, current);
 			if (prev->next == NULL) {
 				q->last = prev;
 			}
@@ -139,10 +139,10 @@ void q_destroy(queue_t q)
 	node_t            *current = q->first;
 	while (current != NULL) {
 		node_t *next = current->next;
-		free_memory(mm, current);
+		mm_free(mm, current);
 		current = next;
 	}
-	free_memory(mm, q);
+	mm_free(mm, q);
 }
 
 // Inicializa el iterador al comienzo de la queue
@@ -196,7 +196,7 @@ int q_remove_current(queue_t q)
 		if (q->first == NULL) {
 			q->last = NULL;
 		}
-		free_memory(mm, to_remove);
+		mm_free(mm, to_remove);
 		q->prev_current = NULL;
 		return 1;
 	}
@@ -220,7 +220,7 @@ int q_remove_current(queue_t q)
 		q->last = prev;
 	}
 
-	free_memory(mm, to_remove);
+	mm_free(mm, to_remove);
 	q->prev_current = NULL;
 
 	return 1;

@@ -85,8 +85,8 @@ static int sys_write(int fd, const char *buffer, uint64_t count)
 	if (fd < 0 || fd >= MAX_FDS) {
 		return -1;
 	}
-	int  pid = scheduler_get_current_pid();
-	pcb_t *p   = scheduler_get_pcb(pid);
+	int  pid = sch_get_current_pid();
+	pcb_t *p   = sch_get_pcb(pid);
 
 	fd = p->fd_table[fd];
 
@@ -114,8 +114,8 @@ static int sys_read(int fd, char *buffer, uint64_t count)
 		return -1;
 	}
 
-	int pid = scheduler_get_current_pid();
-	pcb_t *p = scheduler_get_pcb(pid);
+	int pid = sch_get_current_pid();
+	pcb_t *p = sch_get_pcb(pid);
 
 	fd = p->fd_table[fd];
 
@@ -235,7 +235,7 @@ static uint64_t sys_is_pressed(uint8_t scancode)
 static void sys_sleep(uint64_t miliseconds) {
 	uint64_t start_ms = get_timer_ms();
 	while (get_timer_ms() - start_ms < miliseconds) {
-		scheduler_force_reschedule();
+		sch_force_reschedule();
 	}
 }
 
@@ -252,12 +252,12 @@ static uint64_t sys_ms_elapsed()
 // Memory management syscalls
 static void *sys_malloc(uint64_t size)
 {
-	return alloc_memory(get_kernel_memory_manager(), size);
+	return mm_alloc(get_kernel_memory_manager(), size);
 }
 
 static void sys_free(void *ptr)
 {
-	free_memory(get_kernel_memory_manager(), ptr);
+	mm_free(get_kernel_memory_manager(), ptr);
 }
 
 static int sys_mem_info(mem_info_t *buffer)
@@ -265,7 +265,7 @@ static int sys_mem_info(mem_info_t *buffer)
 	if (buffer == NULL) {
 		return -1;
 	}
-	get_mem_status(get_kernel_memory_manager(), buffer);
+	get_memory_info(get_kernel_memory_manager(), buffer);
 	return 0;
 }
 
@@ -280,35 +280,35 @@ sys_create_process(void *entry, int argc, const char **argv, const char *name, i
 		return -1;
 	}
 
-	int new_pid = scheduler_add_process((process_entry_t)entry, argc, argv, name, fds);
+	int new_pid = sch_add_process((process_entry_t)entry, argc, argv, name, fds);
 	return new_pid;
 }
 
 // Termina el proceso actual con un status, POR AHORA NO USAMOS
 static void sys_exit(int status)
 {
-	scheduler_exit_process(status);
+	sch_exit_process(status);
 }
 
 // Devuelve el PID del proceso en ejecución
 static int64_t sys_getpid(void)
 {
-	return (int64_t)scheduler_get_current_pid();
+	return (int64_t)sch_get_current_pid();
 }
 
 // Mata un proceso por PID
 static int64_t sys_kill(int pid)
 {
-	return scheduler_kill_process(pid);
+	return sch_kill_process(pid);
 }
 
 // Bloquea un proceso por PID
 static int64_t sys_block(int pid)
 {	
-	if (scheduler_block_process(pid) < 0) {
+	if (sch_block_process(pid) < 0) {
 		return -1;
 	}
-	pcb_t * p = scheduler_get_pcb(pid);
+	pcb_t * p = sch_get_pcb(pid);
 	p->unblockable = 1;
 	return 0;
 }
@@ -316,29 +316,29 @@ static int64_t sys_block(int pid)
 // Desbloquea un proceso por PID
 static int64_t sys_unblock(int pid)
 {
-	pcb_t * p = scheduler_get_pcb(pid);
+	pcb_t * p = sch_get_pcb(pid);
 	if (p == NULL || !p->unblockable) {
 		return -1;
 	}
-	return (int64_t)scheduler_unblock_process(pid);
+	return (int64_t)sch_ublock_process(pid);
 }
 
 // Espera a que el proceso hijo 'pid' termine. Devuelve su código de salida si estaba terminado o 0
 // si bloqueó.
 static int64_t sys_wait(int pid)
 {
-	return (int64_t)scheduler_waitpid(pid);
+	return (int64_t)sch_waitpid(pid);
 }
 
 static int64_t sys_nice(int pid, int new_prio)
 {
-	return scheduler_set_priority(pid, new_prio);
+	return sch_set_priority(pid, new_prio);
 }
 
 static void sys_yield()
 {
 	// _hlt();
-	scheduler_force_reschedule();
+	sch_force_reschedule();
 }
 
 static int sys_processes_info(process_info_t *buffer, int max_count)
@@ -346,7 +346,7 @@ static int sys_processes_info(process_info_t *buffer, int max_count)
 	if (buffer == NULL) {
 		return -1;
 	}
-	return scheduler_get_processes(buffer, max_count);
+	return get_processes_info(buffer, max_count);
 }
 
 // SEMÁFOROS (API basada en nombre)
@@ -374,8 +374,8 @@ static int sys_create_pipe(int fds[2])
 		return pipe_id;
 	}
 
-	pid_t pid = scheduler_get_current_pid();
-	pcb_t *p   = scheduler_get_pcb(pid);
+	pid_t pid = sch_get_current_pid();
+	pcb_t *p   = sch_get_pcb(pid);
 
 	p->fd_table[fds[0]] = fds[0];
 	p->fd_table[fds[1]] = fds[1];
@@ -413,8 +413,8 @@ static int sys_open_named_pipe(char *name, int fds[2])
 	}
 
 	// Agregar ambos FDs a la lista de open_fds del proceso
-	pid_t pid = scheduler_get_current_pid();
-	pcb_t  *p   = scheduler_get_pcb(pid);
+	pid_t pid = sch_get_current_pid();
+	pcb_t  *p   = sch_get_pcb(pid);
 
 	p->fd_table[fds[0]] = fds[0];
 	p->fd_table[fds[1]] = fds[1];
@@ -428,8 +428,8 @@ static int sys_close_fd(int fd)
 		return -1;
 	}
 	
-	pid_t pid = scheduler_get_current_pid();
-	pcb_t  *p   = scheduler_get_pcb(pid);
+	pid_t pid = sch_get_current_pid();
+	pcb_t  *p   = sch_get_pcb(pid);
 	fd = p->fd_table[fd];
 	if (fd < FIRST_FREE_FD) {
 		return -1;

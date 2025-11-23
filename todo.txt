@@ -1,13 +1,32 @@
-processes con el inicializador para fds y prio
-init y la shell no se pueden matar, sacar killable de pcb
-que lo cree processes y que processes info sea de processes
-
 agregar un flush que sirva tanto para el teclado como para los pipes
 
+---- scheduler
 
-pantalla de inicio
+processes con el inicializador para fds y prio, que los cree processes y los agregue al scheduler
+
+init y la shell no se pueden matar, sacar killable de pcb
+
+tener 3 funciones para remove, kill, exit ? -> refactor como se hace esto y que quizas lo haga processes la logica de kill / exit y despues solo llame a remove (separar mejor logica de procesos y scheduling)
+
+----
+
+
+refactor manejo de excepciones que mate al proceso que la causo y desp todo lo demas siga bien
+
+programa de calculadora para probar lo de div 0
+
+rework mm -> entenderlo y que no sea un adt, tambien ver de usar toda la memoria disponible como korman
+
+refactor semaforos para usar queue_t
+
+
+
+
+
 
 ---- video
+
+pantalla de inicio
 
 rework driver de video y que solo el de fg pueda dibujar
 
@@ -40,17 +59,12 @@ poner gdb
 
 -------
 
-rework mm -> entenderlo y que no sea un adt, tambien ver de usar toda la memoria disponible como korman
 
-ver cleanup resources (leaks en bg)
-
-ver que es necesario y que no del scheduler (force_reschedule?)
-
-refactor semaforos para usar queue_t
 
 
 
 
+ver cleanup resources (leaks en bg)
 
 jueguito con delta t
 
@@ -58,9 +72,7 @@ piano
 
 doom
 
-refactor manejo de excepciones que mate al proceso que la causo y desp todo lo demas siga bien
 
-programa de calculador para probar lo de div 0
 
 
 

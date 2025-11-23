@@ -18,9 +18,9 @@ typedef struct {
 	size_t allocated_blocks;
 } mem_info_t;
 
-void *alloc_memory(memory_manager_ADT memory_manager, size_t size);
-void free_memory(memory_manager_ADT memory_manager, void *ptr);
-void get_mem_status(memory_manager_ADT memory_manager, mem_info_t * buffer);
+void *mm_alloc(memory_manager_ADT memory_manager, size_t size);
+void mm_free(memory_manager_ADT memory_manager, void *ptr);
+void get_memory_info(memory_manager_ADT memory_manager, mem_info_t * buffer);
 void init_kernel_memory_manager(void);
 memory_manager_ADT get_kernel_memory_manager(void);
 

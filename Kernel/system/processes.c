@@ -23,7 +23,7 @@ static void
 init_pcb_base_fields(pcb_t *p, int pid, process_entry_t entry, const char *name, uint8_t killable)
 {
 	p->pid        = pid;
-	p->parent_pid = scheduler_get_current_pid();
+	p->parent_pid = sch_get_current_pid();
 	strncpy(p->name, name, MAX_PROCESS_NAME_LENGTH - 1);
 	p->name[MAX_PROCESS_NAME_LENGTH - 1] = '\0';
 	p->entry                             = entry;
@@ -35,7 +35,7 @@ init_pcb_base_fields(pcb_t *p, int pid, process_entry_t entry, const char *name,
 
 static int init_pcb_stack(pcb_t *p, memory_manager_ADT mm)
 {
-	p->stack_base = alloc_memory(mm, PROCESS_STACK_SIZE);
+	p->stack_base = mm_alloc(mm, PROCESS_STACK_SIZE);
 	if (p->stack_base == NULL) {
 		return ERROR;
 	}
@@ -95,7 +95,7 @@ pcb_t *proc_create(int pid, process_entry_t entry, int argc, const char **argv,
 
 	memory_manager_ADT mm = get_kernel_memory_manager();
 
-	pcb_t *p = alloc_memory(mm, sizeof(pcb_t));
+	pcb_t *p = mm_alloc(mm, sizeof(pcb_t));
 	if (!p) {
 		return NULL;
 	}
@@ -103,13 +103,13 @@ pcb_t *proc_create(int pid, process_entry_t entry, int argc, const char **argv,
 	init_pcb_base_fields(p, pid, entry, name, killable);
 
 	if (init_pcb_stack(p, mm) == ERROR) {
-		free_memory(mm, p);
+		mm_free(mm, p);
 		return NULL;
 	}
 
 	if (init_pcb_argv(p, argc, argv, mm) == ERROR) {
-		free_memory(mm, p->stack_base);
-		free_memory(mm, p);
+		mm_free(mm, p->stack_base);
+		mm_free(mm, p);
 		return NULL;
 	}
 
@@ -123,10 +123,10 @@ static void free_pcb_argv(pcb_t *p, memory_manager_ADT mm)
 	if (p->argv != NULL) {
 		for (int i = 0; i < p->argc; i++) {
 			if (p->argv[i] != NULL) {
-				free_memory(mm, p->argv[i]);
+				mm_free(mm, p->argv[i]);
 			}
 		}
-		free_memory(mm, p->argv);
+		mm_free(mm, p->argv);
 		p->argv = NULL;
 	}
 }
@@ -134,7 +134,7 @@ static void free_pcb_argv(pcb_t *p, memory_manager_ADT mm)
 static void free_pcb_stack(pcb_t *p, memory_manager_ADT mm)
 {
 	if (p->stack_base != NULL) {
-		free_memory(mm, p->stack_base);
+		mm_free(mm, p->stack_base);
 		p->stack_base    = NULL;
 		p->stack_pointer = NULL;
 	}
@@ -152,14 +152,14 @@ void free_process_resources(pcb_t *p)
 	free_pcb_stack(p, mm);
 
 	// Liberar pcb_t
-	free_memory(mm, p);
+	mm_free(mm, p);
 }
 
 static char **duplicate_argv(const char **argv, int argc, memory_manager_ADT mm)
 {
 	// Caso argv vacío o NULL: crear argv minimal con solo NULL
 	if (argv == NULL || argc == 0 || (argc > 0 && argv[0] == NULL)) {
-		char **new_argv = alloc_memory(mm, sizeof(char *));
+		char **new_argv = mm_alloc(mm, sizeof(char *));
 		if (new_argv == NULL) {
 			return NULL;
 		}
@@ -168,7 +168,7 @@ static char **duplicate_argv(const char **argv, int argc, memory_manager_ADT mm)
 	}
 
 	// Alocar array de punteros (argc + 1 para el NULL terminador)
-	char **new_argv = alloc_memory(mm, (argc + 1) * sizeof(char *));
+	char **new_argv = mm_alloc(mm, (argc + 1) * sizeof(char *));
 	if (new_argv == NULL) {
 		return NULL;
 	}
@@ -181,16 +181,16 @@ static char **duplicate_argv(const char **argv, int argc, memory_manager_ADT mm)
 		}
 
 		size_t len  = strlen(argv[i]) + 1;
-		new_argv[i] = alloc_memory(mm, len);
+		new_argv[i] = mm_alloc(mm, len);
 
 		if (new_argv[i] == NULL) {
 			// Error: liberar todo lo alocado hasta ahora (ROLLBACK)
 			for (int j = 0; j < i; j++) {
 				if (new_argv[j] != NULL) {
-					free_memory(mm, new_argv[j]);
+					mm_free(mm, new_argv[j]);
 				}
 			}
-			free_memory(mm, new_argv);
+			mm_free(mm, new_argv);
 			return NULL;
 		}
 
@@ -204,9 +204,9 @@ static char **duplicate_argv(const char **argv, int argc, memory_manager_ADT mm)
 // check
 static void process_caller(int pid)
 {
-	pcb_t *p = scheduler_get_pcb(pid);
+	pcb_t *p = sch_get_pcb(pid);
 	if (p == NULL || p->entry == NULL) {
-		scheduler_exit_process(-1);
+		sch_exit_process(-1);
 		return;
 	}
 
@@ -214,5 +214,5 @@ static void process_caller(int pid)
 	int res = p->entry(p->argc, p->argv);
 
 	// Cuando retorna, terminar el proceso
-	scheduler_exit_process(res);
+	sch_exit_process(res);
 }

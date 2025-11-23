@@ -145,7 +145,7 @@ memory_manager_ADT create_memory_manager(void *start_address, size_t size)
 	return memory_manager;
 }
 
-void *alloc_memory(memory_manager_ADT memory_manager, size_t size)
+void *mm_alloc(memory_manager_ADT memory_manager, size_t size)
 {
 	if (memory_manager == NULL || size == 0) {
 		return NULL;
@@ -173,7 +173,7 @@ void *alloc_memory(memory_manager_ADT memory_manager, size_t size)
 	return (char *)block + sizeof(mem_block);
 }
 
-void free_memory(memory_manager_ADT memory_manager, void *ptr)
+void mm_free(memory_manager_ADT memory_manager, void *ptr)
 {
 	if (memory_manager == NULL || ptr == NULL) {
 		return;
@@ -202,7 +202,7 @@ void free_memory(memory_manager_ADT memory_manager, void *ptr)
 	coalesce_blocks(block);
 }
 
-void get_mem_status(memory_manager_ADT memory_manager, mem_info_t * buffer)
+void get_memory_info(memory_manager_ADT memory_manager, mem_info_t * buffer)
 {
 
 
