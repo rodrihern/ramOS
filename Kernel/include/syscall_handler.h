@@ -23,7 +23,7 @@ static int     sys_time_info(time_info_t *buffer);
 static void     sys_clear();
 static void     sys_increase_fontsize();
 static void     sys_decrease_fontsize();
-static void     sys_screensize(uint32_t *width, uint32_t *height);
+static int      sys_video_info(video_info_t *buffer);
 static void     sys_circle(uint64_t fill, uint64_t *info, uint32_t color);
 static void     sys_rectangle(uint64_t fill, uint64_t *info, uint32_t color);
 static void     sys_draw_line(uint64_t *info, uint32_t color);

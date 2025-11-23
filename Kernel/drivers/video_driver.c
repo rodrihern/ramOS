@@ -29,6 +29,14 @@ static int is_within_screen_bounds(uint64_t x, uint64_t y) {
 return x < VBE_mode_info->width && y < VBE_mode_info->height;
 }
 
+void get_video_info(video_info_t * buffer) {
+	buffer->width = WIDTH;
+	buffer->heght = HEIGHT;
+	buffer->pitch = PITCH;
+	buffer->bpp = BPP;
+	
+}
+
 //Write a 0xRRGGBB pixel to framebuffer. Supports 24/32bpp.
 void put_pixel(uint32_t hex_color, uint64_t x, uint64_t y) {
 	if (!is_within_screen_bounds(x, y)) {
@@ -46,11 +54,7 @@ void put_pixel(uint32_t hex_color, uint64_t x, uint64_t y) {
 	}
 }
 
-uint16_t get_screen_height() { return HEIGHT; }
 
-uint16_t get_screen_width() { return WIDTH; }
-
-uint8_t get_screen_bpp() { return BPP; }
 
 /*
 	MODO TEXTO

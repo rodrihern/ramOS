@@ -60,6 +60,13 @@ typedef struct time_info {
     uint8_t year;
 } time_info_t;
 
+typedef struct video_info {
+	uint16_t width;
+	uint16_t heght;
+	uint16_t pitch;
+	uint8_t bpp;
+} video_info_t;
+
 
 typedef struct mem_info {
 	size_t total_memory;
@@ -100,13 +107,13 @@ extern int      sys_write(int fd, const char *buf, uint64_t count);
 extern int sys_regs(register_info_t * buffer);
 extern void     sys_speaker_start(uint32_t freq_hz);
 extern void     sys_speaker_stop(void);
-extern uint64_t sys_is_pressed(char key);
+extern uint8_t sys_is_pressed(uint8_t scancode);
 extern void     sys_clear_input_buffer();
 
 // syscalls de video
 extern void     sys_increase_fontsize();
 extern void     sys_decrease_fontsize();
-extern void     sys_screensize(uint32_t *width, uint32_t *height); // TODO: refactor
+extern int      sys_video_info(video_info_t *buffer);
 extern void     sys_circle(uint64_t fill, uint64_t *info, uint32_t color);
 extern void     sys_rectangle(uint64_t fill, uint64_t *info, uint32_t color);
 extern void     sys_draw_line(uint64_t *info, uint32_t color);

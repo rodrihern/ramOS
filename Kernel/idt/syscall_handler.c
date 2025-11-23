@@ -16,7 +16,7 @@ void *syscalls[] = {
 	&sys_time_info,          // 3
 	&sys_increase_fontsize,  // 4
 	&sys_decrease_fontsize,  // 5
-	&sys_screensize,         // 6
+	&sys_video_info,         // 6
 	&sys_circle,             // 7
 	&sys_rectangle,          // 8
 	&sys_draw_line,          // 9
@@ -161,10 +161,13 @@ static void sys_decrease_fontsize()
 }
 
 // devuelve la info del tamaño de la pantalla
-static void sys_screensize(uint32_t *width, uint32_t *height)
+static int sys_video_info(video_info_t *buffer)
 {
-	*width  = get_screen_width();
-	*height = get_screen_height();
+	if (buffer == NULL) {
+		return -1;
+	}
+	get_video_info(buffer);
+	return 0;
 }
 
 // info: [x_center, y_center, radius]

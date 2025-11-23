@@ -55,11 +55,20 @@ struct vbe_mode_info_structure {
 
 typedef struct vbe_mode_info_structure *VBEInfoPtr;
 
+typedef struct video_info {
+	uint16_t width;
+	uint16_t heght;
+	uint16_t pitch;
+	uint8_t bpp;
+} video_info_t;
+
+
+void get_video_info(video_info_t * buffer);
+
 // dibuja un pixel en pantalla
 void     put_pixel(uint32_t hex_color, uint64_t x, uint64_t y);
-uint16_t get_screen_height();
-uint16_t get_screen_width();
-uint8_t get_screen_bpp();
+
+
 
 /*  FUNCIONES DE MODO TEXTO  */
 void    enable_text_mode();
