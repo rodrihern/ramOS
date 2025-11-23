@@ -11,7 +11,7 @@ int time_main(int argc, char *argv[])
 
 	printf("%d:%d:%d %d/%d/%d\n", info.hour, info.minutes, info.seconds,
 		info.day, info.month, info.year);
-	printf("ms: %u\n", sys_ms_elapsed());
+	printf("ms since boot: %u\n", sys_ms_elapsed());
 
 	return OK;
 }

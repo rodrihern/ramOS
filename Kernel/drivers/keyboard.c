@@ -72,15 +72,7 @@ static void write_buffer(unsigned char c) {
   sem_post(KEYBOARD_SEM_NAME);
 }
 
-void clear_buffer() {
-  buffer_end = buffer_start = buffer_current_size = 0;
-
-  // Resetear el semáforo: cerrar y reabrir en 0
-  sem_close(KEYBOARD_SEM_NAME);
-  sem_open(KEYBOARD_SEM_NAME, 0);
-}
-
-uint8_t get_char_from_buffer() {
+uint8_t kb_get_char_from_buffer() {
   if (buffer_current_size == 0) {
     return -1;
   }
@@ -90,15 +82,24 @@ uint8_t get_char_from_buffer() {
   return result;
 }
 
+void kb_flush_buffer() {
+  buffer_end = buffer_start = buffer_current_size = 0;
+
+  // Resetear el semáforo: cerrar y reabrir en 0
+  sem_close(KEYBOARD_SEM_NAME);
+  sem_open(KEYBOARD_SEM_NAME, 0);
+}
+
+
 // copia en el buff lo que hay en el buffer de teclado hasta count y va vaciando
 // el buffer de teclado Bloquea hasta tener TODOS los caracteres pedidos
 // (comportamiento idéntico a pipes)
-uint64_t read_keyboard_buffer(char *buff_copy, uint64_t count) {
+uint64_t kb_read_buffer(char *buff_copy, uint64_t count) {
 
   for (int i = 0; i < count; i++) {
     sem_wait(
         KEYBOARD_SEM_NAME); // Bloquea hasta que haya un carácter disponible
-    buff_copy[i] = get_char_from_buffer();
+    buff_copy[i] = kb_get_char_from_buffer();
   }
   return count;
 }
@@ -145,7 +146,7 @@ void handle_pressed_key() {
 
 
 
-uint8_t is_pressed_key(uint8_t scancode) {
+uint8_t kb_is_pressed(uint8_t scancode) {
 	if (scancode >= KEYS_COUNT) {
 		return 0;
 	}
@@ -180,7 +181,7 @@ uint32_t uint64_to_register_format(uint64_t value, char *dest) {
 
 
 // -1 si todavia no se saco snapshot
-int copy_registers(register_info_t * buffer)
+int kb_get_snapshot(register_info_t * buffer)
 {
 	if (!snapshot_saved) {
 		return -1;

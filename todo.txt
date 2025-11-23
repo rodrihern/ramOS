@@ -1,9 +1,7 @@
-agregar un flush que sirva tanto para el teclado como para los pipes
-
 processes con el inicializador para fds y prio
 init y la shell no se pueden matar, sacar killable de pcb
 
-struct con info para las syscalls que devuelven info
+agregar un flush que sirva tanto para el teclado como para los pipes
 
 
 pantalla de inicio
@@ -41,7 +39,7 @@ poner gdb
 
 -------
 
-rework mm -> tener uno solo, inicializarlo piola
+rework mm -> entenderlo y que no sea un adt, tambien ver de usar toda la memoria disponible como korman
 
 ver cleanup resources (leaks en bg)
 
@@ -59,7 +57,9 @@ piano
 
 doom
 
-manejo de excepciones que rebootee la compu? calculadora para poder probar el div0
+manejo de excepciones que mate al proceso que la causo y desp todo lo demas siga bien
+
+programa de calculador para probar lo de div 0
 
 
 

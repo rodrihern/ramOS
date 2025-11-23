@@ -43,14 +43,15 @@ typedef struct register_info {
 
 
 void     init_keyboard_sem();
-void     print_registers();
-void     clear_buffer();
-uint8_t  get_char_from_buffer();
-uint64_t read_keyboard_buffer(char *buff_copy, uint64_t count);
-void     handle_pressed_key();
+void     kb_flush_buffer();
 
-int copy_registers(register_info_t * buffer);
+uint64_t kb_read_buffer(char *buff_copy, uint64_t count);
+uint8_t kb_get_char_from_buffer();
+void     handle_pressed_key();
+uint8_t  kb_is_pressed(uint8_t scancode);
+
+void     print_registers();
+int kb_get_snapshot(register_info_t * buffer);
 uint32_t uint64_to_register_format(uint64_t value, char *dest);
-uint8_t  is_pressed_key(uint8_t scancode);
 
 #endif

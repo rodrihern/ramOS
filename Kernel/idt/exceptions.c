@@ -32,7 +32,7 @@ static void excep_handler(char *msg)
 	_sti();
 	do {
 		_hlt();
-	} while ((c = get_char_from_buffer()) != '\n');
+	} while ((c = kb_get_char_from_buffer()) != '\n');
 	vd_clear();
 }
 

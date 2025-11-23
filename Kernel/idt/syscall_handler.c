@@ -76,7 +76,7 @@ static int sys_regs(register_info_t * buffer)
 		return -1;
 	}
 
-	return copy_registers(buffer);
+	return kb_get_snapshot(buffer);
 }
 
 // devuelve cuantos chars escribió
@@ -128,7 +128,7 @@ static int sys_read(int fd, char *buffer, uint64_t count)
 		if (pid != foreground_pid) {
 			return -1; // solo el proceso de foreground puede leer del teclado
 		}
-		return read_keyboard_buffer(buffer, count);
+		return kb_read_buffer(buffer, count);
 	}
 
 	// es un pipe
@@ -229,7 +229,7 @@ static void sys_put_pixel(uint32_t hex_color, uint64_t x, uint64_t y)
 
 static uint64_t sys_is_pressed(uint8_t scancode)
 {
-	return is_pressed_key(scancode);
+	return kb_is_pressed(scancode);
 }
 
 static void sys_sleep(uint64_t miliseconds) {
@@ -241,7 +241,7 @@ static void sys_sleep(uint64_t miliseconds) {
 
 static void sys_clear_input_buffer()
 {
-	clear_buffer();
+	kb_flush_buffer();
 }
 
 static uint64_t sys_ms_elapsed()
