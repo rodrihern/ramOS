@@ -202,20 +202,20 @@ void free_memory(memory_manager_ADT memory_manager, void *ptr)
 	coalesce_blocks(block);
 }
 
-mem_info_t get_mem_status(memory_manager_ADT memory_manager)
+void get_mem_status(memory_manager_ADT memory_manager, mem_info_t * buffer)
 {
-	mem_info_t status = {0};
+
 
 	if (memory_manager != NULL) {
-		status.total_memory = memory_manager->total_size;
-		status.used_memory  = memory_manager->total_allocated;
-		status.free_memory  = status.total_memory - status.used_memory -
+		buffer->total_memory = memory_manager->total_size;
+		buffer->used_memory  = memory_manager->total_allocated;
+		buffer->free_memory  = buffer->total_memory - buffer->used_memory -
 		                     sizeof(struct memory_manager_CDT) -
 		                     (memory_manager->allocated_blocks * sizeof(mem_block));
-		status.allocated_blocks = memory_manager->allocated_blocks;
+		buffer->allocated_blocks = memory_manager->allocated_blocks;
 	}
 
-	return status;
+
 }
 
 void init_kernel_memory_manager(void)

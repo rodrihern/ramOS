@@ -35,7 +35,8 @@ int mem_main(int argc, char *argv[])
 		return -1;
 	}
 
-	mem_info_t info = sys_mem_info();
+	mem_info_t info;
+	sys_mem_info(&info);
 
 	char *units[] = {"B", "KB", "MB", "GB"};
 

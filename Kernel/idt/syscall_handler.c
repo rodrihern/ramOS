@@ -260,10 +260,15 @@ static void sys_free(void *ptr)
 	free_memory(get_kernel_memory_manager(), ptr);
 }
 
-static mem_info_t sys_mem_info(void) // TODO: cambiar
+static int sys_mem_info(mem_info_t *buffer)
 {
-	return get_mem_status(get_kernel_memory_manager());
+	if (buffer == NULL) {
+		return -1;
+	}
+	get_mem_status(get_kernel_memory_manager(), buffer);
+	return 0;
 }
+
 
 // ===================== Processes syscalls =====================
 

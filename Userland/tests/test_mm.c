@@ -77,7 +77,8 @@ int test_mm(int argc, char *argv[])
 				sys_free(mm_rqs[i].address);
 
 		// Mostrar estado de memoria cada iteración
-		mem_info_t st = sys_mem_info();
+		mem_info_t st;
+		sys_mem_info(&st);
 		printf("[MM] total=%u used=%u free=%u blocks=%u\n",
 		       (unsigned)st.total_memory,
 		       (unsigned)st.used_memory,
