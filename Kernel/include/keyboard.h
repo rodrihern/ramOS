@@ -7,9 +7,13 @@
 #define RIGHT_SHIFT 0x36
 #define CAPS_LOCK 0x3A
 #define LEFT_CONTROL 0x1D
+
+#define KEY_C 0x2E
+#define KEY_D 0x20
+
 #define BREAKCODE_OFFSET 0x80
 
-#define KEYS_COUNT 69
+#define KEYS_COUNT 81
 #define BUFFER_LENGTH 256
 #define LETTERS 26
 
@@ -47,6 +51,6 @@ void     handle_pressed_key();
 
 int copy_registers(register_info_t * buffer);
 uint32_t uint64_to_register_format(uint64_t value, char *dest);
-uint8_t  is_pressed_key(char c);
+uint8_t  is_pressed_key(uint8_t scancode);
 
 #endif

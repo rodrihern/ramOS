@@ -12,6 +12,8 @@
 
 #define KEYBOARD_SEM_NAME "keyboard"
 
+#define TO_UPPER(x) ( ('a' <= x && x <= 'z') ? (x - 'a' + 'A' ) : x )
+
 extern uint8_t snapshot_saved;
 extern uint8_t pressed_key;
 extern register_info_t * reg_array[];
@@ -24,30 +26,36 @@ uint16_t buffer_current_size = 0;
 
 static uint8_t buffer[BUFFER_LENGTH];
 
-static void write_buffer(unsigned char c);
+static uint8_t is_pressed[KEYS_COUNT] = {0};
 
-static uint8_t pressed_keys[KEYS_COUNT] = {0};
 
 // 0: not supported key
+// 1: up arrow
+// 2: left arrow
+// 3: right arrow
+// 4: down arrow
 
 static const char lower_keys[] = {
-    0,    27,   '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-',  '=',
+	0,    27,   '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-',  '=',
     '\b', '\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[',  ']',
     '\n', 0,    'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`',
     0,    '\\', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', 0,    '*',
-    0,    ' ',  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0 // hasta F10
+    0,    ' ',  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, // F10
+	0, 0, 0, 1, 0, 0, 2, 0, 3, 0, 0, 4
 };
 
 static const char upper_keys[] = {
-    0,   27,   '!',  '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '\b',
+	0,   27,   '!',  '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '\b',
 	'\t', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}',  '\n', 
 	0,   'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"',  '~',  0,   '|',
 	'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?',  0, '*', 
-	0,   ' ', 0,   0,   0,   0,   0,   0,   0, 0,   0,    0,    0
+	0,  ' ',  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, // F10
+	0, 0, 0, 1, 0, 0, 2, 0, 3, 0, 0, 4
 };
 
 static const char *scancode_to_ascii[] = {lower_keys, upper_keys};
 
+static void write_buffer(unsigned char c);
 
 void init_keyboard_sem() {
   sem_open(KEYBOARD_SEM_NAME, 0); // Empieza en 0 (sin caracteres disponibles)
@@ -95,72 +103,51 @@ uint64_t read_keyboard_buffer(char *buff_copy, uint64_t count) {
   return count;
 }
 
-// void handle_pressed_key() {
 
-//   if (pressed_key == LEFT_SHIFT || pressed_key == RIGHT_SHIFT) {
-//     shift = 1;
-//   } else if (pressed_key == LEFT_SHIFT + BREAKCODE_OFFSET ||
-//              pressed_key == RIGHT_SHIFT + BREAKCODE_OFFSET) {
-//     shift = 0;
-//   } else if (pressed_key == LEFT_CONTROL) {
-//     control = 1;
-//   } else if (pressed_key == LEFT_CONTROL + BREAKCODE_OFFSET) {
-//     control = 0;
-//   } else if (pressed_key == CAPS_LOCK) {
-//     caps_lock = !caps_lock;
-//   } else if (pressed_key == 0) {
-//     return;
-//   } else if (pressed_key > BREAKCODE_OFFSET) { // se soltó una tecla o es un
-//                                             // caracter no imprimible
-//     char raw = lower_keys[pressed_key - BREAKCODE_OFFSET];
-//     if (raw >= 'a' && raw <= 'z') {
-//       pressed_keys[raw - 'a'] = 0; // marcamos la tecla como no presionada
-//     }
-//     return;
-//   } else {
-//     int index;
-//     char raw = lower_keys[pressed_key];
-//     int is_letter = (raw >= 'a' && raw <= 'z');
 
-//     if (is_letter && raw == 'c' && control) {
-//       if (!pressed_keys['c' - 'a']) { // para que solo se llame una vez
-//         scheduler_kill_foreground_process();
-//       }
-//       pressed_keys['c' - 'a'] = 1; // marcamos como presionada
-//       return;                      // para no meter la 'c' en el buffer
-//     }
+void handle_pressed_key() {
+	// mark or unmark it as pressed
+	if (pressed_key < KEYS_COUNT) {
+		is_pressed[pressed_key] = 1;
+	} else if (pressed_key > BREAKCODE_OFFSET && 
+		pressed_key - BREAKCODE_OFFSET < KEYS_COUNT) {
+			is_pressed[pressed_key - BREAKCODE_OFFSET] = 0;
+	}
 
-//     if (is_letter && raw == 'd' && control) {
-//       if (!pressed_keys['d' - 'a']) { // para que solo se llame una vez
-//         write_buffer(EOF);
-//       }
-//       pressed_keys['d' - 'a'] = 1; // marcamos como presionada
-//       return;                      // para no meter la 'd' en el buffer
-//     }
+	// handle special commands
+	if (is_pressed[LEFT_CONTROL]) {
+		if (pressed_key == KEY_C) {
+			scheduler_kill_foreground_process();
+		} else if (pressed_key == KEY_D) {
+			write_buffer(EOF);
+		}
+	}
 
-//     if (is_letter) {
-//       index = shift ^ caps_lock;
-//       pressed_keys[raw - 'a'] = 1;
-//     } else {
-//       index = shift;
-//     }
 
-//     write_buffer(scancode_to_ascii[index][pressed_key]);
-//   }
+	if (pressed_key == caps_lock) {
+		caps_lock = !caps_lock;
+		return;
+	}
+	
+	if (pressed_key < KEYS_COUNT) {
+		uint8_t shift = is_pressed[LEFT_SHIFT] || is_pressed[RIGHT_SHIFT];
+		char c = scancode_to_ascii[shift][pressed_key];
+		if (caps_lock) {
+			c = TO_UPPER(c);
+		}
+		write_buffer(c);
+	}
 
-//   return;
-// }
+}
 
 
 
 
-
-uint8_t is_pressed_key(char c) {
-  if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
-    c = (c < 'a') ? c - 'A' + 'a' : c; // Convertir a minúscula si es mayúscula
-    return pressed_keys[c - 'a']; // Devuelve 1 si la tecla está presionada, 0 si no
-  }
-  return 0; // Si el char es inválido, retornamos 0
+uint8_t is_pressed_key(uint8_t scancode) {
+	if (scancode >= KEYS_COUNT) {
+		return 0;
+	}
+	return is_pressed[scancode];
 }
 
 // devuelve la cantidad de caracteres escritos
