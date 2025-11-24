@@ -30,6 +30,12 @@ static int init_pcb_stack(pcb_t *p, memory_manager_ADT mm)
 	return OK;
 }
 
+int proc_init_stack(pcb_t *p)
+{
+	memory_manager_ADT mm = get_kernel_memory_manager();
+	return init_pcb_stack(p, mm);
+}
+
 static int init_pcb_argv(pcb_t *p, int argc, const char **argv, memory_manager_ADT mm)
 {
 	p->argc = argc;
@@ -79,11 +85,6 @@ int create_process(process_entry_t entry, int argc, const char **argv,
 		return -1;
 	}
 
-	pid_t pid = sch_next_pid();
-	if (pid == NO_PID) {
-		return -1;
-	}
-
 	memory_manager_ADT mm = get_kernel_memory_manager();
 
 	pcb_t *p = mm_alloc(mm, sizeof(pcb_t));
@@ -91,7 +92,9 @@ int create_process(process_entry_t entry, int argc, const char **argv,
 		return -1;
 	}
 
-	p->pid = pid;
+	p->pid = NO_PID;
+	p->stack_base = NULL;
+	p->stack_pointer = NULL;
 	p->parent_pid = sch_get_current_pid();
 	strncpy(p->name, name, MAX_PROCESS_NAME_LENGTH - 1);
 	p->name[MAX_PROCESS_NAME_LENGTH - 1] = '\0';
@@ -101,13 +104,10 @@ int create_process(process_entry_t entry, int argc, const char **argv,
 	p->killable = 1;
 	p->unblockable = 0;
 
-	if (init_pcb_stack(p, mm) == ERROR) {
-		mm_free(mm, p);
-		return -1;
-	}
-
 	if (init_pcb_argv(p, argc, argv, mm) == ERROR) {
-		mm_free(mm, p->stack_base);
+		if (p->stack_base != NULL) {
+			mm_free(mm, p->stack_base);
+		}
 		mm_free(mm, p);
 		return -1;
 	}

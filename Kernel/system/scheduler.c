@@ -35,6 +35,7 @@ static void        cleanup_all_processes(void);
 static int         create_shell();
 static void        close_open_fds(pcb_t *p);
 static void        apply_aging(void);
+static int         terminate_process(pcb_t *p, int64_t ret_value);
 
 static inline uint8_t pid_is_valid(pid_t pid)
 {
@@ -313,14 +314,18 @@ static void apply_aging(void)
 
 int sch_add_process(pcb_t *p, uint8_t foreground)
 {
-	if (process_count >= MAX_PROCESSES) {
+	if (p == NULL || p->priority >= PRIORITY_COUNT) {
+		return -1;
+	}
+
+	if (process_count >= MAX_PROCESSES ||
+	    (!scheduler_initialized && ready_queue[DEFAULT_PRIORITY] == NULL)) {
 		return -1;
 	}
 
 	p->pid = sch_next_pid();
 
 	if (!pid_is_valid(p->pid)) {
-		free_process_resources(p);
 		return -1;
 	}
 	
@@ -331,29 +336,28 @@ int sch_add_process(pcb_t *p, uint8_t foreground)
 	p->effective_priority = p->priority;
 	p->status             = PS_READY;
 	p->last_tick          = ticks;
-	processes[p->pid]     = p;
-	process_count++;
+
+	if (proc_init_stack(p) == ERROR) {
+		return -1;
+	}
 
 	queue_t target_queue = ready_queue[p->effective_priority];
 	if (target_queue == NULL) {
-		processes[p->pid] = NULL;
-		process_count--;
-		free_process_resources(p);
 		return -1;
 	}
 
 	if (!q_add(target_queue, p->pid)) {
-		processes[p->pid] = NULL;
-		process_count--;
-		free_process_resources(p);
 		return -1;
 	}
+
+	processes[p->pid] = p;
+	process_count++;
+
 	if (foreground) {
 		foreground_process_pid = p->pid;
 	}
 	
 	return p->pid;
-
 }
 
 int sch_remove_process(pid_t pid)
@@ -481,42 +485,7 @@ int sch_kill_process(pid_t pid)
 		return -4; // Process is protected (init or shell)
 	}
 
-	reparent_children_to_init(killed_process->pid);
-
-	remove_process_from_all_semaphore_queues(killed_process->pid);
-
-	if (pid == foreground_process_pid) {
-		foreground_process_pid = SHELL_PID;
-	}
-
-	killed_process->status       = PS_TERMINATED;
-	killed_process->return_value = KILLED_RET_VALUE;
-
-	// cierra los fds abiertos
-	close_open_fds(killed_process);
-
-	if (killed_process->parent_pid == INIT_PID) {
-		sch_remove_process(killed_process->pid);
-	} else { // si el padre no es init, no vamos a eliminarlo porque su padre podria hacerle un
-		 // wait
-		// Lo sacamos de la cola de procesos ready para que no vuelva a correr PERO NO  del
-		// array de procesos (para que el padre pueda acceder a su ret_value)
-		if (killed_process->status == PS_READY || killed_process->status == PS_RUNNING) {
-			q_remove(ready_queue[killed_process->effective_priority],
-			         killed_process->pid);
-		}
-		killed_process->status =
-		        PS_TERMINATED; // Le cambio el estado despues de hacer el dequeue o sino no
-		                       // va a entrar en la condición del if
-		killed_process->return_value = KILLED_RET_VALUE;
-		pcb_t *parent                  = processes[killed_process->parent_pid];
-
-		if (parent != NULL && parent->status == PS_BLOCKED &&
-		    parent->waiting_on == killed_process->pid) {
-			sch_ublock_process(parent->pid);
-		}
-	}
-	if (pid == current_pid) {
+	if (terminate_process(killed_process, KILLED_RET_VALUE)) {
 		sch_force_reschedule();
 	}
 	return 0;
@@ -654,6 +623,43 @@ int get_processes_info(process_info_t *buffer, int max_count)
 	return count;
 }
 
+// Lógica común de terminación (exit/kill)
+static int terminate_process(pcb_t *p, int64_t ret_value)
+{
+	if (p == NULL) {
+		return 0;
+	}
+
+	reparent_children_to_init(p->pid);
+
+	if (p->pid == foreground_process_pid) {
+		foreground_process_pid = SHELL_PID;
+	}
+
+	remove_process_from_all_semaphore_queues(p->pid);
+	close_open_fds(p);
+
+	// Si aún está en READY/RUNNING, quitarlo de la cola
+	if (p->status == PS_READY || p->status == PS_RUNNING) {
+		q_remove(ready_queue[p->effective_priority], p->pid);
+	}
+
+	p->status       = PS_TERMINATED;
+	p->return_value = ret_value;
+
+	// Si el padre es init, removemos el PCB; si no, lo dejamos para waitpid
+	if (p->parent_pid == INIT_PID) {
+		sch_remove_process(p->pid);
+	} else {
+		pcb_t *parent = processes[p->parent_pid];
+		if (parent != NULL && parent->status == PS_BLOCKED && parent->waiting_on == p->pid) {
+			sch_ublock_process(parent->pid);
+		}
+	}
+
+	return (p->pid == current_pid);
+}
+
 void sch_exit_process(int64_t ret_value)
 {
 	if (!scheduler_initialized) {
@@ -661,40 +667,11 @@ void sch_exit_process(int64_t ret_value)
 	}
 
 	pcb_t *current_process = processes[current_pid];
-
-	reparent_children_to_init(current_process->pid);
-
-	if (current_pid == foreground_process_pid) {
-		foreground_process_pid = SHELL_PID;
+	if (current_process == NULL) {
+		return;
 	}
-	remove_process_from_all_semaphore_queues(current_process->pid);
 
-	// limpia los fds abiertos
-	close_open_fds(current_process);
-
-	if (current_process->parent_pid ==
-	    INIT_PID) { // si el padre es init, no hace falta mantener su pcb para guardarnos
-		        // ret_value pues nadie le va a hacer waitpid
-		sch_remove_process(current_process->pid);
-	} else { // si el padre no es init, no vamos a eliminarlo porque su padre podria hacerle un
-		 // wait
-		// Lo sacamos de la cola de procesos ready para que no vuelva a correr PERO NO  del
-		// array de procesos (para que el padre pueda acceder a su ret_value)
-		if (current_process->status == PS_READY || current_process->status == PS_RUNNING) {
-			q_remove(ready_queue[current_process->effective_priority],
-			         current_process->pid);
-		}
-		current_process->status =
-		        PS_TERMINATED; // Le cambio el estado despues de hacer el dequeue o sino no
-		                       // va a entrar en la condición del if
-		current_process->return_value = ret_value;
-		pcb_t *parent                   = processes[current_process->parent_pid];
-
-		// Si el padre estaba bloqueado haciendo waitpid, lo desbloqueamos
-		if (parent->status == PS_BLOCKED && parent->waiting_on == current_process->pid) {
-			sch_ublock_process(parent->pid);
-		}
-	}
+	terminate_process(current_process, ret_value);
 	sch_force_reschedule();
 }
 
@@ -735,6 +712,11 @@ int adopt_init_as_parent(pid_t pid)
 	pcb_t *orphan_process = processes[pid];
 	if (orphan_process == NULL) {
 		return -1;
+	}
+
+	// Si ya terminó, reapearlo al instante
+	if (orphan_process->status == PS_TERMINATED) {
+		return sch_remove_process(pid);
 	}
 
 	orphan_process->parent_pid = INIT_PID;

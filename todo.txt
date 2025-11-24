@@ -2,9 +2,7 @@ cambiar nombre de la syscall de registros a sys_register_snapshot
 
 agregar un flush que sirva tanto para el teclado como para los pipes
 
----- scheduler
-
-processes con el inicializador para fds y prio, que los cree processes y los agregue al scheduler
+---- scheduler  
 
 init y la shell no se pueden matar, sacar killable de pcb
 
@@ -77,3 +75,20 @@ doom
 
 
 
+---- codex
+
+Selección de pid repetida: En varios lugares se busca next PID (sch_next_pid) y luego se setea el PCB. Está centralizado en sch_add_process, pero create_process también llama a sch_next_pid antes de armar el PCB. Podrías mover la responsabilidad de asignar PID a un único punto (ej. sch_add_process siempre asigna, y create_process solo arma PCB sin pedir PID). Evita usar dos veces el contador y reduce riesgo de inconsistencias.
+
+Manejo de foreground (seteo directo): sch_add_process puede setear foreground_process_pid si recibe foreground=1, y terminate_process resetea a SHELL_PID. create_shell/init también llaman a sch_set_foreground_process o setean foreground en attrs. Para evitar estados intermedios, podrías: (a) usar siempre sch_set_foreground_process dentro de sch_add_process (en vez de asignar directamente) y (b) normalizar que solo sch_add_process cambie el fg en creación.
+
+Ready queue/estado repetido: Cada vez que se bloquea, desaloja, mata o termina un proceso se hace q_remove según status y luego setea status nuevo. Podrías encapsular la lógica de “sacar de ready si está en READY/RUNNING” en un helper tipo static void dequeue_if_ready(pcb_t *p) y reutilizarlo en sch_block_process, terminate_process, etc.
+
+Reparent + wake parent repetido: terminate_process ya lo agrupa para kill/exit. Si hay otros lugares que cambian paternidad (e.g. adopt_init_as_parent), podrías centralizar más la lógica de despertar al padre en wait (ahora está encapsulada en terminate, bien). Revisa que cualquier camino que marque PS_TERMINATED use el helper.
+
+Validaciones de scheduler iniciado: Hay checks dispersos (if (!scheduler_initialized) return ...) en casi todas las funciones. Podrías envolver en macros/inline SCH_GUARD_INIT() o reorganizar para retornar códigos consistentes (ej. siempre -1 o error enum).
+
+Prioridad efectiva/base: En schedule reseteas effective_priority a priority cuando el proceso deja CPU. En sch_add_process ya inicializas effective_priority. Podrías crear static void reset_priority(pcb_t *p) para evitar olvidar la asignación en futuros cambios (aging o unblock también setean effective). No crítico.
+
+Cierre de FDs y semáforos: terminate_process ya lo usa; scheduler_destroy limpia todas las colas y luego cleanup_all_processes llama free_process_resources (que no cierra FDs). Podrías considerar usar close_open_fds al destruir todo, para coherencia (si hubiera FDs abiertos al apagar). No es funcionalmente crítico si el shutdown reinicia memoria.
+
+Uso directo de globals: sch_add_process escribe foreground_process_pid directamente. Igual que arriba, homogenizar con setters ayuda a mantener invariantes (validación de pid).
