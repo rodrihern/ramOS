@@ -36,6 +36,7 @@ static int         create_shell();
 static void        close_open_fds(pcb_t *p);
 static void        apply_aging(void);
 static int         terminate_process(pcb_t *p, int64_t ret_value);
+static void        dequeue_if_ready(pcb_t *p);
 
 static inline uint8_t pid_is_valid(pid_t pid)
 {
@@ -312,6 +313,17 @@ static void apply_aging(void)
 
 
 
+// Saca el proceso de la cola READY si estaba listo/corriendo
+static void dequeue_if_ready(pcb_t *p)
+{
+	if (p == NULL) {
+		return;
+	}
+	if (p->status == PS_READY || p->status == PS_RUNNING) {
+		q_remove(ready_queue[p->effective_priority], p->pid);
+	}
+}
+
 int sch_add_process(pcb_t *p, uint8_t foreground)
 {
 	if (p == NULL || p->priority >= PRIORITY_COUNT) {
@@ -354,7 +366,7 @@ int sch_add_process(pcb_t *p, uint8_t foreground)
 	process_count++;
 
 	if (foreground) {
-		foreground_process_pid = p->pid;
+		sch_set_foreground_process(p->pid);
 	}
 	
 	return p->pid;
@@ -372,10 +384,7 @@ int sch_remove_process(pid_t pid)
 	}
 
 	// Remover de la cola de procesos listos para correr
-	if (process->status == PS_READY || process->status == PS_RUNNING) {
-		// Buscar en la cola correspondiente a su prioridad efectiva
-		q_remove(ready_queue[process->effective_priority], process->pid);
-	}
+	dequeue_if_ready(process);
 
 	// Remover del array
 	processes[pid] = NULL;
@@ -504,9 +513,7 @@ int sch_block_process(pid_t pid)
 	}
 
 	// Remover de cola READY (si está ahí)
-	if (process->status == PS_READY || process->status == PS_RUNNING) {
-		q_remove(ready_queue[process->effective_priority], process->pid);
-	}
+	dequeue_if_ready(process);
 
 	process->status = PS_BLOCKED;
 
