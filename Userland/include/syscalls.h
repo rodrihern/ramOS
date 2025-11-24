@@ -112,7 +112,7 @@ typedef struct pipe_info {
 // syscalls de io
 extern int      sys_read(int fd, char *buf, uint64_t count);
 extern int      sys_write(int fd, const char *buf, uint64_t count);
-extern int sys_regs(register_info_t * buffer);
+extern int sys_register_snapshot(register_info_t * buffer);
 extern void     sys_speaker_start(uint32_t freq_hz);
 extern void     sys_speaker_stop(void);
 extern uint8_t sys_is_pressed(uint8_t scancode);

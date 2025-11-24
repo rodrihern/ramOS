@@ -1,4 +1,4 @@
-global  sys_write, sys_read, sys_time_info, sys_regs, sys_clear
+global  sys_write, sys_read, sys_time_info, sys_register_snapshot, sys_clear
 global  sys_increase_fontsize, sys_decrease_fontsize
 global  sys_video_info, sys_circle, sys_rectangle, sys_draw_line, sys_draw_string
 global  sys_textmode, sys_videomode, sys_put_pixel, sys_is_pressed
@@ -25,7 +25,7 @@ sys_read:
 sys_write:
 	SYSCALL 1
 
-sys_regs:
+sys_register_snapshot:
 	SYSCALL 2
 
 sys_time_info:

@@ -12,7 +12,7 @@ void *syscalls[] = {
 	// syscalls de arqui
 	&sys_read,               // 0
 	&sys_write,              // 1
-	&sys_regs,               // 2
+	&sys_register_snapshot,               // 2
 	&sys_time_info,          // 3
 	&sys_increase_fontsize,  // 4
 	&sys_decrease_fontsize,  // 5
@@ -70,7 +70,7 @@ void *syscalls[] = {
 
 uint64_t syscall_count = sizeof(syscalls) / sizeof(syscalls[0]);
 
-static int sys_regs(register_info_t * buffer)
+static int sys_register_snapshot(register_info_t * buffer)
 {
 	if (buffer == NULL) {
 		return -1;

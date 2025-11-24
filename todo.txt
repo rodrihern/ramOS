@@ -1,15 +1,4 @@
-cambiar nombre de la syscall de registros a sys_register_snapshot
-
 agregar un flush que sirva tanto para el teclado como para los pipes
-
----- scheduler  
-
-init y la shell no se pueden matar, sacar killable de pcb
-
-tener 3 funciones para remove, kill, exit ? -> refactor como se hace esto y que quizas lo haga processes la logica de kill / exit y despues solo llame a remove (separar mejor logica de procesos y scheduling)
-
-----
-
 
 refactor manejo de excepciones que mate al proceso que la causo y desp todo lo demas siga bien
 
