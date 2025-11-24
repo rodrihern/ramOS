@@ -41,6 +41,16 @@ static inline uint8_t pid_is_valid(pid_t pid)
 	return pid >= 0 && pid <= MAX_PID;
 }
 
+pid_t sch_next_pid(void)
+{
+	for (int i = 0; i < MAX_PROCESSES; i++) {
+		if (processes[i] == NULL) {
+			return i;
+		}
+	}
+	return NO_PID;
+}
+
 static void close_open_fds(pcb_t *p)
 {
 	for (int i = 0; i < MAX_FDS; i++) {
@@ -58,14 +68,14 @@ static int init(int argc, char **argv)
 	if (create_shell() != 0) {
 		return -1;
 	}
-	scheduler_set_foreground_process(SHELL_PID);
+	sch_set_foreground_process(SHELL_PID);
 	while (1) {
 		_hlt();
 	}
 	return -1;
 }
 
-pid_t scheduler_get_foreground_pid(void)
+pid_t sch_get_foreground_pid(void)
 {
 	if (!scheduler_initialized) {
 		return NO_PID;
@@ -73,7 +83,7 @@ pid_t scheduler_get_foreground_pid(void)
 	return foreground_process_pid;
 }
 
-int scheduler_set_foreground_process(pid_t pid)
+int sch_set_foreground_process(pid_t pid)
 {
 	if (!scheduler_initialized) {
 		return -1;
@@ -90,22 +100,21 @@ int scheduler_set_foreground_process(pid_t pid)
 
 static int create_shell()
 {
-	pcb_t *pcb_shell = proc_create(
-	        SHELL_PID, (process_entry_t)SHELL_ADDRESS, 0, NULL, "shell", false, NULL);
-	if (pcb_shell == NULL) {
+	process_attrs_t attrs = {
+		.read_fd    = STDIN,
+		.write_fd   = STDOUT,
+		.priority   = MAX_PRIORITY,
+		.foreground = 1,
+	};
+
+	int pid = create_process((process_entry_t)SHELL_ADDRESS, 0, NULL, "shell", &attrs);
+	if (pid != SHELL_PID) {
 		return -1;
 	}
-	pcb_shell->priority           = MAX_PRIORITY;
-	pcb_shell->effective_priority = MAX_PRIORITY;
-	pcb_shell->status             = PS_READY;
-	pcb_shell->last_tick          = ticks;
-	processes[SHELL_PID]          = pcb_shell;
-	process_count++;
-	if (!q_add(ready_queue[pcb_shell->effective_priority], SHELL_PID)) {
-		processes[SHELL_PID] = NULL;
-		process_count--;
-		free_process_resources(pcb_shell);
-		return -1;
+
+	pcb_t *pcb_shell = sch_get_pcb(pid);
+	if (pcb_shell != NULL) {
+		pcb_shell->killable = 0;
 	}
 	return 0;
 }
@@ -116,18 +125,22 @@ static int scheduler_add_init()
 		return -1;
 	}
 
-	pcb_t *pcb_init = proc_create(INIT_PID, (process_entry_t)init, 0, NULL, "init", false, NULL);
-	if (pcb_init == NULL) {
+	process_attrs_t attrs = {
+		.read_fd    = STDIN,
+		.write_fd   = STDOUT,
+		.priority   = MIN_PRIORITY,
+		.foreground = 0,
+	};
+
+	int pid = create_process((process_entry_t)init, 0, NULL, "init", &attrs);
+	if (pid != INIT_PID) {
 		return -1;
 	}
 
-	pcb_init->priority           = MIN_PRIORITY;
-	pcb_init->effective_priority = MIN_PRIORITY;
-	pcb_init->status             = PS_READY;
-	pcb_init->last_tick          = 0;
-
-	processes[INIT_PID] = pcb_init;
-	process_count++;
+	pcb_t *pcb_init = sch_get_pcb(pid);
+	if (pcb_init != NULL) {
+		pcb_init->killable = 0;
+	}
 	return 0;
 }
 
@@ -296,48 +309,51 @@ static void apply_aging(void)
 	}
 }
 
-// Agrega el proceso al array de procesos y a la cola READY
-int sch_add_process(
-        process_entry_t entry, int argc, const char **argv, const char *name, int fds[2])
+
+
+int sch_add_process(pcb_t *p, uint8_t foreground)
 {
-	if (!scheduler_initialized || process_count >= MAX_PROCESSES) {
+	if (process_count >= MAX_PROCESSES) {
 		return -1;
 	}
 
-	// Buscar primer PID libre
-	pid_t pid = NO_PID;
-	for (int i = 0; i < MAX_PROCESSES; i++) {
-		if (processes[i] == NULL) {
-			pid = i;
-			break;
-		}
-	}
-	if (!pid_is_valid(pid)) {
+	p->pid = sch_next_pid();
+
+	if (!pid_is_valid(p->pid)) {
+		free_process_resources(p);
 		return -1;
 	}
-
-	pcb_t *process = proc_create(pid, entry, argc, argv, name, true, fds);
-	if (process == NULL) {
-		return -1;
+	
+	if (p->priority > MIN_PRIORITY) {
+		p->priority = DEFAULT_PRIORITY;
 	}
 
-	// Inicializar campos relacionados con scheduling
-	process->priority           = DEFAULT_PRIORITY; // Asignar prioridad por defecto
-	process->effective_priority = DEFAULT_PRIORITY; // Inicialmente igual a priority
-	process->status             = PS_READY;
-	process->last_tick          = ticks;
-
-	processes[pid] = process;
+	p->effective_priority = p->priority;
+	p->status             = PS_READY;
+	p->last_tick          = ticks;
+	processes[p->pid]     = p;
 	process_count++;
 
-	if (!q_add(ready_queue[process->effective_priority], pid)) {
-		processes[pid] = NULL;
+	queue_t target_queue = ready_queue[p->effective_priority];
+	if (target_queue == NULL) {
+		processes[p->pid] = NULL;
 		process_count--;
-		free_process_resources(process);
+		free_process_resources(p);
 		return -1;
 	}
 
-	return pid;
+	if (!q_add(target_queue, p->pid)) {
+		processes[p->pid] = NULL;
+		process_count--;
+		free_process_resources(p);
+		return -1;
+	}
+	if (foreground) {
+		foreground_process_pid = p->pid;
+	}
+	
+	return p->pid;
+
 }
 
 int sch_remove_process(pid_t pid)
@@ -744,7 +760,7 @@ static void reparent_children_to_init(pid_t pid)
 }
 
 // Mata el proceso que está en foreground. Devuelve 0 en éxito, -1 en error.
-int scheduler_kill_foreground_process(void)
+int sch_kill_foreground_process(void)
 {
 	if (!scheduler_initialized) {
 		return -1;

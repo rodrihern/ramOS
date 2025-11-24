@@ -45,7 +45,7 @@ static int sys_mem_info(mem_info_t *buffer);
 
 // syscalls de procesos
 static int64_t
-sys_create_process(void *entry, int argc, const char **argv, const char *name, int fds[2]);
+sys_create_process(void *entry, int argc, const char **argv, const char *name, process_attrs_t * attrs);
 static void    sys_exit(int status);
 static int64_t sys_getpid(void);
 static int64_t sys_kill(int pid);

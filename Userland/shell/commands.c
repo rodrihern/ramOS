@@ -104,7 +104,7 @@ static int parse_input(char *input, char **tokens)
 	return count;
 }
 
-static int try_builtin_command(char *name, int argc, char **argv)
+static uint8_t try_builtin_command(char *name, int argc, char **argv)
 {
 	for (int i = 0; i < builtins_count; i++) {
 		if (strcmp(name, builtins[i].name) == 0) {
@@ -126,7 +126,7 @@ static process_entry_t find_program_entry(char *name)
 	return NULL;
 }
 
-static int try_external_program(char *name, int argc, char **argv, uint8_t background)
+static uint8_t try_external_program(char *name, int argc, char **argv, uint8_t background)
 {
 	process_entry_t entry = find_program_entry(name);
 
@@ -134,7 +134,13 @@ static int try_external_program(char *name, int argc, char **argv, uint8_t backg
 		return 0;
 	}
 
-	int pid = sys_create_process(entry, argc, (const char **)argv, name, NULL);
+	process_attrs_t attrs;
+	attrs.read_fd = STDIN;
+	attrs.write_fd = STDOUT;
+	attrs.foreground = !background;
+	attrs.priority = background ? DEFAULT_PRIORITY : MAX_PRIORITY;
+
+	int pid = sys_create_process(entry, argc, (const char **)argv, name, &attrs);
 
 	if (pid < 0) {
 		print_err("Failed to create process\n");
@@ -147,8 +153,6 @@ static int try_external_program(char *name, int argc, char **argv, uint8_t backg
 	}
 
 	// Sigue acá si es foreground
-	sys_set_foreground_process(pid);
-	sys_nice(pid, MAX_PRIORITY);
 	sys_wait(pid);
 	sys_clear_input_buffer(); // limpiar buffer de entrada por si quedó algo
 	putchar('\n');
@@ -181,8 +185,8 @@ static int execute_piped_commands(
 	}
 
 	// Crear pipe
-	int fds_pipe[2];
-	int pipe_id = sys_create_pipe(fds_pipe);
+	int fds[2];
+	int pipe_id = sys_create_pipe(fds);
 	if (pipe_id < 0) {
 		print_err("Failed to create pipe\n");
 		return 0;
@@ -195,25 +199,30 @@ static int execute_piped_commands(
 	char **right_argv = &right_tokens[1];
 	int    right_argc = right_count - 1;
 
-	// FDs para el comando izquierdo (escribe al pipe)
-	int fds_left[2];
-	fds_left[0] = STDIN;       // Lee de STDIN
-	fds_left[1] = fds_pipe[1]; // Escribe al pipe (write end)
+	process_attrs_t attrs_left;
+	process_attrs_t attrs_right;
 
-	// FDs para el comando derecho (lee del pipe)
-	int fds_right[2];
-	fds_right[0] = fds_pipe[0]; // Lee del pipe (read end)
-	fds_right[1] = STDOUT;      // Escribe a STDOUT
+	attrs_left.foreground = !background;
+	attrs_right.foreground = 0;
 
+	attrs_left.priority = background ? DEFAULT_PRIORITY : MAX_PRIORITY;
+	attrs_right.priority = background ? DEFAULT_PRIORITY : MAX_PRIORITY;
+
+	attrs_left.read_fd = STDIN;
+	attrs_left.write_fd = fds[1];
+
+	attrs_right.read_fd = fds[0];
+	attrs_right.write_fd = STDOUT;
+	
 	// Crear ambos procesos
 	int pid_left = sys_create_process(
-	        left_entry, left_argc, (const char **)left_argv, left_cmd, fds_left);
+	        left_entry, left_argc, (const char **)left_argv, left_cmd, &attrs_left);
 
 	int pid_right = sys_create_process(
-	        right_entry, right_argc, (const char **)right_argv, right_cmd, fds_right);
+	        right_entry, right_argc, (const char **)right_argv, right_cmd, &attrs_right);
 
-	sys_close_fd(fds_pipe[0]);
-	sys_close_fd(fds_pipe[1]);
+	sys_close_fd(fds[0]);
+	sys_close_fd(fds[1]);
 
 	if (pid_left < 0 || pid_right < 0) {
 		print_err("Failed to create piped processes\n");
@@ -227,11 +236,6 @@ static int execute_piped_commands(
 		sys_adopt_init_as_parent(pid_right);
 		return 1;
 	}
-
-	// foreground el de la izquierda para que pueda leer de teclado
-	sys_set_foreground_process(pid_left);
-	sys_nice(pid_left, MAX_PRIORITY);
-	sys_nice(pid_right, MAX_PRIORITY);
 
 	// Esperar a que terminen ambos procesos
 	sys_wait(pid_left);
@@ -357,5 +361,4 @@ void help_cmd(int argc, char *argv[])
 
 	putchar('\n');
 }
-
 

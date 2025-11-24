@@ -172,7 +172,7 @@ int open_fd(int fd)
 
 	if (fd == pipe->read_fd) {
 		pipe->reader_count++;
-		return 1;
+		return 0;
 	}
 
 	if (fd == pipe->write_fd) {
@@ -184,7 +184,7 @@ int open_fd(int fd)
 		return 1;
 	}
 
-	return 0;
+	return -1;
 }
 
 int close_fd(int fd)

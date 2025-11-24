@@ -124,7 +124,7 @@ static int sys_read(int fd, char *buffer, uint64_t count)
 	}
 
 	if (fd == STDIN) { // quiere leer de teclado
-		int foreground_pid = scheduler_get_foreground_pid();
+		int foreground_pid = sch_get_foreground_pid();
 		if (pid != foreground_pid) {
 			return -1; // solo el proceso de foreground puede leer del teclado
 		}
@@ -274,14 +274,18 @@ static int sys_mem_info(mem_info_t *buffer)
 
 // Crea un proceso: reserva un PID libre y delega en el scheduler
 static int64_t
-sys_create_process(void *entry, int argc, const char **argv, const char *name, int fds[2])
+sys_create_process(void *entry, int argc, const char **argv, const char *name, process_attrs_t * attrs)
 {
 	if (entry == NULL || name == NULL) {
 		return -1;
 	}
 
-	int new_pid = sch_add_process((process_entry_t)entry, argc, argv, name, fds);
-	return new_pid;
+	int current_pid = sch_get_current_pid();
+	if (attrs != NULL && current_pid != sch_get_foreground_pid()) {
+		attrs->foreground = 0;
+	}
+
+	return create_process(entry, argc, argv, name, attrs);
 }
 
 // Termina el proceso actual con un status, POR AHORA NO USAMOS
@@ -390,14 +394,14 @@ static void sys_destroy_pipe(int id)
 
 static int sys_set_foreground_process(int pid)
 {
-	// scheduler_set_foreground_process devuelve 0/-1 según éxito
-	return scheduler_set_foreground_process((pid_t)pid);
+	// sch_set_foreground_process devuelve 0/-1 según éxito
+	return sch_set_foreground_process((pid_t)pid);
 }
 
 static int sys_get_foreground_process(void)
 {
-	// scheduler_get_foreground_pid devuelve el PID del proceso en foreground o NO_PID
-	return scheduler_get_foreground_pid();
+	// sch_get_foreground_pid devuelve el PID del proceso en foreground o NO_PID
+	return sch_get_foreground_pid();
 }
 
 static int sys_adopt_init_as_parent(int pid)

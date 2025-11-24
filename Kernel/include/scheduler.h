@@ -24,12 +24,12 @@ void scheduler_destroy(void);
 void *schedule(void *prev_rsp);
 
 // Gestión de procesos
-int sch_add_process(
-        process_entry_t entry, int argc, const char **argv, const char *name, int fds[2]);
+int sch_add_process(pcb_t * pcb, uint8_t foreground);
 int  sch_remove_process(pid_t pid);
 int  sch_set_priority(pid_t pid, uint8_t priority);
 int  sch_get_priority(pid_t pid);
 int  sch_kill_process(pid_t pid);
+pid_t sch_next_pid(void);
 pcb_t *sch_get_pcb(pid_t pid);
 void sch_exit_process(int64_t retValue);
 int  sch_waitpid(pid_t child_pid);
@@ -46,9 +46,9 @@ int  sch_get_current_pid(void);
 int get_processes_info(process_info_t *buffer, int max_count);
 
 // Foreground process control (getter/setter)
-pid_t scheduler_get_foreground_pid(void);
-int   scheduler_set_foreground_process(pid_t pid);
-int   scheduler_kill_foreground_process(void);
+pid_t sch_get_foreground_pid(void);
+int   sch_set_foreground_process(pid_t pid);
+int   sch_kill_foreground_process(void);
 
 // Reparent single process to INIT
 int adopt_init_as_parent(pid_t pid);

@@ -118,7 +118,7 @@ void handle_pressed_key() {
 	// handle special commands
 	if (is_pressed[LEFT_CONTROL]) {
 		if (pressed_key == KEY_C) {
-			scheduler_kill_foreground_process();
+			sch_kill_foreground_process();
 		} else if (pressed_key == KEY_D) {
 			write_buffer(EOF);
 		}

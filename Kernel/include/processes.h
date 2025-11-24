@@ -29,17 +29,14 @@ typedef struct pcb {
 	int  pid;
 	int  parent_pid; // PID del proceso padre (-1 si no tiene)
 	char name[MAX_PROCESS_NAME_LENGTH];
-
 	
 	process_status_t status;
 	uint8_t          priority;           // Prioridad base (0-2, 0 = mayor prioridad)
 	uint8_t          effective_priority; // prioridad de aging
 	uint64_t         last_tick;
 
-	
 	void *stack_base;    // Base del stack
 	void *stack_pointer; // RSP actual (apunta al contexto guardado)
-
 	
 	process_entry_t entry;
 	int             argc;
@@ -68,14 +65,17 @@ typedef struct process_info {
 	uint64_t         stack_pointer;
 } process_info_t;
 
+typedef struct process_attrs {
+	uint8_t read_fd;
+	uint8_t write_fd;
+	uint8_t priority;
+	uint8_t foreground; // 1 = fg, 0 = bg
+} process_attrs_t;
+
+
 // Creación y limpieza (usadas por scheduler)
-pcb_t *proc_create(int             pid,
-                 process_entry_t entry,
-                 int             argc,
-                 const char    **argv,
-                 const char     *name,
-                 uint8_t            killable,
-                 int             fds[2]);
+int create_process(process_entry_t entry, int argc, const char **argv, 
+	const char * name, process_attrs_t * attrs);
 				 
 void free_process_resources(pcb_t *p);
 

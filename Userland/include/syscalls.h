@@ -11,6 +11,7 @@
 #define MAX_PROCESSES 64
 
 #define MIN_PRIORITY 2
+#define DEFAULT_PRIORITY 1
 #define MAX_PRIORITY 0
 
 #define MAX_PIPES 32
@@ -91,6 +92,13 @@ typedef struct process_info {
 	uint64_t         stack_pointer;
 } process_info_t;
 
+typedef struct process_attrs {
+	uint8_t read_fd;
+	uint8_t write_fd;
+	uint8_t priority;
+	uint8_t foreground; // 1 = fg, 0 = bg
+} process_attrs_t;
+
 typedef struct pipe_info {
 	int  id;
 	char name[MAX_PIPE_NAME_LENGTH];
@@ -135,7 +143,7 @@ extern int sys_mem_info(mem_info_t * buffer);
 
 // syscalls de procesos
 extern int64_t
-sys_create_process(void *entry, int argc, const char **argv, const char *name, int fds[2]);
+sys_create_process(void *entry, int argc, const char **argv, const char *name, process_attrs_t * attrs);
 extern void    sys_exit(int status);
 extern int64_t sys_getpid(void);
 extern int64_t sys_kill(int pid);
