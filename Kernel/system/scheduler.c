@@ -43,7 +43,7 @@ static inline uint8_t pid_is_valid(pid_t pid)
 	return pid >= 0 && pid <= MAX_PID;
 }
 
-pid_t sch_next_pid(void)
+static int get_next_free_pid(void)
 {
 	for (int i = 0; i < MAX_PROCESSES; i++) {
 		if (processes[i] == NULL) {
@@ -335,7 +335,7 @@ int sch_add_process(pcb_t *p, uint8_t foreground)
 		return -1;
 	}
 
-	p->pid = sch_next_pid();
+	p->pid = get_next_free_pid();
 
 	if (!pid_is_valid(p->pid)) {
 		return -1;
@@ -349,7 +349,7 @@ int sch_add_process(pcb_t *p, uint8_t foreground)
 	p->status             = PS_READY;
 	p->last_tick          = ticks;
 
-	if (proc_init_stack(p) == ERROR) {
+	if (init_pcb_stack(p) == ERROR) {
 		return -1;
 	}
 

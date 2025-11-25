@@ -76,7 +76,9 @@ typedef struct process_attrs {
 // Creación y limpieza (usadas por scheduler)
 int create_process(process_entry_t entry, int argc, const char **argv, 
 	const char * name, process_attrs_t * attrs);
-int proc_init_stack(pcb_t *p);
+int init_pcb(pcb_t * p, process_entry_t entry, int argc, const char ** argv, const char * name,
+		int parent_pid, uint8_t priority , uint8_t read_fd, uint8_t write_fd, uint8_t killable);
+int init_pcb_stack(pcb_t *p);
 				 
 void free_process_resources(pcb_t *p);
 

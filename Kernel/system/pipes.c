@@ -318,6 +318,23 @@ void destroy_pipe(int idx)
 	pipes[idx] = NULL;
 }
 
+// void flush_pipe(int fd) {
+// 	// hay que ver que hacer con los semaforos
+// 	int idx = get_idx_from_fd(fd);
+// 	if (idx < 0) {
+// 		return -1;
+// 	}
+
+// 	pipe_t * pipe = pipes[idx];
+// 	if (fd != pipe->read_fd) {
+// 		return -1;
+// 	}
+
+// 	// hay que flushearlo
+// 	pipe->read_idx = pipe->write_idx = 0;
+
+// }
+
 int get_pipes_info(pipe_info_t *buf, int max_count)
 {
 	if (buf == NULL || max_count <= 0) {

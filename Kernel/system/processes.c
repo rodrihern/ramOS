@@ -11,7 +11,6 @@
 extern void  *setup_initial_stack(void *caller, int pid, void *stack_pointer, void *rcx);
 static char **duplicate_argv(const char **argv, int argc, memory_manager_ADT mm);
 static void   process_caller(int pid);
-static int  init_pcb_stack(pcb_t *p, memory_manager_ADT mm);
 static int  init_pcb_argv(pcb_t *p, int argc, const char **argv, memory_manager_ADT mm);
 static void init_pcb_file_descriptors(pcb_t *p, uint8_t read_fd, uint8_t write_fd);
 static void free_pcb_argv(pcb_t *p, memory_manager_ADT mm);
@@ -19,22 +18,21 @@ static void free_pcb_stack(pcb_t *p, memory_manager_ADT mm);
 
 
 
-static int init_pcb_stack(pcb_t *p, memory_manager_ADT mm)
+int init_pcb_stack(pcb_t *p)
 {
+
+	memory_manager_ADT mm = get_kernel_memory_manager();
+
 	p->stack_base = mm_alloc(mm, PROCESS_STACK_SIZE);
 	if (p->stack_base == NULL) {
-		return ERROR;
+		return -1;
 	}
 	p->stack_pointer = setup_initial_stack(
 	        &process_caller, p->pid, (char *)p->stack_base + PROCESS_STACK_SIZE, 0);
-	return OK;
+	return 0;
 }
 
-int proc_init_stack(pcb_t *p)
-{
-	memory_manager_ADT mm = get_kernel_memory_manager();
-	return init_pcb_stack(p, mm);
-}
+
 
 static int init_pcb_argv(pcb_t *p, int argc, const char **argv, memory_manager_ADT mm)
 {
@@ -42,12 +40,12 @@ static int init_pcb_argv(pcb_t *p, int argc, const char **argv, memory_manager_A
 	if (argc > 0 && argv != NULL) {
 		p->argv = duplicate_argv(argv, argc, mm);
 		if (p->argv == NULL) {
-			return ERROR;
+			return -1;
 		}
 	} else {
 		p->argv = NULL;
 	}
-	return OK;
+	return 0;
 }
 
 static void init_pcb_file_descriptors(pcb_t *p, uint8_t read_fd, uint8_t write_fd)
@@ -78,6 +76,33 @@ static void init_pcb_file_descriptors(pcb_t *p, uint8_t read_fd, uint8_t write_f
 	}
 }
 
+int init_pcb(pcb_t * p, process_entry_t entry, int argc, const char ** argv, const char * name,
+		int parent_pid, uint8_t priority , uint8_t read_fd, uint8_t write_fd, uint8_t killable) {
+
+	memory_manager_ADT mm = get_kernel_memory_manager();
+
+	p->parent_pid = parent_pid;
+	strncpy(p->name, name, MAX_PROCESS_NAME_LENGTH - 1);
+	p->name[MAX_PROCESS_NAME_LENGTH - 1] = '\0';
+	p->entry = entry;
+	p->waiting_on = NO_PID;
+	p->killable = killable;
+	p->unblockable = 0;
+	p->priority = priority;
+
+	if (init_pcb_argv(p, argc, argv, mm) == ERROR) {
+		if (p->stack_base != NULL) {
+			mm_free(mm, p->stack_base);
+		}
+		mm_free(mm, p);
+		return -1;
+	}
+
+	init_pcb_file_descriptors(p, read_fd, write_fd);
+
+	return 0;
+}
+
 
 int create_process(process_entry_t entry, int argc, const char **argv, 
 						const char * name, process_attrs_t * attrs) {
@@ -92,32 +117,20 @@ int create_process(process_entry_t entry, int argc, const char **argv,
 		return -1;
 	}
 
-	p->pid = NO_PID;
-	p->stack_base = NULL;
-	p->stack_pointer = NULL;
-	p->parent_pid = sch_get_current_pid();
-	strncpy(p->name, name, MAX_PROCESS_NAME_LENGTH - 1);
-	p->name[MAX_PROCESS_NAME_LENGTH - 1] = '\0';
-	p->entry = entry;
-	p->return_value = 0;
-	p->waiting_on = NO_PID;
-	p->killable = 1;
-	p->unblockable = 0;
 
-	if (init_pcb_argv(p, argc, argv, mm) == ERROR) {
-		if (p->stack_base != NULL) {
-			mm_free(mm, p->stack_base);
-		}
-		mm_free(mm, p);
+	int parent_pid = sch_get_current_pid();
+	uint8_t read_fd = STDIN;
+	uint8_t write_fd = STDOUT;
+	uint8_t priority = DEFAULT_PRIORITY;
+
+	if (attrs != NULL) {
+		read_fd = attrs->read_fd;
+		write_fd = attrs->write_fd;
+		priority = attrs->priority;
+	} 
+
+	if (init_pcb(p, entry, argc, argv, name, parent_pid, priority, read_fd, write_fd, 1) < 0) {
 		return -1;
-	}
-
-	if (attrs == NULL) {
-		init_pcb_file_descriptors(p, STDIN, STDOUT);
-		p->priority = DEFAULT_PRIORITY;
-	} else {
-		init_pcb_file_descriptors(p, attrs->read_fd, attrs->write_fd);
-		p->priority = attrs->priority < PRIORITY_COUNT ? attrs->priority : DEFAULT_PRIORITY;
 	}
 
 	uint8_t foreground = attrs != NULL ? attrs->foreground : 0;

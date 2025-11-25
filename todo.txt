@@ -1,4 +1,6 @@
-agregar un flush que sirva tanto para el teclado como para los pipes
+una funcion para inicializar los pcb y usarla cuando se crea un proceso y cuando se crea a init y a la shell
+
+agregar un flush que sirva tanto para el teclado como para los pipes, (el de teclado que solo lo pueda flushear el de foreground y el de un pipe alguien que tenga abierto el fd) -> hacer una funcion para resetear el valor con gpt
 
 refactor manejo de excepciones que mate al proceso que la causo y desp todo lo demas siga bien
 
@@ -43,14 +45,12 @@ correr un formatter mejor
 
 poner gdb
 
-makefile incremental
-
 -------
 
 
 
 
-
+ver si hacemos que herede los fd del padre
 
 ver cleanup resources (leaks en bg)
 
