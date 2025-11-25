@@ -134,11 +134,12 @@ static uint8_t try_external_program(char *name, int argc, char **argv, uint8_t b
 		return 0;
 	}
 
-	process_attrs_t attrs;
-	attrs.read_fd = STDIN;
-	attrs.write_fd = STDOUT;
-	attrs.foreground = !background;
-	attrs.priority = background ? DEFAULT_PRIORITY : MAX_PRIORITY;
+	process_attrs_t attrs = {
+		.read_fd = STDIN,
+		.write_fd = STDOUT,
+		.foreground = !background,
+		.priority = background ? DEFAULT_PRIORITY : MAX_PRIORITY
+	};
 
 	int pid = sys_create_process(entry, argc, (const char **)argv, name, &attrs);
 
@@ -199,20 +200,19 @@ static int execute_piped_commands(
 	char **right_argv = &right_tokens[1];
 	int    right_argc = right_count - 1;
 
-	process_attrs_t attrs_left;
-	process_attrs_t attrs_right;
+	process_attrs_t attrs_left = {
+		.read_fd = STDIN,
+		.write_fd = fds[1],
+		.priority = background ? DEFAULT_PRIORITY : MAX_PRIORITY,
+		.foreground = !background,
+	};
 
-	attrs_left.foreground = !background;
-	attrs_right.foreground = 0;
-
-	attrs_left.priority = background ? DEFAULT_PRIORITY : MAX_PRIORITY;
-	attrs_right.priority = background ? DEFAULT_PRIORITY : MAX_PRIORITY;
-
-	attrs_left.read_fd = STDIN;
-	attrs_left.write_fd = fds[1];
-
-	attrs_right.read_fd = fds[0];
-	attrs_right.write_fd = STDOUT;
+	process_attrs_t attrs_right = {
+		.read_fd = fds[0],
+		.write_fd = STDOUT,
+		.priority = background ? DEFAULT_PRIORITY : MAX_PRIORITY,
+		.foreground = 0,
+	};
 	
 	// Crear ambos procesos
 	int pid_left = sys_create_process(

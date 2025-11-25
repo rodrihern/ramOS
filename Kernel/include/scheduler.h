@@ -29,7 +29,6 @@ int  sch_remove_process(pid_t pid);
 int  sch_set_priority(pid_t pid, uint8_t priority);
 int  sch_get_priority(pid_t pid);
 int  sch_kill_process(pid_t pid);
-pid_t get_next_free_pid(void);
 pcb_t *sch_get_pcb(pid_t pid);
 void sch_exit_process(int64_t retValue);
 int  sch_waitpid(pid_t child_pid);

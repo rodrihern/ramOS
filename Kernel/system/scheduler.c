@@ -11,6 +11,7 @@
 #include "../include/time.h"
 #include <stddef.h>
 #include "semaphores.h"
+#include "memory_manager.h"
 
 extern void timer_tick();
 
@@ -25,6 +26,7 @@ static uint64_t ticks        = 0;
 static uint8_t     force_reschedule       = false;
 static uint8_t     scheduler_initialized  = false;
 static pid_t    foreground_process_pid = NO_PID;
+static int shell_pid;
 
 static pcb_t        *pick_next_process(void);
 static void        reparent_children_to_init(pid_t pid);
@@ -32,7 +34,6 @@ static int         init(int argc, char **argv);
 static int         scheduler_add_init();
 static inline uint8_t pid_is_valid(pid_t pid);
 static void        cleanup_all_processes(void);
-static int         create_shell();
 static void        close_open_fds(pcb_t *p);
 static void        apply_aging(void);
 static int         terminate_process(pcb_t *p, int64_t ret_value);
@@ -67,10 +68,27 @@ static void close_open_fds(pcb_t *p)
 // idle). Se lo elige siempre que no haya otro proceso para correr!!!!
 static int init(int argc, char **argv)
 {
-	if (create_shell() != 0) {
+	process_attrs_t attrs = {
+		.read_fd = STDIN,
+		.write_fd = STDOUT,
+		.priority = MAX_PRIORITY,
+		.foreground = 1
+	};
+	
+	shell_pid = create_process((process_entry_t)SHELL_ADDRESS, 0, NULL, "shell", &attrs);
+
+	if (shell_pid < 0) {
 		return -1;
 	}
-	sch_set_foreground_process(SHELL_PID);
+
+	pcb_t * shell_pcb = sch_get_pcb(shell_pid);
+
+	if (shell_pcb < 0) {
+		return -1;
+	}
+
+	shell_pcb->killable = 0;
+
 	while (1) {
 		_hlt();
 	}
@@ -100,26 +118,6 @@ int sch_set_foreground_process(pid_t pid)
 	return 0;
 }
 
-static int create_shell()
-{
-	process_attrs_t attrs = {
-		.read_fd    = STDIN,
-		.write_fd   = STDOUT,
-		.priority   = MAX_PRIORITY,
-		.foreground = 1,
-	};
-
-	int pid = create_process((process_entry_t)SHELL_ADDRESS, 0, NULL, "shell", &attrs);
-	if (pid != SHELL_PID) {
-		return -1;
-	}
-
-	pcb_t *pcb_shell = sch_get_pcb(pid);
-	if (pcb_shell != NULL) {
-		pcb_shell->killable = 0;
-	}
-	return 0;
-}
 
 static int scheduler_add_init()
 {
@@ -127,22 +125,42 @@ static int scheduler_add_init()
 		return -1;
 	}
 
-	process_attrs_t attrs = {
-		.read_fd    = STDIN,
-		.write_fd   = STDOUT,
-		.priority   = MIN_PRIORITY,
-		.foreground = 0,
-	};
-
-	int pid = create_process((process_entry_t)init, 0, NULL, "init", &attrs);
-	if (pid != INIT_PID) {
+	memory_manager_ADT mm = get_kernel_memory_manager();
+	
+	pcb_t *pcb_init = mm_alloc(mm, sizeof(pcb_t));
+	if (pcb_init == NULL) {
 		return -1;
 	}
 
-	pcb_t *pcb_init = sch_get_pcb(pid);
-	if (pcb_init != NULL) {
-		pcb_init->killable = 0;
+	// Inicializar el PCB del proceso init
+	if (init_pcb(pcb_init, (process_entry_t)init, 0, NULL, "init", 
+	             NO_PID, MIN_PRIORITY, STDIN, STDOUT, 0) < 0) {
+		mm_free(mm, pcb_init);
+		return -1;
 	}
+
+	// Configurar campos específicos del scheduler
+	pcb_init->pid = INIT_PID;
+	pcb_init->effective_priority = MIN_PRIORITY;
+	pcb_init->status = PS_READY;
+	pcb_init->last_tick = 0;
+
+	// Inicializar el stack del proceso
+	if (init_pcb_stack(pcb_init) == ERROR) {
+		free_process_resources(pcb_init);
+		return -1;
+	}
+
+	// Agregar a la cola de menor prioridad
+	if (!q_add(ready_queue[MIN_PRIORITY], INIT_PID)) {
+		free_process_resources(pcb_init);
+		return -1;
+	}
+
+	// Colocar directamente en el array
+	processes[INIT_PID] = pcb_init;
+	process_count++;
+
 	return 0;
 }
 
@@ -640,7 +658,7 @@ static int terminate_process(pcb_t *p, int64_t ret_value)
 	reparent_children_to_init(p->pid);
 
 	if (p->pid == foreground_process_pid) {
-		foreground_process_pid = SHELL_PID;
+		foreground_process_pid = shell_pid;
 	}
 
 	remove_process_from_all_semaphore_queues(p->pid);
@@ -762,7 +780,7 @@ int sch_kill_foreground_process(void)
 
 	int result = sch_kill_process(foreground_process_pid);
 	// Después de matar el proceso en foreground, establecer la shell como proceso en foreground
-	foreground_process_pid = SHELL_PID;
+	foreground_process_pid = shell_pid;
 
 	return result;
 }

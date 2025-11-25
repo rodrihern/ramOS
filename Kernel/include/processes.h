@@ -12,7 +12,6 @@
 #define KILLED_RET_VALUE -1
 
 #define INIT_PID 0
-#define SHELL_PID 1
 #define NO_PID -1
 #define NO_FD -1
 
