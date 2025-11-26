@@ -1,6 +1,6 @@
-una funcion para inicializar los pcb y usarla cuando se crea un proceso y cuando se crea a init y a la shell
-
 agregar un flush que sirva tanto para el teclado como para los pipes, (el de teclado que solo lo pueda flushear el de foreground y el de un pipe alguien que tenga abierto el fd) -> hacer una funcion para resetear el valor con gpt
+
+cursor manejado por el driver de teclado
 
 refactor manejo de excepciones que mate al proceso que la causo y desp todo lo demas siga bien
 
@@ -18,18 +18,18 @@ pantalla de inicio
 
 rework driver de video y que solo el de fg pueda dibujar
 
+rework de tty para tener un buffer[max_rows * max_cols]
+
 todas las funciones de dibujo a graphics.c en userland (incluyendo algunas de strings con fonts)
 
 syscalls:
     typedef region_t
 
-    habilitar y deshabilitar textmode
+    habilitar y deshabilitar tty -> sys_enable/disable_tty
 
-    cambiar background y text color
+    cambiar background -> sys_tty_bgcolor
 
     info de video
-
-    un get de un framebuffer
 
     present
 
@@ -47,8 +47,7 @@ poner gdb
 
 -------
 
-
-
+limpiar el scheduler
 
 ver si hacemos que herede los fd del padre
 

@@ -133,34 +133,61 @@ if (!is_within_screen_bounds(cursor_x + FONT_WIDTH * text_size,
 }
 
 static void move_cursor_right() {
-uint64_t step_x = FONT_WIDTH * text_size;
-if (cursor_x + 2 * step_x <= WIDTH) {
-	cursor_x += step_x;
-} else {
-	vd_new_line();
-}
+	uint64_t step_x = FONT_WIDTH * text_size;
+	if (cursor_x + 2 * step_x <= WIDTH) {
+		cursor_x += step_x;
+	} else {
+		vd_new_line();
+	}
 }
 
 static void move_cursor_left() {
-uint64_t step_x = FONT_WIDTH * text_size;
-if (cursor_x >= step_x) {
-	cursor_x -= step_x;
-} else {
-	uint64_t step_y = FONT_HEIGHT * text_size;
-	if (cursor_y >= step_y) {
-	cursor_y -= step_y;
-	cursor_x = (WIDTH / step_x - 1) * step_x;
+	uint64_t step_x = FONT_WIDTH * text_size;
+	if (cursor_x >= step_x) {
+		cursor_x -= step_x;
+	} else {
+		uint64_t step_y = FONT_HEIGHT * text_size;
+		if (cursor_y >= step_y) {
+		cursor_y -= step_y;
+		cursor_x = (WIDTH / step_x - 1) * step_x;
+		}
 	}
 }
+
+static void draw_bitmap(uint8_t bitmap[FONT_HEIGHT], uint64_t x, uint64_t y, uint32_t color, uint64_t size) {
+	for (int i = 0; i < FONT_HEIGHT; i++) {
+		char line = bitmap[i];
+		for (int j = 0; j < FONT_WIDTH; j++) {
+			uint32_t pixel_color = (line << j) & 0x80 ? color : BKG_COLOR;
+		
+			// dibuja un cuadrado de size × size pixels por cada bit
+			for (uint64_t dy = 0; dy < size; dy++) {
+				for (uint64_t dx = 0; dx < size; dx++) {
+					put_pixel(pixel_color, x + j * size + dx, y + i * size + dy);
+				}
+			}
+				
+			
+		}
+	}
+}
+
+static void draw_cursor() {
+	draw_bitmap(cursor, cursor_x, cursor_y, 0xFFFFFF, text_size);
+}
+
+static void delete_cursor() {
+	draw_bitmap(font[0], cursor_x, cursor_y, 0x000000, text_size);
 }
 
 static void delete_char() {
 	move_cursor_left();
 	for (int y = 0; y < FONT_HEIGHT * text_size; y++) {
 		for (int x = 0; x < FONT_WIDTH * text_size; x++) {
-		put_pixel(BKG_COLOR, cursor_x + x, cursor_y + y);
+			put_pixel(BKG_COLOR, cursor_x + x, cursor_y + y);
 		}
 	}
+	draw_cursor();
 }
 
 void vd_put_char(uint8_t ch, uint32_t color) {
@@ -169,14 +196,17 @@ void vd_put_char(uint8_t ch, uint32_t color) {
 	}
 	switch (ch) {
 	case '\b':
+		delete_cursor();
 		delete_char();
 		break;
 	case '\n':
+		delete_cursor();
 		vd_new_line();
 		break;
 	default:
 		vd_draw_char(ch, cursor_x, cursor_y, color, text_size);
 		move_cursor_right();
+		draw_cursor();
 		break;
 	}
 }
@@ -219,29 +249,16 @@ void vd_clear() {
 	MODO VIDEO
 */
 
-void vd_draw_char(uint8_t ch, uint64_t x, uint64_t y, uint32_t color,
-				uint64_t size) {
-if (ch >= 128) {
-	return;
-}
-
-if (size == 0) {
-	size = 1; // aseguramos minimo size de 1
-}
-
-for (int i = 0; i < FONT_HEIGHT; i++) {
-	char line = font[ch][i];
-	for (int j = 0; j < FONT_WIDTH; j++) {
-	if ((line << j) & 0x80) {
-		// dibuja un cuadrado de size × size pixels por cada bit
-		for (uint64_t dy = 0; dy < size; dy++) {
-		for (uint64_t dx = 0; dx < size; dx++) {
-			put_pixel(color, x + j * size + dx, y + i * size + dy);
-		}
-		}
+void vd_draw_char(uint8_t ch, uint64_t x, uint64_t y, uint32_t color, uint64_t size) {
+	if (ch >= 128) {
+		return;
 	}
+
+	if (size == 0) {
+		size = 1; // aseguramos minimo size de 1
 	}
-}
+
+	draw_bitmap(font[ch], x, y, color, size);
 }
 
 void vd_draw_string(const char *str, uint64_t x, uint64_t y, uint32_t color,

@@ -85,9 +85,6 @@ void read_line(char *buf, uint64_t max)
 	// Resetear navegación del historial
 	history_nav_idx = -1;
 
-	// Mostrar cursor inicial
-	putchar(CURSOR);
-
 	while ((c = getchar()) != '\n') {
 		if (c <= 0) {
 			continue;
@@ -96,15 +93,11 @@ void read_line(char *buf, uint64_t max)
 			if (idx != 0) {
 				idx--;
 				buf[idx] = '\0'; // Limpiar el caracter borrado
-				putchar('\b');   // borro el cursor
 				putchar('\b');   // borro el caracter
-				putchar(CURSOR);
 			}
 		} else if (c == UP_ARROW) {
 			const char *history_cmd = get_history_up();
 			if (history_cmd != NULL) {
-				// Borrar línea actual
-				putchar('\b'); // borro el cursor
 				while (idx-- > 0) {
 					putchar('\b');
 				}
@@ -113,12 +106,10 @@ void read_line(char *buf, uint64_t max)
 				for (idx = 0; buf[idx]; idx++) {
 					putchar(buf[idx]);
 				}
-				putchar(CURSOR);
 			}
 		} else if (c == DOWN_ARROW) {
 			const char *history_cmd = get_history_down();
 			// Borrar línea actual
-			putchar('\b'); // borro el cursor
 			while (idx > 0) {
 				idx--;
 				putchar('\b');
@@ -135,16 +126,12 @@ void read_line(char *buf, uint64_t max)
 				buf[0] = '\0';
 				idx = 0;
 			}
-			putchar(CURSOR);
 		} else if (idx < max) {
 			buf[idx++] = c;
-			putchar('\b');   // borro el cursor
 			putchar(c);      // escribo el caracter
-			putchar(CURSOR); // escribo el cursor
 		}
 	}
 
-	putchar('\b'); // borro el cursor final antes de salir
 	buf[idx] = 0;
 }
 
