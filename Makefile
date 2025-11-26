@@ -1,4 +1,4 @@
-all:  bootloader kernel userland image
+all: clean bootloader kernel userland image
 
 
 bootloader:
