@@ -14,7 +14,7 @@ int calc_main(int argc, char * argv[]) {
     char op = argv[1][0];
     int b = satoi(argv[2]);
     int res;
-    
+
     switch (op) {
         case '+': res = a + b; break;
         case '-': res = a - b; break;
@@ -26,7 +26,7 @@ int calc_main(int argc, char * argv[]) {
             return -1;
     }
 
-    printf("%d %c %d = %d", a, op, b, res);
+    printf("%d", res);
     return 0;
 
 

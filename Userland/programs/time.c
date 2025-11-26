@@ -9,7 +9,7 @@ int time_main(int argc, char *argv[])
 	sys_time_info(&info);
 	
 
-	printf("%d:%d:%d %d/%d/%d\n", info.hour, info.minutes, info.seconds,
+	printf("%2d:%2d:%2d %2d/%2d/%2d\n", info.hour, info.minutes, info.seconds,
 		info.day, info.month, info.year);
 	printf("ms since boot: %u\n", sys_ms_elapsed());
 

@@ -4,7 +4,7 @@
 #include "usrlib.h"
 
 static uint64_t print_udecimal(uint64_t value);
-static uint64_t print_decimal(int64_t value);
+static uint64_t print_decimal_width(int64_t value, int width);
 static uint64_t print_hex(uint64_t value, uint8_t uppercase);
 static uint64_t print_pointer(uint64_t ptr);
 static uint64_t print_oct(uint64_t value);
@@ -77,14 +77,20 @@ uint64_t printf_aux(const char     *fmt,
 				chars_written++;
 				fmt++;
 			} else {
+				int width = 0;
+				while (*fmt >= '0' && *fmt <= '9') {
+					width = width * 10 + (*fmt - '0');
+					fmt++;
+				}
+
 				uint64_t uint_arg;
 				int64_t  int_arg;
 				double   float_arg;
 				if (*fmt == 'd' || *fmt == 'i') {
 					if (int_idx < NUM_INT_REGS) {
-						int_arg = *(int64_t *)&intArgs[int_idx++];
+						int_arg = (int32_t)intArgs[int_idx++];
 					} else {
-						int_arg = *(int64_t *)&stackPtr[stk_idx++];
+						int_arg = (int32_t)stackPtr[stk_idx++];
 					}
 				} else if (*fmt == 'u' || *fmt == 'x' || *fmt == 'X' ||
 				           *fmt == 'o' || *fmt == 'b' || *fmt == 'p' ||
@@ -115,7 +121,7 @@ uint64_t printf_aux(const char     *fmt,
 					break;
 				case 'd':
 				case 'i':
-					chars_written += print_decimal(int_arg);
+					chars_written += print_decimal_width(int_arg, width);
 					break;
 				case 'x':
 					chars_written += print_hex(uint_arg, 0);
@@ -310,12 +316,28 @@ static uint64_t print_udecimal(uint64_t value)
 }
 
 // Imprime el signed uint64_t en base 10 y devuelve la cantidad de caracteres escritos
-static uint64_t print_decimal(int64_t value)
+static uint64_t print_decimal_width(int64_t value, int width)
 {
+	uint64_t count = 0;
+	uint64_t mag;
+
 	if (value < 0) {
-		putchar('-');
-		value = -value;                             // Convertir a positivo para imprimir
-		return print_udecimal((uint64_t)value) + 1; // +1 por el signo negativo
+		count += putchar('-');
+		// Magnitud en unsigned para evitar overflow en INT64_MIN
+		mag = (uint64_t)(~value) + 1;
+	} else {
+		mag = (uint64_t)value;
 	}
-	return print_udecimal((uint64_t)value);
+
+	// Calcular longitud del módulo
+	char tmp[DECIMAL_BUFFER_SIZE];
+	uint64_t len = num_to_str_base(mag, tmp, 10);
+
+	int pad = width - (int)len;
+	while (pad > 0) {
+		count += putchar('0');
+		pad--;
+	}
+
+	return count + print_udecimal((uint64_t)mag);
 }

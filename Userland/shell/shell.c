@@ -48,7 +48,7 @@ int main(void)
 /*-- FUNCIONES AUXILIARES --*/
 static void print_initial_message()
 {
-	print("Type your username: ");
+	fprint(STDMAGENTA, "Type your username: ");
 	read_line(user_name, USERNAME_MAX_LENGTH - 1);
 	putchar('\n');
 	fprint(STDMAGENTA, HELP_MESSAGE);
