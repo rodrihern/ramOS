@@ -1,10 +1,4 @@
 
-refactor como se imprimen los registros en la excepcion
-
-ver de vibecodear el agregar al printf algo como completar con 0s y numeros negativos
-
-programa de calculadora para probar lo de div 0
-
 rework mm -> entenderlo y que no sea un adt, tambien ver de usar toda la memoria disponible como korman
 
 
