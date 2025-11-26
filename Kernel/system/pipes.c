@@ -8,6 +8,7 @@
 #include "lib.h"
 #include "semaphores.h"
 #include "queue.h"
+#include "processes.h"
 #include "video.h"
 
 typedef struct pipe {
@@ -318,22 +319,31 @@ void destroy_pipe(int idx)
 	pipes[idx] = NULL;
 }
 
-// void flush_pipe(int fd) {
-// 	// hay que ver que hacer con los semaforos
-// 	int idx = get_idx_from_fd(fd);
-// 	if (idx < 0) {
-// 		return -1;
-// 	}
+int flush_pipe(int fd)
+{
+	int idx = get_idx_from_fd(fd);
+	if (idx < 0) {
+		return -1;
+	}
 
-// 	pipe_t * pipe = pipes[idx];
-// 	if (fd != pipe->read_fd) {
-// 		return -1;
-// 	}
+	pipe_t *pipe = pipes[idx];
+	if (pipe == NULL) {
+		return -1;
+	}
 
-// 	// hay que flushearlo
-// 	pipe->read_idx = pipe->write_idx = 0;
+	if (fd != pipe->read_fd) {
+		return -1;
+	}
 
-// }
+	// Vaciar el buffer
+	pipe->read_idx = pipe->write_idx;
+
+	// Reseteo de semáforos: sin bytes listos para leer, buffer totalmente libre
+	sem_reset(pipe->read_sem, 0);
+	sem_reset(pipe->write_sem, PIPE_BUFFER_SIZE);
+
+	return 0;
+}
 
 int get_pipes_info(pipe_info_t *buf, int max_count)
 {

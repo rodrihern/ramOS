@@ -16,26 +16,26 @@ typedef struct {
 	char              name[MAX_SEM_NAME_LENGTH];
 	queue_t           queue;
 	int               lock; // Spinlock simple para proteger acceso concurrente
-} semaphore_t;
+} sem_t;
 
-static semaphore_t *semaphores[MAX_SEMAPHORES] = {NULL};
+static sem_t *semaphores[MAX_SEMAPHORES] = {NULL};
 static int          semaphore_count            = 0;
 static int          semaphores_initialized     = 0;
 
 static int64_t      get_free_id(void);
-static semaphore_t *get_sem_by_name(const char *name);
+static sem_t *get_sem_by_name(const char *name);
 static int          get_idx_by_name(const char *name);
-static int          remove_process_from_queue(semaphore_t *sem, uint32_t pid);
+static int          remove_process_from_queue(sem_t *sem, uint32_t pid);
 static int64_t      sem_close_by_pid(char *name, uint32_t pid);
 static void
-init_semaphore_struct(semaphore_t *sem, const char *name, int initial_value, uint32_t owner_pid);
+init_semaphore_struct(sem_t *sem, const char *name, int initial_value, uint32_t owner_pid);
 
-static int pid_present_in_semaphore(semaphore_t *sem, uint32_t pid)
+static int pid_present_in_semaphore(sem_t *sem, uint32_t pid)
 {
 	return sem->owner_pids[pid];
 }
 
-void init_semaphore_manager(void)
+void init_semaphores(void)
 {
 	if (semaphores_initialized) {
 		return;
@@ -56,7 +56,7 @@ int64_t sem_open(char *name, int initial_value)
 	}
 
 	// primero verificar si ya existe
-	semaphore_t *sem = get_sem_by_name(name);
+	sem_t *sem = get_sem_by_name(name);
 	if (sem != NULL) {
 		// Ya existe, solo incrementar contador si no es un proceso que ya lo creo
 		if (pid_present_in_semaphore(sem, sch_get_current_pid())) {
@@ -77,7 +77,7 @@ int64_t sem_open(char *name, int initial_value)
 
 	// Crear nuevo semáforo
 	memory_manager_ADT mm = get_kernel_memory_manager();
-	sem                   = mm_alloc(mm, sizeof(semaphore_t));
+	sem                   = mm_alloc(mm, sizeof(sem_t));
 	if (sem == NULL) {
 		return ERROR;
 	}
@@ -107,7 +107,7 @@ int64_t sem_close(char *name)
 		return ERROR;
 	}
 
-	semaphore_t *sem = semaphores[idx];
+	sem_t *sem = semaphores[idx];
 
 	acquire_lock(&sem->lock);
 
@@ -136,7 +136,7 @@ int64_t sem_wait(char *name)
 		return ERROR;
 	}
 
-	semaphore_t *sem = get_sem_by_name(name);
+	sem_t *sem = get_sem_by_name(name);
 	if (sem == NULL) {
 		return ERROR;
 	}
@@ -174,7 +174,7 @@ int64_t sem_post(char *name)
 		return ERROR;
 	}
 
-	semaphore_t *sem = get_sem_by_name(name);
+	sem_t *sem = get_sem_by_name(name);
 	if (sem == NULL) {
 		return ERROR;
 	}
@@ -207,7 +207,7 @@ int64_t sem_reset(char *name, int new_value)
 		return ERROR;
 	}
 
-	semaphore_t *sem = get_sem_by_name(name);
+	sem_t *sem = get_sem_by_name(name);
 	if (sem == NULL) {
 		return ERROR;
 	}
@@ -248,7 +248,7 @@ int remove_process_from_all_semaphore_queues(uint32_t pid)
 	}
 
 	for (int i = 0; i < MAX_SEMAPHORES; i++) {
-		semaphore_t *sem = semaphores[i];
+		sem_t *sem = semaphores[i];
 		if (sem == NULL) {
 			continue;
 		}
@@ -267,7 +267,7 @@ int remove_process_from_all_semaphore_queues(uint32_t pid)
 }
 
 static void
-init_semaphore_struct(semaphore_t *sem, const char *name, int initial_value, uint32_t owner_pid)
+init_semaphore_struct(sem_t *sem, const char *name, int initial_value, uint32_t owner_pid)
 {
 	sem->value = initial_value;
 	strncpy(sem->name, name, MAX_SEM_NAME_LENGTH - 1);
@@ -300,7 +300,7 @@ static int get_idx_by_name(const char *name)
 	return ERROR;
 }
 
-static semaphore_t *get_sem_by_name(const char *name)
+static sem_t *get_sem_by_name(const char *name)
 {
 	int idx = get_idx_by_name(name);
 	if (idx == ERROR) {
@@ -309,7 +309,7 @@ static semaphore_t *get_sem_by_name(const char *name)
 	return semaphores[idx];
 }
 
-static int remove_process_from_queue(semaphore_t *sem, uint32_t pid)
+static int remove_process_from_queue(sem_t *sem, uint32_t pid)
 {
 	if (sem == NULL || sem->queue == NULL) {
 		return ERROR;
@@ -329,7 +329,7 @@ static int64_t sem_close_by_pid(char *name, uint32_t pid)
 		return ERROR;
 	}
 
-	semaphore_t *sem = semaphores[idx];
+	sem_t *sem = semaphores[idx];
 
 	acquire_lock(&sem->lock);
 

@@ -62,15 +62,16 @@ int main()
 {
 	init_kernel_memory_manager();
 
+	init_timer();
+	
 	init_scheduler();
 
-	init_semaphore_manager();
+	init_semaphores();
 
 	init_keyboard_sem();
 
 	vd_enable_textmode();
 
-	init_timer();
 
 	timer_tick(); // esto hace el salto a userland
 

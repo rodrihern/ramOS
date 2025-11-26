@@ -17,7 +17,7 @@ extern void _cli(void);
 extern void _sti(void);
 
 // Inicializa el sistema de semáforos al arrancar el kernel.
-void init_semaphore_manager(void);
+void init_semaphores(void);
 // Crea o abre un semáforo con un nombre dado.
 // Aloca memoria para el manager de semáforos
 // Inicializa el array de semáforos en NULL

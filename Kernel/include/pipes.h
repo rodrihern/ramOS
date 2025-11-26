@@ -36,8 +36,9 @@ int write_pipe(int fd, const char *buf, int count);
 // libera los recursos del pipe
 void destroy_pipe(int idx);
 
-
-// void flush_pipe(int read_fd);
+// vacía el buffer del pipe y resetea semáforos; sólo se puede invocar desde el extremo de lectura
+// retorna 0 si éxito, -1 si error
+int flush_pipe(int read_fd);
 
 // open para un pipe con nombre, si no existe lo crea y devuelve ambos fds
 // retorna -1 si el pipe existe pero ya cerró todos sus writers (protección EOF)
