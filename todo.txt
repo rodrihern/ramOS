@@ -1,12 +1,9 @@
-agregar un flush que sirva tanto para el teclado como para los pipes, (el de teclado que solo lo pueda flushear el de foreground y el de un pipe alguien que tenga abierto el fd) -> hacer una funcion para resetear el valor con gpt
 
 refactor manejo de excepciones que mate al proceso que la causo y desp todo lo demas siga bien
 
 programa de calculadora para probar lo de div 0
 
 rework mm -> entenderlo y que no sea un adt, tambien ver de usar toda la memoria disponible como korman
-
-refactor semaforos para usar queue_t
 
 
 
