@@ -9,7 +9,6 @@
 static void zero_division();
 static void invalid_opcode();
 static void excep_handler(char *msg);
-extern void return_to_userland();
 extern void _hlt();
 extern void _sti();
 

@@ -1,5 +1,7 @@
 
-refactor manejo de excepciones que mate al proceso que la causo y desp todo lo demas siga bien
+refactor como se imprimen los registros en la excepcion
+
+ver de vibecodear el agregar al printf algo como completar con 0s y numeros negativos
 
 programa de calculadora para probar lo de div 0
 

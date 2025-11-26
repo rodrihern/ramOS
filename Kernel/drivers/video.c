@@ -218,6 +218,7 @@ void vd_print(const char *str, uint32_t color) {
 	for (int i = 0; str[i] != 0; i++) {
 		vd_put_char(str[i], color);
 	}
+	delete_cursor();
 }
 
 void vd_increase_text_size() {
