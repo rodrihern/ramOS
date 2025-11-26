@@ -7,22 +7,14 @@
 #include "lib.h"
 #include "processes.h"
 #include "video.h"
-
-typedef struct {
-	uint32_t pids[MAX_PROCESSES]; // Array de PIDs circular
-	uint32_t read_index;  // Índice de lectura (frente de la cola) (donde sacas el próximo
-	                      // elemento)
-	uint32_t write_index; // Índice de escritura (final de la cola) (donde pones el próximo
-	                      // elemento)
-	uint32_t size;        // Cantidad de elementos en la cola
-} circular_buffer_t;
+#include "queue.h"
 
 typedef struct {
 	int               value; // Contador del semáforo
 	uint32_t          owner_pids[MAX_PROCESSES];
 	int               ref_count; // Cantidad de procesos usando este semáforo
 	char              name[MAX_SEM_NAME_LENGTH];
-	circular_buffer_t queue;
+	queue_t           queue;
 	int               lock; // Spinlock simple para proteger acceso concurrente
 } semaphore_t;
 
@@ -34,8 +26,6 @@ typedef struct {
 static semaphore_manager_t *sem_manager = NULL;
 
 static int64_t      get_free_id(void);
-static uint64_t     pop_from_queue(semaphore_t *sem);
-static int          add_to_queue(semaphore_t *sem, uint32_t pid);
 static semaphore_t *get_sem_by_name(const char *name);
 static int          get_idx_by_name(const char *name);
 static int          remove_process_from_queue(semaphore_t *sem, uint32_t pid);
@@ -101,6 +91,12 @@ int64_t sem_open(char *name, int initial_value)
 		return ERROR;
 	}
 
+	sem->queue = q_init();
+	if (sem->queue == NULL) {
+		mm_free(mm, sem);
+		return ERROR;
+	}
+
 	init_semaphore_struct(sem, name, initial_value, sch_get_current_pid());
 
 	sem_manager->semaphores[id] = sem;
@@ -135,6 +131,7 @@ int64_t sem_close(char *name)
 
 	// Último proceso usando el semáforo, destruirlo
 	memory_manager_ADT mm = get_kernel_memory_manager();
+	q_destroy(sem->queue);
 	mm_free(mm, sem);
 	sem_manager->semaphores[idx] = NULL;
 	sem_manager->semaphore_count--;
@@ -164,7 +161,7 @@ int64_t sem_wait(char *name)
 	// No hay recursos disponibles, bloquear proceso
 	int pid = sch_get_current_pid();
 
-	if (add_to_queue(sem, pid) == ERROR) {
+	if (!q_add(sem->queue, pid)) {
 		release_lock(&sem->lock);
 		return ERROR;
 	}
@@ -193,17 +190,61 @@ int64_t sem_post(char *name)
 
 	acquire_lock(&sem->lock);
 
-	if (sem->queue.size > 0) {
+	if (!q_is_empty(sem->queue)) {
 		// Hay procesos esperando, desbloquear uno
-		uint32_t pid = pop_from_queue(sem);
+		int pid = q_poll(sem->queue);
+		if (pid < 0) {
+			release_lock(&sem->lock);
+			return ERROR;
+		}
 		_cli(); // deshabilitar interrupciones
 		release_lock(&sem->lock);
-		sch_ublock_process(pid);
+		sch_ublock_process((uint32_t) pid);
 		_sti(); // habilitar interrupciones
 	} else {
 		// No hay procesos esperando, incrementar contador
 		sem->value++;
 		release_lock(&sem->lock);
+	}
+
+	return OK;
+}
+
+int64_t sem_reset(char *name, int new_value)
+{
+	if (sem_manager == NULL || name == NULL || new_value < 0) {
+		return ERROR;
+	}
+
+	semaphore_t *sem = get_sem_by_name(name);
+	if (sem == NULL) {
+		return ERROR;
+	}
+
+	uint32_t to_unblock[MAX_PROCESSES];
+	uint32_t unblock_count = 0;
+
+	acquire_lock(&sem->lock);
+
+	// Desencolar procesos hasta agotar new_value o la cola
+	while (!q_is_empty(sem->queue) && new_value > 0) {
+		int pid = q_poll(sem->queue);
+		if (pid < 0) {
+			break;
+		}
+		to_unblock[unblock_count++] = (uint32_t) pid;
+		new_value--;
+	}
+
+	// Ajustar contador a lo que quede disponible
+	sem->value = new_value;
+	release_lock(&sem->lock);
+
+	// Desbloquear procesos seleccionados
+	for (uint32_t i = 0; i < unblock_count; i++) {
+		_cli();
+		sch_ublock_process(to_unblock[i]);
+		_sti();
 	}
 
 	return OK;
@@ -240,9 +281,6 @@ init_semaphore_struct(semaphore_t *sem, const char *name, int initial_value, uin
 	sem->value = initial_value;
 	strncpy(sem->name, name, MAX_SEM_NAME_LENGTH - 1);
 	sem->name[MAX_SEM_NAME_LENGTH - 1] = '\0';
-	sem->queue.read_index              = 0;
-	sem->queue.write_index             = 0;
-	sem->queue.size                    = 0;
 	sem->lock                          = 1; // Spinlock desbloqueado
 	sem->ref_count                     = 1;
 	for (int i = 0; i < MAX_PROCESSES; i++) {
@@ -259,32 +297,6 @@ static int64_t get_free_id(void)
 		}
 	}
 	return ERROR;
-}
-
-static uint64_t pop_from_queue(semaphore_t *sem)
-{
-	if (sem->queue.size == 0) {
-		return ERROR;
-	}
-
-	uint32_t pid          = sem->queue.pids[sem->queue.read_index];
-	sem->queue.read_index = (sem->queue.read_index + 1) % MAX_PROCESSES;
-	sem->queue.size--;
-
-	return pid;
-}
-
-static int add_to_queue(semaphore_t *sem, uint32_t pid)
-{
-	if (sem->queue.size >= MAX_PROCESSES) {
-		return ERROR;
-	}
-
-	sem->queue.pids[sem->queue.write_index] = pid;
-	sem->queue.write_index                  = (sem->queue.write_index + 1) % MAX_PROCESSES;
-	sem->queue.size++;
-
-	return OK;
 }
 
 static int get_idx_by_name(const char *name)
@@ -309,40 +321,11 @@ static semaphore_t *get_sem_by_name(const char *name)
 
 static int remove_process_from_queue(semaphore_t *sem, uint32_t pid)
 {
-	if (sem->queue.size == 0) {
+	if (sem == NULL || sem->queue == NULL) {
 		return ERROR;
 	}
 
-	uint32_t i     = sem->queue.read_index;
-	uint32_t j     = 0;
-	int      found = ERROR;
-
-	// Buscar el proceso en la cola
-	while (j < sem->queue.size) {
-		if (sem->queue.pids[i] == pid) {
-			found = i;
-			break;
-		}
-		i = (i + 1) % MAX_PROCESSES;
-		j++;
-	}
-
-	if (found == ERROR) {
-		return ERROR; // No encontrado
-	}
-
-	// Desplazar elementos para llenar el hueco
-	for (uint32_t k = found; k != sem->queue.write_index; k = (k + 1) % MAX_PROCESSES) {
-		uint32_t next      = (k + 1) % MAX_PROCESSES;
-		sem->queue.pids[k] = sem->queue.pids[next];
-	}
-
-	// Es un truco matemático para evitar números negativos al retroceder en aritmética
-	// circular.
-	sem->queue.write_index = (sem->queue.write_index + MAX_PROCESSES - 1) % MAX_PROCESSES;
-	sem->queue.size--;
-
-	return OK;
+	return q_remove(sem->queue, pid) ? OK : ERROR;
 }
 
 static int64_t sem_close_by_pid(char *name, uint32_t pid)
@@ -371,6 +354,7 @@ static int64_t sem_close_by_pid(char *name, uint32_t pid)
 
 	// Ultimo proceso usando el semaforo, destruirlo
 	memory_manager_ADT mm = get_kernel_memory_manager();
+	q_destroy(sem->queue);
 	mm_free(mm, sem);
 	sem_manager->semaphores[idx] = NULL;
 	sem_manager->semaphore_count--;

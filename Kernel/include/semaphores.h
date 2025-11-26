@@ -39,6 +39,12 @@ int64_t sem_wait(char *name);
 // Retorna: 0 si éxito, -1 si error
 // Ejemplo: Salir de sección crítica
 int64_t sem_post(char *name);
+// Reestablece el valor del semáforo y gestiona su cola de espera.
+// - Ajusta el contador a new_value (>=0).
+// - Desbloquea hasta new_value procesos encolados, decrementando en consecuencia.
+// - Deja en la cola los procesos restantes si no alcanza el nuevo valor.
+// Retorna: 0 si éxito, -1 si error.
+int64_t sem_reset(char *name, int new_value);
 // Limpia un proceso de TODAS las colas de semáforos.
 // Se llama cuando un proceso termina o es matado
 // Evita que queden PIDs zombies bloqueados en semáforos
