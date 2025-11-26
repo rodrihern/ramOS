@@ -29,7 +29,7 @@ void *syscalls[] = {
 	&sys_put_pixel,          // 16
 	&sys_is_pressed,         // 17
 	&sys_sleep,              // 18
-	&sys_clear_input_buffer, // 19
+	&sys_flush,              // 19
 	&sys_ms_elapsed,         // 20
 
 	// syscalls de memoria
@@ -239,9 +239,33 @@ static void sys_sleep(uint64_t miliseconds) {
 	}
 }
 
-static void sys_clear_input_buffer()
+int sys_flush(uint8_t fd)
 {
-	kb_flush_buffer();
+
+	if (fd < 0 || fd >= MAX_FDS) {
+		return -1;
+	}
+
+	int pid = sch_get_current_pid();
+	pcb_t *p = sch_get_pcb(pid);
+
+	fd = p->fd_table[fd];
+
+	if (fd < 0 || (STDOUT <= fd && fd < FIRST_FREE_FD)) {
+		return -1;
+	}
+
+	if (fd == STDIN) { // quiere leer de teclado
+		int foreground_pid = sch_get_foreground_pid();
+		if (pid != foreground_pid) {
+			return -1; // solo el proceso de foreground puede leer del teclado
+		}
+		kb_flush_buffer();
+		return 0;
+	}
+
+	// es un pipe
+	return flush_pipe(fd);
 }
 
 static uint64_t sys_ms_elapsed()

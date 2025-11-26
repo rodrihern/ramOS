@@ -2,7 +2,7 @@ global  sys_write, sys_read, sys_time_info, sys_register_snapshot, sys_clear
 global  sys_increase_fontsize, sys_decrease_fontsize
 global  sys_video_info, sys_circle, sys_rectangle, sys_draw_line, sys_draw_string
 global  sys_textmode, sys_videomode, sys_put_pixel, sys_is_pressed
-global  sys_sleep, sys_clear_input_buffer, sys_ms_elapsed
+global  sys_sleep, sys_flush, sys_ms_elapsed
 global  sys_speaker_start, sys_speaker_stop
 global  sys_malloc, sys_free, sys_mem_info
 global  sys_create_process, sys_exit_current, sys_getpid, sys_kill, sys_block, sys_unblock, sys_wait, sys_nice, sys_processes_info, sys_yield
@@ -76,7 +76,7 @@ sys_is_pressed:
 sys_sleep:
 	SYSCALL 18
 
-sys_clear_input_buffer:
+sys_flush:
 	SYSCALL 19
 
 sys_ms_elapsed:

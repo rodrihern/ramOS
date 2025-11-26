@@ -26,13 +26,9 @@ int main(void)
 {
 	sys_textmode();
 
-	// Limpiar buffer de teclado y resetear semáforo antes de empezar
-	sys_clear_input_buffer();
+	sys_flush(STDIN);
 
 	print_initial_message();
-
-	// Limpiar buffer de teclado y resetear semáforo antes de empezar
-	sys_clear_input_buffer();
 
 	while (1) {
 		fprint(STDCYAN, user_name);
@@ -52,15 +48,11 @@ int main(void)
 /*-- FUNCIONES AUXILIARES --*/
 static void print_initial_message()
 {
-	sys_increase_fontsize();
-	fprint(STDMAGENTA, INITIAL_MESSAGE_1);
-	putchar('\n');
-	print(INITIAL_MESSAGE_2);
+	print("Type your username: ");
 	read_line(user_name, USERNAME_MAX_LENGTH - 1);
 	putchar('\n');
 	fprint(STDMAGENTA, HELP_MESSAGE);
 	putchar('\n');
-	sys_decrease_fontsize();
 }
 
 void set_username(const char *new_name)

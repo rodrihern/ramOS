@@ -155,7 +155,7 @@ static uint8_t try_external_program(char *name, int argc, char **argv, uint8_t b
 
 	// Sigue acá si es foreground
 	sys_wait(pid);
-	sys_clear_input_buffer(); // limpiar buffer de entrada por si quedó algo
+	sys_flush(STDIN); // limpiar buffer de entrada por si quedó algo
 	putchar('\n');
 	return 1;
 }
@@ -240,7 +240,7 @@ static int execute_piped_commands(
 	// Esperar a que terminen ambos procesos
 	sys_wait(pid_left);
 	sys_wait(pid_right);
-	sys_clear_input_buffer(); // limpiar buffer de entrada por si quedó algo
+	sys_flush(STDIN); // limpiar buffer de entrada por si quedó algo
 	putchar('\n');
 
 	// Destruir el pipe

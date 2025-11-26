@@ -83,11 +83,8 @@ uint8_t kb_get_char_from_buffer() {
 }
 
 void kb_flush_buffer() {
-  buffer_end = buffer_start = buffer_current_size = 0;
-
-  // Resetear el semáforo: cerrar y reabrir en 0
-  sem_close(KEYBOARD_SEM_NAME);
-  sem_open(KEYBOARD_SEM_NAME, 0);
+    buffer_end = buffer_start = buffer_current_size = 0;
+    sem_reset(KEYBOARD_SEM_NAME, 0);
 }
 
 

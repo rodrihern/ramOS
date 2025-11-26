@@ -21,8 +21,6 @@ typedef struct {
 #define INPUT_MAX 128
 #define PROMPT "> "
 #define ERROR_MSG "Use command \'help\' to see available commands\n"
-#define INITIAL_MESSAGE_1 "Welcome to ramOS!"
-#define INITIAL_MESSAGE_2 "Type your username: "
 #define HELP_MESSAGE "--Write help to see available commands--\n"
 #define USERNAME_MAX_LENGTH 16
 

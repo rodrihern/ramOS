@@ -116,7 +116,7 @@ extern int sys_register_snapshot(register_info_t * buffer);
 extern void     sys_speaker_start(uint32_t freq_hz);
 extern void     sys_speaker_stop(void);
 extern uint8_t sys_is_pressed(uint8_t scancode);
-extern void     sys_clear_input_buffer();
+extern void     sys_flush(uint8_t fd);
 
 // syscalls de video
 extern void     sys_increase_fontsize();
