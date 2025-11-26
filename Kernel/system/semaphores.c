@@ -18,12 +18,9 @@ typedef struct {
 	int               lock; // Spinlock simple para proteger acceso concurrente
 } semaphore_t;
 
-typedef struct {
-	semaphore_t *semaphores[MAX_SEMAPHORES];
-	int          semaphore_count; // Cantidad de semáforos activos
-} semaphore_manager_t;
-
-static semaphore_manager_t *sem_manager = NULL;
+static semaphore_t *semaphores[MAX_SEMAPHORES] = {NULL};
+static int          semaphore_count            = 0;
+static int          semaphores_initialized     = 0;
 
 static int64_t      get_free_id(void);
 static semaphore_t *get_sem_by_name(const char *name);
@@ -40,27 +37,21 @@ static int pid_present_in_semaphore(semaphore_t *sem, uint32_t pid)
 
 void init_semaphore_manager(void)
 {
-	if (sem_manager != NULL) {
+	if (semaphores_initialized) {
 		return;
 	}
 
-	memory_manager_ADT mm = get_kernel_memory_manager();
-	sem_manager           = mm_alloc(mm, sizeof(semaphore_manager_t));
-
-	if (sem_manager == NULL) {
-		return; // Error crítico
-	}
-
 	for (int i = 0; i < MAX_SEMAPHORES; i++) {
-		sem_manager->semaphores[i] = NULL;
+		semaphores[i] = NULL;
 	}
 
-	sem_manager->semaphore_count = 0;
+	semaphore_count        = 0;
+	semaphores_initialized = 1;
 }
 
 int64_t sem_open(char *name, int initial_value)
 {
-	if (sem_manager == NULL || name == NULL) {
+	if (!semaphores_initialized || name == NULL) {
 		return -1;
 	}
 
@@ -99,15 +90,15 @@ int64_t sem_open(char *name, int initial_value)
 
 	init_semaphore_struct(sem, name, initial_value, sch_get_current_pid());
 
-	sem_manager->semaphores[id] = sem;
-	sem_manager->semaphore_count++;
+	semaphores[id] = sem;
+	semaphore_count++;
 
 	return OK;
 }
 
 int64_t sem_close(char *name)
 {
-	if (sem_manager == NULL || name == NULL) {
+	if (!semaphores_initialized || name == NULL) {
 		return ERROR;
 	}
 
@@ -116,7 +107,7 @@ int64_t sem_close(char *name)
 		return ERROR;
 	}
 
-	semaphore_t *sem = sem_manager->semaphores[idx];
+	semaphore_t *sem = semaphores[idx];
 
 	acquire_lock(&sem->lock);
 
@@ -133,15 +124,15 @@ int64_t sem_close(char *name)
 	memory_manager_ADT mm = get_kernel_memory_manager();
 	q_destroy(sem->queue);
 	mm_free(mm, sem);
-	sem_manager->semaphores[idx] = NULL;
-	sem_manager->semaphore_count--;
+	semaphores[idx] = NULL;
+	semaphore_count--;
 
 	return OK;
 }
 
 int64_t sem_wait(char *name)
 {
-	if (sem_manager == NULL || name == NULL) {
+	if (!semaphores_initialized || name == NULL) {
 		return ERROR;
 	}
 
@@ -179,7 +170,7 @@ int64_t sem_wait(char *name)
 
 int64_t sem_post(char *name)
 {
-	if (sem_manager == NULL || name == NULL) {
+	if (!semaphores_initialized || name == NULL) {
 		return ERROR;
 	}
 
@@ -212,7 +203,7 @@ int64_t sem_post(char *name)
 
 int64_t sem_reset(char *name, int new_value)
 {
-	if (sem_manager == NULL || name == NULL || new_value < 0) {
+	if (!semaphores_initialized || name == NULL || new_value < 0) {
 		return ERROR;
 	}
 
@@ -252,12 +243,12 @@ int64_t sem_reset(char *name, int new_value)
 
 int remove_process_from_all_semaphore_queues(uint32_t pid)
 {
-	if (sem_manager == NULL) {
+	if (!semaphores_initialized) {
 		return ERROR;
 	}
 
 	for (int i = 0; i < MAX_SEMAPHORES; i++) {
-		semaphore_t *sem = sem_manager->semaphores[i];
+		semaphore_t *sem = semaphores[i];
 		if (sem == NULL) {
 			continue;
 		}
@@ -292,7 +283,7 @@ init_semaphore_struct(semaphore_t *sem, const char *name, int initial_value, uin
 static int64_t get_free_id(void)
 {
 	for (int i = 0; i < MAX_SEMAPHORES; i++) {
-		if (sem_manager->semaphores[i] == NULL) {
+		if (semaphores[i] == NULL) {
 			return i;
 		}
 	}
@@ -302,8 +293,7 @@ static int64_t get_free_id(void)
 static int get_idx_by_name(const char *name)
 {
 	for (int i = 0; i < MAX_SEMAPHORES; i++) {
-		if (sem_manager->semaphores[i] != NULL &&
-		    strcmp(sem_manager->semaphores[i]->name, name) == 0) {
+		if (semaphores[i] != NULL && strcmp(semaphores[i]->name, name) == 0) {
 			return i;
 		}
 	}
@@ -316,7 +306,7 @@ static semaphore_t *get_sem_by_name(const char *name)
 	if (idx == ERROR) {
 		return NULL;
 	}
-	return sem_manager->semaphores[idx];
+	return semaphores[idx];
 }
 
 static int remove_process_from_queue(semaphore_t *sem, uint32_t pid)
@@ -330,7 +320,7 @@ static int remove_process_from_queue(semaphore_t *sem, uint32_t pid)
 
 static int64_t sem_close_by_pid(char *name, uint32_t pid)
 {
-	if (sem_manager == NULL || name == NULL) {
+	if (!semaphores_initialized || name == NULL) {
 		return ERROR;
 	}
 
@@ -339,7 +329,7 @@ static int64_t sem_close_by_pid(char *name, uint32_t pid)
 		return ERROR;
 	}
 
-	semaphore_t *sem = sem_manager->semaphores[idx];
+	semaphore_t *sem = semaphores[idx];
 
 	acquire_lock(&sem->lock);
 
@@ -356,8 +346,8 @@ static int64_t sem_close_by_pid(char *name, uint32_t pid)
 	memory_manager_ADT mm = get_kernel_memory_manager();
 	q_destroy(sem->queue);
 	mm_free(mm, sem);
-	sem_manager->semaphores[idx] = NULL;
-	sem_manager->semaphore_count--;
+	semaphores[idx] = NULL;
+	semaphore_count--;
 
 	return OK;
 }
