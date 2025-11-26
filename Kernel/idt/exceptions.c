@@ -3,6 +3,7 @@
 
 #include "exceptions.h"
 #include "keyboard.h"
+#include "scheduler.h"
 #include "video.h"
 
 static void zero_division();
@@ -27,13 +28,9 @@ static void excep_handler(char *msg)
 {
 	vd_print(msg, 0xff0000);
 	vd_new_line();
-	vd_print("Press enter to continue", 0xff0000);
-	int c;
-	_sti();
-	do {
-		_hlt();
-	} while ((c = kb_get_char_from_buffer()) != '\n');
-	vd_clear();
+	int pid = sch_get_current_pid();
+	sch_kill_process(pid);
+	
 }
 
 static void zero_division()

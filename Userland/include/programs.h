@@ -17,6 +17,8 @@ int wc_main(int argc, char *argv[]);
 
 int spotify_main(int argc, char * argv[]);
 
+int div0_main(int argc, char * argv[]);
+
 int kill_main(int argc, char *argv[]);
 int block_main(int argc, char *argv[]);
 int unblock_main(int argc, char *argv[]);
