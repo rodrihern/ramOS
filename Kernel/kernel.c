@@ -60,7 +60,7 @@ void *initializeKernelBinary()
 
 int main()
 {
-	init_kernel_memory_manager();
+	init_memory_manager((void *)HEAP_START_ADDRESS, HEAP_SIZE);
 
 	init_timer();
 	

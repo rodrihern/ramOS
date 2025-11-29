@@ -2,26 +2,21 @@
 #define MEMORY_MANAGER_H
 
 #include <stdint.h>
-#include <stddef.h>
 
 #define HEAP_START_ADDRESS 0x600000 // Dirección de inicio del heap
 #define HEAP_SIZE 0x2000000         // 32MB de heap
 
-// TAD - Tipo ABStracto de datos (estructura opaca)
-typedef struct memory_manager_CDT *memory_manager_ADT;
-
 // Estructura para estadísticas de memoria
 typedef struct {
-	size_t total_memory;
-	size_t used_memory;
-	size_t free_memory;
-	size_t allocated_blocks;
+	uint64_t total_memory;
+	uint64_t used_memory;
+	uint64_t free_memory;
+	uint64_t allocated_blocks;
 } mem_info_t;
 
-void *mm_alloc(memory_manager_ADT memory_manager, size_t size);
-void mm_free(memory_manager_ADT memory_manager, void *ptr);
-void get_memory_info(memory_manager_ADT memory_manager, mem_info_t * buffer);
-void init_kernel_memory_manager(void);
-memory_manager_ADT get_kernel_memory_manager(void);
+void init_memory_manager(void *start_address, uint64_t size);
+void *mm_alloc(uint64_t size);
+void mm_free(void *ptr);
+void get_memory_info(mem_info_t *buffer);
 
 #endif 

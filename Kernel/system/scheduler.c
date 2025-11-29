@@ -124,10 +124,8 @@ static int scheduler_add_init()
 	if (process_count != 0) { // si no es el primer proceso en ser creado está mal
 		return -1;
 	}
-
-	memory_manager_ADT mm = get_kernel_memory_manager();
 	
-	pcb_t *pcb_init = mm_alloc(mm, sizeof(pcb_t));
+	pcb_t *pcb_init = mm_alloc(sizeof(pcb_t));
 	if (pcb_init == NULL) {
 		return -1;
 	}
@@ -135,7 +133,7 @@ static int scheduler_add_init()
 	// Inicializar el PCB del proceso init
 	if (init_pcb(pcb_init, (process_entry_t)init, 0, NULL, "init", 
 	             NO_PID, MIN_PRIORITY, STDIN, STDOUT, 0) < 0) {
-		mm_free(mm, pcb_init);
+		mm_free(pcb_init);
 		return -1;
 	}
 

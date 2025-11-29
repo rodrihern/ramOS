@@ -8,6 +8,7 @@
 #include "processes.h"
 #include "video.h"
 #include "queue.h"
+#include <stddef.h>
 
 typedef struct {
 	int               value; // Contador del semáforo
@@ -76,15 +77,14 @@ int64_t sem_open(char *name, int initial_value)
 	}
 
 	// Crear nuevo semáforo
-	memory_manager_ADT mm = get_kernel_memory_manager();
-	sem                   = mm_alloc(mm, sizeof(sem_t));
+	sem = mm_alloc(sizeof(sem_t));
 	if (sem == NULL) {
 		return ERROR;
 	}
 
 	sem->queue = q_init();
 	if (sem->queue == NULL) {
-		mm_free(mm, sem);
+		mm_free(sem);
 		return ERROR;
 	}
 
@@ -121,9 +121,8 @@ int64_t sem_close(char *name)
 	release_lock(&sem->lock);
 
 	// Último proceso usando el semáforo, destruirlo
-	memory_manager_ADT mm = get_kernel_memory_manager();
 	q_destroy(sem->queue);
-	mm_free(mm, sem);
+	mm_free(sem);
 	semaphores[idx] = NULL;
 	semaphore_count--;
 
@@ -343,9 +342,8 @@ static int64_t sem_close_by_pid(char *name, uint32_t pid)
 	release_lock(&sem->lock);
 
 	// Ultimo proceso usando el semaforo, destruirlo
-	memory_manager_ADT mm = get_kernel_memory_manager();
 	q_destroy(sem->queue);
-	mm_free(mm, sem);
+	mm_free(sem);
 	semaphores[idx] = NULL;
 	semaphore_count--;
 

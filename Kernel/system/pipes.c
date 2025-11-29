@@ -10,6 +10,7 @@
 #include "queue.h"
 #include "processes.h"
 #include "video.h"
+#include <stddef.h>
 
 typedef struct pipe {
 	char buffer[PIPE_BUFFER_SIZE]; // buffer circular
@@ -64,8 +65,7 @@ int create_pipe(int fds[2])
 		return -1;
 	}
 
-	memory_manager_ADT mm   = get_kernel_memory_manager();
-	pipe_t            *pipe = mm_alloc(mm, sizeof(pipe_t));
+	pipe_t *pipe = mm_alloc(sizeof(pipe_t));
 	if (pipe == NULL) {
 		return -1;
 	}
@@ -88,7 +88,7 @@ int create_pipe(int fds[2])
 	strcat(pipe->read_sem, "r");
 	if (sem_open(pipe->read_sem, 0) < 0) {
 		pipes[idx] = NULL;
-		mm_free(mm, pipe);
+		mm_free(pipe);
 		return -1;
 	}
 
@@ -98,7 +98,7 @@ int create_pipe(int fds[2])
 	if (sem_open(pipe->write_sem, PIPE_BUFFER_SIZE) < 0) {
 		sem_close(pipe->read_sem);
 		pipes[idx] = NULL;
-		mm_free(mm, pipe);
+		mm_free(pipe);
 		return -1;
 	}
 
@@ -311,11 +311,9 @@ void destroy_pipe(int idx)
 		return;
 	}
 
-	memory_manager_ADT mm = get_kernel_memory_manager();
-
 	sem_close(pipe->read_sem);
 	sem_close(pipe->write_sem);
-	mm_free(mm, pipe);
+	mm_free(pipe);
 	pipes[idx] = NULL;
 }
 

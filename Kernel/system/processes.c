@@ -7,23 +7,21 @@
 #include "scheduler.h"
 #include "interrupts.h"
 #include "pipes.h"
+#include <stddef.h>
 
 extern void  *setup_initial_stack(void *caller, int pid, void *stack_pointer, void *rcx);
-static char **duplicate_argv(const char **argv, int argc, memory_manager_ADT mm);
+static char **duplicate_argv(const char **argv, int argc);
 static void   process_caller(int pid);
-static int  init_pcb_argv(pcb_t *p, int argc, const char **argv, memory_manager_ADT mm);
+static int  init_pcb_argv(pcb_t *p, int argc, const char **argv);
 static void init_pcb_file_descriptors(pcb_t *p, uint8_t read_fd, uint8_t write_fd);
-static void free_pcb_argv(pcb_t *p, memory_manager_ADT mm);
-static void free_pcb_stack(pcb_t *p, memory_manager_ADT mm);
+static void free_pcb_argv(pcb_t *p);
+static void free_pcb_stack(pcb_t *p);
 
 
 
 int init_pcb_stack(pcb_t *p)
 {
-
-	memory_manager_ADT mm = get_kernel_memory_manager();
-
-	p->stack_base = mm_alloc(mm, PROCESS_STACK_SIZE);
+	p->stack_base = mm_alloc(PROCESS_STACK_SIZE);
 	if (p->stack_base == NULL) {
 		return -1;
 	}
@@ -34,11 +32,11 @@ int init_pcb_stack(pcb_t *p)
 
 
 
-static int init_pcb_argv(pcb_t *p, int argc, const char **argv, memory_manager_ADT mm)
+static int init_pcb_argv(pcb_t *p, int argc, const char **argv)
 {
 	p->argc = argc;
 	if (argc > 0 && argv != NULL) {
-		p->argv = duplicate_argv(argv, argc, mm);
+		p->argv = duplicate_argv(argv, argc);
 		if (p->argv == NULL) {
 			return -1;
 		}
@@ -79,8 +77,6 @@ static void init_pcb_file_descriptors(pcb_t *p, uint8_t read_fd, uint8_t write_f
 int init_pcb(pcb_t * p, process_entry_t entry, int argc, const char ** argv, const char * name,
 		int parent_pid, uint8_t priority , uint8_t read_fd, uint8_t write_fd, uint8_t killable) {
 
-	memory_manager_ADT mm = get_kernel_memory_manager();
-
 	p->parent_pid = parent_pid;
 	strncpy(p->name, name, MAX_PROCESS_NAME_LENGTH - 1);
 	p->name[MAX_PROCESS_NAME_LENGTH - 1] = '\0';
@@ -90,11 +86,11 @@ int init_pcb(pcb_t * p, process_entry_t entry, int argc, const char ** argv, con
 	p->unblockable = 0;
 	p->priority = priority;
 
-	if (init_pcb_argv(p, argc, argv, mm) == ERROR) {
+	if (init_pcb_argv(p, argc, argv) == ERROR) {
 		if (p->stack_base != NULL) {
-			mm_free(mm, p->stack_base);
+			mm_free(p->stack_base);
 		}
-		mm_free(mm, p);
+		mm_free(p);
 		return -1;
 	}
 
@@ -110,9 +106,7 @@ int create_process(process_entry_t entry, int argc, const char **argv,
 		return -1;
 	}
 
-	memory_manager_ADT mm = get_kernel_memory_manager();
-
-	pcb_t *p = mm_alloc(mm, sizeof(pcb_t));
+	pcb_t *p = mm_alloc(sizeof(pcb_t));
 	if (!p) {
 		return -1;
 	}
@@ -143,23 +137,23 @@ int create_process(process_entry_t entry, int argc, const char **argv,
 	
 }
 
-static void free_pcb_argv(pcb_t *p, memory_manager_ADT mm)
+static void free_pcb_argv(pcb_t *p)
 {
 	if (p->argv != NULL) {
 		for (int i = 0; i < p->argc; i++) {
 			if (p->argv[i] != NULL) {
-				mm_free(mm, p->argv[i]);
+				mm_free(p->argv[i]);
 			}
 		}
-		mm_free(mm, p->argv);
+		mm_free(p->argv);
 		p->argv = NULL;
 	}
 }
 
-static void free_pcb_stack(pcb_t *p, memory_manager_ADT mm)
+static void free_pcb_stack(pcb_t *p)
 {
 	if (p->stack_base != NULL) {
-		mm_free(mm, p->stack_base);
+		mm_free(p->stack_base);
 		p->stack_base    = NULL;
 		p->stack_pointer = NULL;
 	}
@@ -171,20 +165,20 @@ void free_process_resources(pcb_t *p)
 		return;
 	}
 
-	memory_manager_ADT mm = get_kernel_memory_manager();
 
-	free_pcb_argv(p, mm);
-	free_pcb_stack(p, mm);
+
+	free_pcb_argv(p);
+	free_pcb_stack(p);
 
 	// Liberar pcb_t
-	mm_free(mm, p);
+	mm_free(p);
 }
 
-static char **duplicate_argv(const char **argv, int argc, memory_manager_ADT mm)
+static char **duplicate_argv(const char **argv, int argc)
 {
 	// Caso argv vacío o NULL: crear argv minimal con solo NULL
 	if (argv == NULL || argc == 0 || (argc > 0 && argv[0] == NULL)) {
-		char **new_argv = mm_alloc(mm, sizeof(char *));
+		char **new_argv = mm_alloc(sizeof(char *));
 		if (new_argv == NULL) {
 			return NULL;
 		}
@@ -193,7 +187,7 @@ static char **duplicate_argv(const char **argv, int argc, memory_manager_ADT mm)
 	}
 
 	// Alocar array de punteros (argc + 1 para el NULL terminador)
-	char **new_argv = mm_alloc(mm, (argc + 1) * sizeof(char *));
+	char **new_argv = mm_alloc((argc + 1) * sizeof(char *));
 	if (new_argv == NULL) {
 		return NULL;
 	}
@@ -206,16 +200,16 @@ static char **duplicate_argv(const char **argv, int argc, memory_manager_ADT mm)
 		}
 
 		size_t len  = strlen(argv[i]) + 1;
-		new_argv[i] = mm_alloc(mm, len);
+		new_argv[i] = mm_alloc(len);
 
 		if (new_argv[i] == NULL) {
 			// Error: liberar todo lo alocado hasta ahora (ROLLBACK)
 			for (int j = 0; j < i; j++) {
 				if (new_argv[j] != NULL) {
-					mm_free(mm, new_argv[j]);
+					mm_free(new_argv[j]);
 				}
 			}
-			mm_free(mm, new_argv);
+			mm_free(new_argv);
 			return NULL;
 		}
 

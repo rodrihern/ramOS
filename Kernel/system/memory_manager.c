@@ -12,35 +12,31 @@
 
 // Header de cada bloque de memoria. Es una lista doblemente enlazada.
 typedef struct mem_block {
-	size_t            size; // Tamaño del bloque (sin incluir header)
+	uint64_t          size; // Tamaño del bloque (sin incluir header)
 	struct mem_block *next; // Siguiente bloque en la lista
 	struct mem_block *prev; // Bloque anterior
-	uint8_t              free; // true si está libre, false si está ocupado
-	uint32_t magic; // Número mágico para verificación.  Al liberar (free_memory) se verifica
-	                // que block->magic == MAGIC_NUMBER antes de confiar en el puntero; si
-	                // alguien pasó una dirección que no proviene del gestor (o fue
-	                // sobrescrita), la comparación falla y se ignora la operación
+	uint8_t           free; // true si está libre, false si está ocupado
+	uint32_t          magic; // Número mágico para verificación.  Al liberar (free_memory) se verifica
+	                         // que block->magic == MAGIC_NUMBER antes de confiar en el puntero; si
+	                         // alguien pasó una dirección que no proviene del gestor (o fue
+	                         // sobrescrita), la comparación falla y se ignora la operación
 } mem_block;
 
-// Estructura del Memory Manager (CDT)
-struct memory_manager_CDT {
-	void      *start_address;    // Dirección base de la memoria
-	size_t     total_size;       // Tamaño total
-	mem_block *first_block;      // Primer bloque de la lista
-	size_t     allocated_blocks; // Contador de bloques allocados
-	size_t     total_allocated;  // Total de bytes allocados
-};
-
-static memory_manager_ADT kernel_mm = NULL;
+// Variables globales del Memory Manager
+static void      *mm_start_address    = NULL;
+static uint64_t   mm_total_size       = 0;
+static mem_block *mm_first_block      = NULL;
+static uint64_t   mm_allocated_blocks = 0;
+static uint64_t   mm_total_allocated  = 0;
 
 // Alinea un tamaño al múltiplo de ALIGN_SIZE
-static size_t align(size_t size)
+static uint64_t align(uint64_t size)
 {
 	return (size + ALIGN_SIZE - 1) & ~(ALIGN_SIZE - 1);
 }
 
 // Divide un bloque si es muy grande
-static void split_block(mem_block *block, size_t size)
+static void split_block(mem_block *block, uint64_t size)
 {
 	if (block->size >= size + sizeof(mem_block) + MIN_BLOCK_SIZE) {
 		// Crear nuevo bloque con el espacio restante
@@ -97,9 +93,9 @@ static void coalesce_blocks(mem_block *block)
 }
 
 // Busca el primer bloque libre que tenga el tamaño suficiente (First Fit)
-static mem_block *find_free_block(memory_manager_ADT memory_manager, size_t size)
+static mem_block *find_free_block(uint64_t size)
 {
-	mem_block *current = memory_manager->first_block;
+	mem_block *current = mm_first_block;
 
 	while (current != NULL) {
 		if (current->free && current->size >= size && current->magic == MAGIC_NUMBER) {
@@ -111,43 +107,31 @@ static mem_block *find_free_block(memory_manager_ADT memory_manager, size_t size
 	return NULL; // No hay bloque libre suficiente
 }
 
-memory_manager_ADT create_memory_manager(void *start_address, size_t size)
+void init_memory_manager(void *start_address, uint64_t size)
 {
-	// Valida tamaño mínimo para el memory manager y al menos un bloque
-	if (start_address == NULL ||
-	    size < sizeof(struct memory_manager_CDT) + sizeof(mem_block) + MIN_BLOCK_SIZE) {
-		return NULL;
+	// Valida tamaño mínimo para al menos un bloque
+	if (start_address == NULL || size < sizeof(mem_block) + MIN_BLOCK_SIZE) {
+		return;
 	}
 
-	// El memory manager se almacena al inicio del área de memoria
-	memory_manager_ADT memory_manager = (memory_manager_ADT)start_address;
-	// El gestor guarda su propia estructura directamente en la memoria gestionada: el puntero
-	// apunta al inicio del heap y se interpreta como la estructura para poder escribir sus
-	// campos.
+	// Inicializar variables globales
+	mm_start_address    = start_address;
+	mm_total_size       = size;
+	mm_allocated_blocks = 0;
+	mm_total_allocated  = 0;
 
-	// Inicializar estructura
-	memory_manager->start_address    = start_address;
-	memory_manager->total_size       = size;
-	memory_manager->allocated_blocks = 0;
-	memory_manager->total_allocated  = 0;
-
-	// Crear el primer bloque libre después del CDT
-	memory_manager->first_block =
-	        (mem_block *)((char *)start_address + sizeof(struct memory_manager_CDT));
-	memory_manager->first_block->size =
-	        size - sizeof(struct memory_manager_CDT) -
-	        sizeof(mem_block); // Resto del espacio del memory manager
-	memory_manager->first_block->free  = true;
-	memory_manager->first_block->next  = NULL;
-	memory_manager->first_block->prev  = NULL;
-	memory_manager->first_block->magic = MAGIC_NUMBER;
-
-	return memory_manager;
+	// Crear el primer bloque libre al inicio del área de memoria
+	mm_first_block = (mem_block *)start_address;
+	mm_first_block->size  = size - sizeof(mem_block);
+	mm_first_block->free  = true;
+	mm_first_block->next  = NULL;
+	mm_first_block->prev  = NULL;
+	mm_first_block->magic = MAGIC_NUMBER;
 }
 
-void *mm_alloc(memory_manager_ADT memory_manager, size_t size)
+void *mm_alloc(uint64_t size)
 {
-	if (memory_manager == NULL || size == 0) {
+	if (mm_start_address == NULL || size == 0) {
 		return NULL;
 	}
 
@@ -155,7 +139,7 @@ void *mm_alloc(memory_manager_ADT memory_manager, size_t size)
 	size = align(size);
 
 	// Buscar un bloque libre
-	mem_block *block = find_free_block(memory_manager, size);
+	mem_block *block = find_free_block(size);
 
 	if (block == NULL) {
 		return NULL; // No hay memoria disponible
@@ -166,16 +150,16 @@ void *mm_alloc(memory_manager_ADT memory_manager, size_t size)
 
 	// Marcar como ocupado
 	block->free = false;
-	memory_manager->allocated_blocks++;
-	memory_manager->total_allocated += block->size;
+	mm_allocated_blocks++;
+	mm_total_allocated += block->size;
 
 	// Retornar puntero después del header (donde arranca el espacio utilizable del bloque)
 	return (char *)block + sizeof(mem_block);
 }
 
-void mm_free(memory_manager_ADT memory_manager, void *ptr)
+void mm_free(void *ptr)
 {
-	if (memory_manager == NULL || ptr == NULL) {
+	if (mm_start_address == NULL || ptr == NULL) {
 		return;
 	}
 
@@ -195,35 +179,23 @@ void mm_free(memory_manager_ADT memory_manager, void *ptr)
 
 	// Marcar como libre
 	block->free = true;
-	memory_manager->allocated_blocks--;
-	memory_manager->total_allocated -= block->size;
+	mm_allocated_blocks--;
+	mm_total_allocated -= block->size;
 
 	// Fusionar con bloques adyacentes
 	coalesce_blocks(block);
 }
 
-void get_memory_info(memory_manager_ADT memory_manager, mem_info_t * buffer)
+void get_memory_info(mem_info_t *buffer)
 {
-
-
-	if (memory_manager != NULL) {
-		buffer->total_memory = memory_manager->total_size;
-		buffer->used_memory  = memory_manager->total_allocated;
-		buffer->free_memory  = buffer->total_memory - buffer->used_memory -
-		                     sizeof(struct memory_manager_CDT) -
-		                     (memory_manager->allocated_blocks * sizeof(mem_block));
-		buffer->allocated_blocks = memory_manager->allocated_blocks;
+	if (mm_start_address == NULL || buffer == NULL) {
+		return;
 	}
 
-
+	buffer->total_memory = mm_total_size;
+	buffer->used_memory  = mm_total_allocated;
+	buffer->free_memory  = buffer->total_memory - buffer->used_memory -
+	                       (mm_allocated_blocks * sizeof(mem_block));
+	buffer->allocated_blocks = mm_allocated_blocks;
 }
 
-void init_kernel_memory_manager(void)
-{
-	kernel_mm = create_memory_manager((void *)HEAP_START_ADDRESS, HEAP_SIZE);
-}
-
-memory_manager_ADT get_kernel_memory_manager(void)
-{
-	return kernel_mm;
-}

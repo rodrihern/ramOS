@@ -3,6 +3,7 @@
 
 #include "queue.h"
 #include "memory_manager.h"
+#include <stddef.h>
 
 typedef struct node {
 	int          value;
@@ -18,8 +19,8 @@ typedef struct queue_cdt {
 
 queue_t q_init()
 {
-	memory_manager_ADT mm = get_kernel_memory_manager();
-	queue_t            q  = mm_alloc(mm, sizeof(queue_cdt));
+
+	queue_t q = mm_alloc(sizeof(queue_cdt));
 	if (q == NULL) {
 		return NULL;
 	}
@@ -33,8 +34,7 @@ queue_t q_init()
 // devuelve 1 si lo agrego, 0 sino (si se puede cambiar a bool)
 int q_add(queue_t q, int value)
 {
-	memory_manager_ADT mm       = get_kernel_memory_manager();
-	node_t            *new_node = mm_alloc(mm, sizeof(node_t));
+	node_t            *new_node = mm_alloc(sizeof(node_t));
 	if (new_node == NULL) {
 		return 0;
 	}
@@ -58,11 +58,11 @@ int q_poll(queue_t q)
 	if (q_is_empty(q)) {
 		return -1;
 	}
-	memory_manager_ADT mm      = get_kernel_memory_manager();
-	int                res     = q->first->value;
-	node_t            *to_free = q->first;
-	q->first                   = to_free->next;
-	mm_free(mm, to_free);
+
+	int res = q->first->value;
+	node_t *to_free = q->first;
+	q->first = to_free->next;
+	mm_free(to_free);
 	if (q->first == NULL) {
 		q->last = NULL;
 	}
@@ -76,11 +76,11 @@ int q_remove(queue_t q, int value)
 	if (q_is_empty(q)) {
 		return 0;
 	}
-	memory_manager_ADT mm = get_kernel_memory_manager();
+
 	if (q->first->value == value) {
 		node_t *to_free = q->first;
 		q->first        = q->first->next;
-		mm_free(mm, to_free);
+		mm_free(to_free);
 		if (q_is_empty(q)) {
 			q->last = NULL;
 		}
@@ -91,7 +91,7 @@ int q_remove(queue_t q, int value)
 	while (current != NULL) {
 		if (current->value == value) {
 			prev->next = current->next;
-			mm_free(mm, current);
+			mm_free(current);
 			if (prev->next == NULL) {
 				q->last = prev;
 			}
@@ -135,14 +135,13 @@ void q_destroy(queue_t q)
 		return;
 	}
 
-	memory_manager_ADT mm      = get_kernel_memory_manager();
-	node_t            *current = q->first;
+	node_t *current = q->first;
 	while (current != NULL) {
 		node_t *next = current->next;
-		mm_free(mm, current);
+		mm_free(current);
 		current = next;
 	}
-	mm_free(mm, q);
+	mm_free(q);
 }
 
 // Inicializa el iterador al comienzo de la queue
@@ -187,8 +186,7 @@ int q_remove_current(queue_t q)
 		return 0;
 	}
 
-	memory_manager_ADT mm        = get_kernel_memory_manager();
-	node_t            *to_remove = q->prev_current;
+	node_t *to_remove = q->prev_current;
 
 	// Caso 1: el nodo a remover es el primero
 	if (to_remove == q->first) {
@@ -196,7 +194,7 @@ int q_remove_current(queue_t q)
 		if (q->first == NULL) {
 			q->last = NULL;
 		}
-		mm_free(mm, to_remove);
+		mm_free(to_remove);
 		q->prev_current = NULL;
 		return 1;
 	}
@@ -220,7 +218,7 @@ int q_remove_current(queue_t q)
 		q->last = prev;
 	}
 
-	mm_free(mm, to_remove);
+	mm_free(to_remove);
 	q->prev_current = NULL;
 
 	return 1;

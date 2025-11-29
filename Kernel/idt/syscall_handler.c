@@ -276,12 +276,12 @@ static uint64_t sys_ms_elapsed()
 // Memory management syscalls
 static void *sys_malloc(uint64_t size)
 {
-	return mm_alloc(get_kernel_memory_manager(), size);
+	return mm_alloc(size);
 }
 
 static void sys_free(void *ptr)
 {
-	mm_free(get_kernel_memory_manager(), ptr);
+	mm_free(ptr);
 }
 
 static int sys_mem_info(mem_info_t *buffer)
@@ -289,7 +289,7 @@ static int sys_mem_info(mem_info_t *buffer)
 	if (buffer == NULL) {
 		return -1;
 	}
-	get_memory_info(get_kernel_memory_manager(), buffer);
+	get_memory_info(buffer);
 	return 0;
 }
 
