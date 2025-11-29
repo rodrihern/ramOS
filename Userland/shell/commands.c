@@ -36,7 +36,7 @@ static external_program_t programs[] = {
 	{"filter", "filters out vowels from input until '-' is encountered", &filter_main},
 	{"wc", "counts the number of lines, words and characters from STDIN", &wc_main},
 	{"spotify", "plays a song", &spotify_main},
-	{"calc", "performs a math operation", &calc_main},
+	{"calc", "a naive calculator that performs simple math operations with ints", &calc_main},
 	{"kill", "kills a process given its pid", &kill_main},
 	{"block", "blocks a process given its pid", &block_main},
 	{"unblock", "unblocks a blocked process given its pid", &unblock_main},

@@ -12,6 +12,21 @@ int kill_main(int argc, char *argv[])
 
 	int errors = 0;
 
+	if (strcmp(argv[0], "all") == 0) {
+		int my_pid = sys_getpid();
+		for (int i = 0; i < MAX_PROCESSES; i++) {
+			if (i == my_pid) {
+				continue;
+			}
+			int res = sys_kill(i);
+			if (res == 0) {
+				printf("Process %d killed successfully\n", i);
+			}
+		}
+
+		return 0;
+	}
+
 	for (int i = 0; i < argc; i++) {
 		int pid = satoi(argv[i]);
 

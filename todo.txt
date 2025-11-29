@@ -1,7 +1,9 @@
 
 rework mm -> entenderlo y que no sea un adt, tambien ver de usar toda la memoria disponible como korman
 
+ver de hacer que se pueda inicializar un proceso remapeandole los fd que uno quiera
 
+usar bool para cuando quiero usar booleanos para mejorar la claridad no?
 
 ---- video
 
@@ -10,6 +12,8 @@ pantalla de inicio
 rework driver de video y que solo el de fg pueda dibujar
 
 rework de tty para tener un buffer[max_rows * max_cols]
+
+ctrl+ y ctrl- para cambiar tamaño de la tty
 
 todas las funciones de dibujo a graphics.c en userland (incluyendo algunas de strings con fonts)
 
