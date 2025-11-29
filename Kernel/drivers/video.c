@@ -112,21 +112,6 @@ fill_rectangle(0, last_line_start, WIDTH,
 				HEIGHT, BKG_COLOR);
 }
 
-void vd_new_line() {
-cursor_x = 0;
-uint64_t step_y = text_size * FONT_HEIGHT;
-
-// Verificar si hay espacio para una línea más sin hacer scroll
-if (cursor_y + step_y < HEIGHT) {
-	cursor_y += step_y;
-	fill_rectangle(cursor_x, cursor_y, WIDTH,
-				cursor_y + FONT_HEIGHT * text_size, BKG_COLOR);
-} else {
-	scroll_up();
-	cursor_y =
-		HEIGHT - step_y; // Posicionar cursor en la última línea
-}
-}
 
 static void update_cursor() {
 if (!is_within_screen_bounds(cursor_x + FONT_WIDTH * text_size,
@@ -182,6 +167,24 @@ static void draw_cursor() {
 static void delete_cursor() {
 	draw_bitmap(font[0], cursor_x, cursor_y, 0x000000, text_size);
 }
+
+void vd_new_line() {
+	cursor_x = 0;
+	uint64_t step_y = text_size * FONT_HEIGHT;
+
+	// Verificar si hay espacio para una línea más sin hacer scroll
+	if (cursor_y + step_y < HEIGHT) {
+		cursor_y += step_y;
+		fill_rectangle(cursor_x, cursor_y, WIDTH,
+					cursor_y + FONT_HEIGHT * text_size, BKG_COLOR);
+	} else {
+		scroll_up();
+		cursor_y =
+			HEIGHT - step_y; // Posicionar cursor en la última línea
+	}
+	draw_cursor();
+}
+
 
 static void delete_char() {
 	move_cursor_left();
@@ -267,13 +270,13 @@ void vd_draw_char(uint8_t ch, uint64_t x, uint64_t y, uint32_t color, uint64_t s
 
 void vd_draw_string(const char *str, uint64_t x, uint64_t y, uint32_t color,
 					uint64_t size) {
-if (size == 0) {
-	size = 1; // aseguramos minimo size de 1
-}
+	if (size == 0) {
+		size = 1; // aseguramos minimo size de 1
+	}
 
-for (int i = 0; str[i] != 0; i++) {
-	vd_draw_char(str[i], x + (FONT_WIDTH * size) * i, y, color, size);
-}
+	for (int i = 0; str[i] != 0; i++) {
+		vd_draw_char(str[i], x + (FONT_WIDTH * size) * i, y, color, size);
+	}
 }
 
 void vd_draw_line(uint64_t x0, uint64_t y0, uint64_t x1, uint64_t y1,
