@@ -1,7 +1,5 @@
 
 
-ver de hacer que se pueda inicializar un proceso remapeandole los fd que uno quiera
-
 ---- video
 
 pantalla de inicio
@@ -20,7 +18,8 @@ syscalls:
 
     typedef region_t
 
-    habilitar y deshabilitar tty -> sys_enable/disable_tty
+    habilitar y deshabilitar tty -> solo el de fg puede
+    con hacer un present se deshabilita solo la tty
 
     cambiar background -> sys_tty_bgcolor
 
@@ -34,6 +33,13 @@ syscalls:
 
 ----
 
+tengo que ver que pasa si quieren cosas de teclado y los crean en background
+
+jueguito con delta t
+
+piano
+
+doom
 
 --------
 
@@ -43,13 +49,28 @@ poner gdb
 
 -------
 
-jueguito con delta t
+---- procesos
 
-piano
+hacer un dup(?)
 
-doom
+refactorizar la inicializacion del proceso -> 
+    hereda los BUILTIN_FD
+    luego recibe remapeos tipo dup que son los del padre
+    recibe en la inicializacion si pasa a ser hijo de init (en ese caso no heredaria nada)
+
+ver si quiero seguir teniendo:
+    // syscalls para foreground process
+    sys_set_foreground_process(int pid);
+    sys_adopt_init_as_parent(int pid);
+    sys_get_foreground_process(void);
 
 limpiar el scheduler
 
+
 ver cleanup resources (leaks en bg)
+
+----
+
+
+
 
