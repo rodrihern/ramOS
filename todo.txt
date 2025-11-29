@@ -1,9 +1,6 @@
 
-rework mm -> entenderlo y que no sea un adt, tambien ver de usar toda la memoria disponible como korman
 
 ver de hacer que se pueda inicializar un proceso remapeandole los fd que uno quiera
-
-usar bool para cuando quiero usar booleanos para mejorar la claridad no?
 
 ---- video
 
@@ -13,11 +10,14 @@ rework driver de video y que solo el de fg pueda dibujar
 
 rework de tty para tener un buffer[max_rows * max_cols]
 
-ctrl+ y ctrl- para cambiar tamaño de la tty
+ctrl+ y ctrl- para cambiar tamaño de la tty desde el keyboard
 
-todas las funciones de dibujo a graphics.c en userland (incluyendo algunas de strings con fonts)
+hacer un frambuffer adt para las funciones de dibujo (incluyendo algunas de strings con fonts)
+
 
 syscalls:
+    rehacer la de sys_ticks de gede y para el jueguito
+
     typedef region_t
 
     habilitar y deshabilitar tty -> sys_enable/disable_tty
@@ -31,6 +31,7 @@ syscalls:
     present_region
 
     present_nregions
+
 ----
 
 
@@ -42,14 +43,13 @@ poner gdb
 
 -------
 
-limpiar el scheduler
-
-ver si hacemos que herede los fd del padre
-
-ver cleanup resources (leaks en bg)
-
 jueguito con delta t
 
 piano
 
 doom
+
+limpiar el scheduler
+
+ver cleanup resources (leaks en bg)
+

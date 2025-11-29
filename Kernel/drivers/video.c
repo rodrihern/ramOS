@@ -37,13 +37,13 @@ void get_video_info(video_info_t * buffer) {
 	
 }
 
-//Write a 0xRRGGBB pixel to framebuffer. Supports 24/32bpp.
 void put_pixel(uint32_t hex_color, uint64_t x, uint64_t y) {
 	if (!is_within_screen_bounds(x, y)) {
 		return;
 	}
 	uint8_t *framebuffer = (uint8_t *)(uintptr_t)VBE_mode_info->framebuffer;
 	uint64_t offset = (x * (BPP / 8)) + (y * PITCH);
+	
 	// if (BPP == 32) {
 	// 	uint32_t *pixel = (uint32_t *)(framebuffer + offset);
 	// 	*pixel = hex_color;
