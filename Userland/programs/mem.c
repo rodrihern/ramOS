@@ -3,29 +3,17 @@
 
 #include "usrlib.h"
 
-// Helper para imprimir número con padding (alineado a la derecha)
-static void print_padded_int(unsigned value, int width)
-{
-	// Contar cuántos dígitos tiene el número
-	int      len = 0;
-	unsigned tmp = value;
+#define UNIT_COUNT 4
 
-	if (value == 0) {
-		len = 1;
-	} else {
-		while (tmp > 0) {
-			len++;
-			tmp /= 10;
-		}
+static void print_converted(uint64_t value) {
+	char *units[UNIT_COUNT] = {"B", "KB", "MB", "GB"};
+	int unit_idx = 0;
+	while (value >= 1024 && unit_idx < UNIT_COUNT-1) {
+		value /= 1024;
+		unit_idx++;
 	}
 
-	// Imprimir espacios de padding a la izquierda
-	for (int i = 0; i < width - len; i++) {
-		putchar(' ');
-	}
-
-	// Imprimir el número
-	printf("%u", value);
+	printf("%d %s", value, units[unit_idx]);
 }
 
 int mem_main(int argc, char *argv[])
@@ -37,36 +25,24 @@ int mem_main(int argc, char *argv[])
 
 	mem_info_t info;
 	sys_mem_info(&info);
+	
 
-	char *units[] = {"B", "KB", "MB", "GB"};
+	double used_percentaje = (info.used_memory / (double) info.free_memory) * 100;
+	double free_percentaje = 100 - used_percentaje;
 
-	size_t      values[] = {info.total_memory, info.used_memory, info.free_memory};
-	const char *labels[] = {"Total", "Used", "Free"};
+	printf("Total: ");
+	print_converted(info.total_memory);
+	putchar('\n');
 
-	// Mostrar información de memoria
-	for (int i = 0; i < 3; i++) {
-		size_t val          = values[i];
-		int    unitIndex    = 0;
-		double convertedVal = (double)val;
+	printf("Used:  ");
+	print_converted(info.used_memory);
+	printf(" (%f %%)\n", used_percentaje);
 
-		while (convertedVal >= 1024.0 && unitIndex < 3) {
-			convertedVal /= 1024.0;
-			unitIndex++;
-		}
+	printf("Free:  ");
+	print_converted(info.free_memory);
+	printf(" (%f %%)\n", free_percentaje);
 
-		int rounded = (int)(convertedVal + 0.5);
-
-		// Padding manual para las etiquetas
-		printf("%s: ", labels[i]);
-
-		// Número en bytes con padding (alineado a 8 caracteres)
-		print_padded_int((unsigned)val, 8);
-
-		// Valor convertido
-		printf(" (%u %s)\n", (unsigned)rounded, units[unitIndex]);
-	}
-
-	printf("Allocated blocks: %u\n", (unsigned)info.allocated_blocks);
+	printf("Allocated blocks: %d\n", info.allocated_blocks);
 
 	return OK;
 }

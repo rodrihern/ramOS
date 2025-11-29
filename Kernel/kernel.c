@@ -48,10 +48,23 @@ void *getStackBase()
 void *initializeKernelBinary()
 {
 	void *moduleAddresses[] = {sampleCodeModuleAddress, sampleDataModuleAddress};
+	uint32_t moduleCount = sizeof(moduleAddresses) / sizeof(moduleAddresses[0]);
+	uint64_t moduleSizes[moduleCount];
 
-	loadModules(&endOfKernelBinary, moduleAddresses);
-
+	loadModules(&endOfKernelBinary, moduleAddresses, moduleSizes);
 	clearBSS(&bss, &endOfKernel - &bss);
+
+	// Read total memory from the address provided by the bootloader
+	uint32_t ram_amount_mib = *((uint32_t *)0x5020);
+	uint64_t total_memory_bytes = (uint64_t)ram_amount_mib * 1024 * 1024;
+
+	uint64_t sampleDataModuleSize = moduleSizes[moduleCount - 1];
+	void * mm_start = (void*)((uint64_t)sampleDataModuleAddress + sampleDataModuleSize);
+    uint64_t mm_size = total_memory_bytes - (uint64_t)mm_start;
+
+	init_memory_manager(mm_start, mm_size);
+
+
 
 	load_idt();
 
@@ -60,7 +73,6 @@ void *initializeKernelBinary()
 
 int main()
 {
-	init_memory_manager((void *)HEAP_START_ADDRESS, HEAP_SIZE);
 
 	init_timer();
 	

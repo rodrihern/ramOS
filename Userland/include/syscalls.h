@@ -70,10 +70,10 @@ typedef struct video_info {
 
 
 typedef struct mem_info {
-	size_t total_memory;
-	size_t used_memory;
-	size_t free_memory;
-	size_t allocated_blocks;
+	uint64_t total_memory;
+	uint64_t used_memory;
+	uint64_t free_memory;
+	uint64_t allocated_blocks;
 } mem_info_t;
 
 typedef int (*process_entry_t)(int argc, char **argv);

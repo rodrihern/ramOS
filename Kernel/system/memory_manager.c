@@ -109,8 +109,25 @@ static mem_block *find_free_block(uint64_t size)
 
 void init_memory_manager(void *start_address, uint64_t size)
 {
-	// Valida tamaño mínimo para al menos un bloque
-	if (start_address == NULL || size < sizeof(mem_block) + MIN_BLOCK_SIZE) {
+	// Validación inicial básica
+	if (start_address == NULL) {
+		return;
+	}
+
+	// Alinear la dirección de inicio
+	uint64_t original_addr = (uint64_t)start_address;
+	uint64_t aligned_addr = align(original_addr);
+	uint64_t offset = aligned_addr - original_addr;
+	
+	// Ajustar el tamaño para compensar el alineamiento
+	if (offset >= size) {
+		return; // No hay espacio suficiente después del alineamiento
+	}
+	size -= offset;
+	start_address = (void *)aligned_addr;
+
+	// Validar tamaño después del alineamiento
+	if (size < sizeof(mem_block) + MIN_BLOCK_SIZE) {
 		return;
 	}
 
