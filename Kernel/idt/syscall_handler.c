@@ -80,6 +80,10 @@ void *syscalls[] = {
 
 uint64_t syscall_count = sizeof(syscalls) / sizeof(syscalls[0]);
 
+static uint8_t is_foreground() {
+	return sch_get_current_pid() == sch_get_foreground_pid();
+}
+
 static int sys_register_snapshot(register_info_t * buffer)
 {
 	if (buffer == NULL) {
@@ -106,9 +110,8 @@ static int sys_read(int fd, char *buffer, uint64_t count)
 	}
 
 	if (fd == STDIN) { // quiere leer de teclado
-		int foreground_pid = sch_get_foreground_pid();
-		if (pid != foreground_pid) {
-			return -1; // solo el proceso de foreground puede leer del teclado
+		if (!is_foreground()) {
+			return -1; // only foreground process can read form keyboard
 		}
 		return kb_read_buffer(buffer, count);
 	}
@@ -211,15 +214,29 @@ static int sys_video_info(video_info_t *buffer)
 }
 
 static void sys_present(void * framebuffer) {
-	// TODO: implement
+	if (!is_foreground()) {
+		return;
+	}
+
+	vd_present(framebuffer);
 }
 
 static void sys_present_region(void * framebuffer, region_t * region) {
-	// TODO: implement
+	if (!is_foreground()) {
+		return;
+	}
+
+	vd_present_region(framebuffer, region);
 }
 
-static void sys_present_nregions(void * framebuffer, region_t * regions, uint64_t n)  {
-	// TODO: implement
+static void sys_present_nregions(void * framebuffer, region_t * regions[], uint64_t n)  {
+	if (!is_foreground()) {
+		return;
+	}
+
+	for (uint64_t i = 0; i < n; i++) {
+		vd_present_region(framebuffer, regions[i]);
+	}
 }
 
 static uint8_t sys_is_pressed(uint8_t scancode)

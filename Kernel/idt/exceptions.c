@@ -26,7 +26,7 @@ void exception_dispatcher(int exception)
 static void excep_handler(char *msg)
 {
 	vd_print(msg, 0xff0000);
-	vd_new_line();
+	vd_putchar('\n', 0xff0000);
 	int pid = sch_get_current_pid();
 	sch_kill_process(pid);
 	

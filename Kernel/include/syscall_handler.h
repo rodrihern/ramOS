@@ -34,7 +34,7 @@ static void sys_tty_set_fontsize(int size);
 static int sys_video_info(video_info_t *buffer);
 static void sys_present(void * framebuffer);
 static void sys_present_region(void * framebuffer, region_t * region);
-static void sys_present_nregions(void * framebuffer, region_t * regions, uint64_t n);
+static void sys_present_nregions(void * framebuffer, region_t * regions[], uint64_t n);
 
 // keyboard
 static uint8_t sys_is_pressed(uint8_t scancode);

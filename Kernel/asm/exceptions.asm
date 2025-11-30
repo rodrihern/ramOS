@@ -2,11 +2,11 @@ GLOBAL print_registers
 GLOBAL return_to_userland
 EXTERN print
 EXTERN printRegisterFormat
-EXTERN vd_new_line
 EXTERN main
 EXTERN getStackBase
 EXTERN vd_set_text_size
 EXTERN vd_print
+EXTERN vd_putchar
 EXTERN uint64_to_register_format
 section .text
 
@@ -35,8 +35,9 @@ print_registers:
     mov rsi, 0xFF0000 
     call vd_print
 
-
-    call vd_new_line
+    mov rdi, 10 ; \n
+    mov rsi, 0xFF0000 
+    call vd_putchar
 
     cmp r10, length
     jne .loop_registers

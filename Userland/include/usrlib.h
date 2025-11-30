@@ -46,3 +46,4 @@ uint32_t get_uint();
 uint32_t get_uniform(uint32_t max);
 
 #endif
+

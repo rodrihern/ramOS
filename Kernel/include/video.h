@@ -71,17 +71,20 @@ typedef struct region {
   uint16_t h;
 } region_t;
 
+// video
 
 void get_video_info(video_info_t * buffer);
+void vd_present(void * framebuffer);
+void vd_present_region(void * framebuffer, region_t * region);
 
+// tty
 
+void vd_putchar(char c, uint32_t color);
+void vd_print(const char *str, uint32_t color);
 void vd_show_tty();
 void vd_clear_tty();
+void vd_set_bg_color(uint32_t color);
 void vd_set_text_size(int size);
 int vd_get_text_size();
-
-void    vd_putchar(uint8_t ch, uint32_t color);
-void    vd_print(const char *str, uint32_t color);
-void    vd_new_line();
 
 #endif 
