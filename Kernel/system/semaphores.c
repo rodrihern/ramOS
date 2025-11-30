@@ -216,19 +216,14 @@ int64_t sem_reset(char *name, int new_value)
 
 	acquire_lock(&sem->lock);
 
-	// Vaciar TODA la cola de procesos esperando si new_value == 0
-	// Esto es necesario para el caso del flush del teclado
-	while (!q_is_empty(sem->queue)) {
+	// Desencolar procesos hasta agotar new_value o la cola
+	while (!q_is_empty(sem->queue) && new_value > 0) {
 		int pid = q_poll(sem->queue);
 		if (pid < 0) {
 			break;
 		}
-		// Solo desbloquear si hay recursos disponibles
-		if (new_value > 0) {
-			to_unblock[unblock_count++] = (uint32_t) pid;
-			new_value--;
-		}
-		// Si new_value == 0, simplemente remover de la cola sin desbloquear
+		to_unblock[unblock_count++] = (uint32_t) pid;
+		new_value--;
 	}
 
 	// Ajustar contador a lo que quede disponible
@@ -257,11 +252,14 @@ int remove_process_from_all_semaphore_queues(uint32_t pid)
 			continue;
 		}
 
+		// Siempre intentar remover el PID de la cola de espera del semáforo,
+		// independientemente de si es "owner" del semáforo o no.
+		acquire_lock(&sem->lock);
+		(void)remove_process_from_queue(sem, pid);
+		release_lock(&sem->lock);
+
+		// Si el proceso era owner del semáforo, ajustar contadores/cerrar por PID.
 		if (sem->owner_pids[pid] == OCCUPIED) {
-			// Remover de la cola sin importar el estado (el proceso puede ya estar TERMINATED)
-			acquire_lock(&sem->lock);
-			remove_process_from_queue(sem, pid);
-			release_lock(&sem->lock);
 			sem_close_by_pid(sem->name, pid);
 		}
 	}
