@@ -2,6 +2,8 @@
 
 ---- video
 
+ver que onda el cursor cuando hago ps
+
 pantalla de inicio
 
 rework driver de video y que solo el de fg pueda dibujar

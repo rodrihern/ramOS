@@ -97,7 +97,7 @@ static int sys_write(int fd, const char *buffer, uint64_t count)
 	if (fd < FIRST_FREE_FD) {
 		uint32_t color = fd_colors[fd];
 		for (int i = 0; i < count; i++) {
-			vd_put_char(buffer[i], color);
+			vd_putchar(buffer[i], color);
 		}
 
 		return count;

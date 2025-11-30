@@ -77,7 +77,7 @@ void    vd_set_text_size(uint8_t size);
 uint8_t vd_get_text_size();
 void    vd_increase_text_size();
 void    vd_decrease_text_size();
-void    vd_put_char(uint8_t ch, uint32_t color);
+void    vd_putchar(uint8_t ch, uint32_t color);
 void    vd_print(const char *str, uint32_t color);
 void    vd_clear();
 void    vd_new_line();

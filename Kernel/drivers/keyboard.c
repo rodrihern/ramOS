@@ -94,8 +94,7 @@ void kb_flush_buffer() {
 uint64_t kb_read_buffer(char *buff_copy, uint64_t count) {
 
   for (int i = 0; i < count; i++) {
-    sem_wait(
-        KEYBOARD_SEM_NAME); // Bloquea hasta que haya un carácter disponible
+    sem_wait(KEYBOARD_SEM_NAME); // Bloquea hasta que haya un carácter disponible
     buff_copy[i] = kb_get_char_from_buffer();
   }
   return count;

@@ -196,24 +196,24 @@ static void delete_char() {
 	draw_cursor();
 }
 
-void vd_put_char(uint8_t ch, uint32_t color) {
-	if (!text_mode) {
+void vd_putchar(uint8_t ch, uint32_t color) {
+	if (!text_mode || ch >= 128) {
 		return;
 	}
 	switch (ch) {
-	case '\b':
-		delete_cursor();
-		delete_char();
-		break;
-	case '\n':
-		delete_cursor();
-		vd_new_line();
-		break;
-	default:
-		vd_draw_char(ch, cursor_x, cursor_y, color, text_size);
-		move_cursor_right();
-		draw_cursor();
-		break;
+		case '\b':
+			delete_cursor();
+			delete_char();
+			break;
+		case '\n':
+			delete_cursor();
+			vd_new_line();
+			break;
+		default:
+			vd_draw_char(ch, cursor_x, cursor_y, color, text_size);
+			move_cursor_right();
+			draw_cursor();
+			break;
 	}
 }
 
@@ -222,9 +222,9 @@ void vd_print(const char *str, uint32_t color) {
 		return;
 	}
 	for (int i = 0; str[i] != 0; i++) {
-		vd_put_char(str[i], color);
+		vd_putchar(str[i], color);
 	}
-	delete_cursor();
+
 }
 
 void vd_increase_text_size() {
