@@ -24,7 +24,7 @@ static const char *get_history_down(void);
 
 int main(void)
 {
-	sys_textmode();
+	sys_tty_show();
 
 	sys_flush(STDIN);
 
@@ -129,18 +129,20 @@ void read_line(char *buf, uint64_t max)
 
 void incfont_cmd(int argc, char * argv[])
 {
-	sys_increase_fontsize();
-	sys_clear();
+	int size = sys_tty_get_fontsize() + 1;
+	sys_tty_set_fontsize(size);
+	sys_tty_clear();
 }
 
 void decfont_cmd(int argc, char * argv[])
 {
-	sys_decrease_fontsize();
-	sys_clear();
+	uint8_t size = sys_tty_get_fontsize() - 1;
+	sys_tty_set_fontsize(size);
+	sys_tty_clear();
 }
 
 void cls_cmd(int argc, char *argv[]) {
-	sys_clear();
+	sys_tty_clear();
 }
 
 void username_cmd(int argc, char *argv[])

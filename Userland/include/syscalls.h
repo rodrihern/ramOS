@@ -68,6 +68,13 @@ typedef struct video_info {
 	uint8_t bpp;
 } video_info_t;
 
+typedef struct region {
+	uint16_t x;
+	uint16_t y;
+	uint16_t width;
+	uint16_t height;
+} region_t;
+
 
 typedef struct mem_info {
 	uint64_t total_memory;
@@ -109,67 +116,72 @@ typedef struct pipe_info {
 	int  buffered;
 } pipe_info_t;
 
-// syscalls de io
-extern int      sys_read(int fd, char *buf, uint64_t count);
-extern int      sys_write(int fd, const char *buf, uint64_t count);
-extern int sys_register_snapshot(register_info_t * buffer);
-extern void     sys_speaker_start(uint32_t freq_hz);
-extern void     sys_speaker_stop(void);
+// registers
+extern int sys_register_snapshot(register_info_t *buffer);
+
+// io
+extern int sys_read(int fd, char *buf, uint64_t count);
+extern int sys_write(int fd, const char *buf, uint64_t count);
+extern int sys_flush(int fd);
+
+// tty
+extern void sys_tty_show(void);
+extern void sys_tty_clear(void);
+extern void sys_tty_set_bgcolor(uint32_t color);
+extern void sys_tty_set_textcolor(uint32_t color);
+extern int sys_tty_get_fontsize(void);
+extern void sys_tty_set_fontsize(int size);
+
+// video
+extern int sys_video_info(video_info_t *buffer);
+extern void sys_present(void *framebuffer);
+extern void sys_present_region(void *framebuffer, region_t *region);
+extern void sys_present_nregions(void *framebuffer, region_t *regions, uint64_t n);
+
+// keyboard
 extern uint8_t sys_is_pressed(uint8_t scancode);
-extern void     sys_flush(uint8_t fd);
 
-// syscalls de video
-extern void     sys_increase_fontsize();
-extern void     sys_decrease_fontsize();
-extern int      sys_video_info(video_info_t *buffer);
-extern void     sys_circle(uint64_t fill, uint64_t *info, uint32_t color);
-extern void     sys_rectangle(uint64_t fill, uint64_t *info, uint32_t color);
-extern void     sys_draw_line(uint64_t *info, uint32_t color);
-extern void     sys_draw_string(const char *s, uint64_t *info, uint32_t color);
-extern void     sys_clear(void);
-extern void     sys_textmode();
-extern void     sys_videomode();
-extern void     sys_put_pixel(uint32_t color, uint64_t x, uint64_t y);
+// time
+extern void sys_sleep(uint64_t miliseconds);
+extern uint64_t sys_ms_elapsed(void);
+extern uint64_t sys_ticks_elapsed(void);
+extern int sys_time_info(time_info_t *buffer);
 
-// syscalls de tiempo
-extern int     sys_time_info(time_info_t *buffer);
-extern void     sys_sleep(uint64_t miliseconds);
-extern uint64_t sys_ms_elapsed();
+// sound
+extern void sys_speaker_start(uint32_t freq_hz);
+extern void sys_speaker_stop(void);
 
-// syscalls de memory management
+// memory
 extern void *sys_malloc(uint64_t size);
-extern void       sys_free(void *ptr);
-extern int sys_mem_info(mem_info_t * buffer);
+extern void sys_free(void *ptr);
+extern int sys_mem_info(mem_info_t *buffer);
 
-// syscalls de procesos
-extern int64_t
-sys_create_process(void *entry, int argc, const char **argv, const char *name, process_attrs_t * attrs);
-extern void    sys_exit(int status);
+// processes
+extern int64_t sys_create_process(void *entry, int argc, const char **argv, const char *name, process_attrs_t *attrs);
+extern void sys_exit(int status);
 extern int64_t sys_getpid(void);
 extern int64_t sys_kill(int pid);
 extern int64_t sys_block(int pid);
 extern int64_t sys_unblock(int pid);
 extern int64_t sys_wait(int pid);
 extern int64_t sys_nice(int pid, int new_prio);
-extern void    sys_yield();
-extern int     sys_processes_info(process_info_t *buf, int max_count);
-
-// syscalls para foreground process
+extern void sys_yield(void);
 extern int sys_set_foreground_process(int pid);
 extern int sys_adopt_init_as_parent(int pid);
 extern int sys_get_foreground_process(void);
+extern int sys_processes_info(process_info_t *buf, int max_count);
 
-// syscalls de semaforos
+// semaphores
 extern int64_t sys_sem_open(const char *name, int value);
-extern void    sys_sem_close(const char *name);
-extern void    sys_sem_wait(const char *name);
-extern void    sys_sem_post(const char *name);
+extern void sys_sem_close(const char *name);
+extern void sys_sem_wait(const char *name);
+extern void sys_sem_post(const char *name);
 
-// syscalls de pipes
-extern int  sys_create_pipe(int fds[2]);
+// pipes
+extern int sys_create_pipe(int fds[2]);
 extern void sys_destroy_pipe(int fd);
-extern int  sys_open_named_pipe(char *name, int fds[2]);
-extern int  sys_close_fd(int fd);
-extern int  sys_pipes_info(pipe_info_t *buf, int max_count);
+extern int sys_open_named_pipe(char *name, int fds[2]);
+extern int sys_close_fd(int fd);
+extern int sys_pipes_info(pipe_info_t *buf, int max_count);
 
 #endif

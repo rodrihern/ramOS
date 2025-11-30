@@ -82,7 +82,7 @@ int main()
 
 	init_keyboard_sem();
 
-	vd_enable_textmode();
+	vd_show_tty();
 
 
 	timer_tick(); // esto hace el salto a userland

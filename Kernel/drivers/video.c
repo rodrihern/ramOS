@@ -19,25 +19,19 @@
 
 static VBEInfoPtr VBE_mode_info = (VBEInfoPtr)0x0000000000005C00;
 
-#define WIDTH (VBE_mode_info->width)
-#define HEIGHT (VBE_mode_info->height)
-#define BPP (VBE_mode_info->bpp)
-#define PITCH (VBE_mode_info->pitch)
+static int tty_show = DISABLED;
 
+static uint64_t cursor_x;
+static uint64_t cursor_y;
+static uint8_t text_size = 1;
 
 static int is_within_screen_bounds(uint64_t x, uint64_t y) {
-return x < VBE_mode_info->width && y < VBE_mode_info->height;
+	return x < VBE_mode_info->width && y < VBE_mode_info->height;
 }
 
-void get_video_info(video_info_t * buffer) {
-	buffer->width = WIDTH;
-	buffer->heght = HEIGHT;
-	buffer->pitch = PITCH;
-	buffer->bpp = BPP;
-	
-}
 
-void put_pixel(uint32_t hex_color, uint64_t x, uint64_t y) {
+
+static void put_pixel(uint32_t hex_color, uint64_t x, uint64_t y) {
 	if (!is_within_screen_bounds(x, y)) {
 		return;
 	}
@@ -57,67 +51,66 @@ void put_pixel(uint32_t hex_color, uint64_t x, uint64_t y) {
 	*pixel = hex_color;
 }
 
+void get_video_info(video_info_t * buffer) {
+	buffer->width = WIDTH;
+	buffer->heght = HEIGHT;
+	buffer->pitch = PITCH;
+	buffer->bpp = BPP;
+	
+}
 
-
-/*
-	MODO TEXTO
-*/
-
-static int text_mode = DISABLED;
-
-static uint64_t cursor_x;
-static uint32_t cursor_y;
-static uint8_t text_size = 1;
-
-void vd_enable_textmode() {
-	if (text_mode) {
+void vd_show_tty() {
+	if (tty_show) {
 		return;
 	}
-	text_mode = ENABLED;
-	vd_clear();
+	tty_show = ENABLED;
+	vd_clear_tty();
 }
 
-void vd_disable_text_mode() {
-if (!text_mode) {
-	return;
-}
-vd_clear();
-text_mode = DISABLED;
+
+void vd_set_text_size(int size) {
+	if (size < MIN_TEXT_SIZE) {
+		text_size = MIN_TEXT_SIZE;
+	} else if (size > MAX_TEXT_SIZE) {
+		text_size = MAX_TEXT_SIZE;
+	} else {
+		text_size = size; 
+	}
 }
 
-void vd_set_text_size(uint8_t size) { text_size = size; }
-
-uint8_t vd_get_text_size() { return text_size; }
+int vd_get_text_size() { return text_size; }
 
 static void scroll_up() {
-uint64_t line_height = text_size * FONT_HEIGHT;
-uint8_t *framebuffer = (uint8_t *)(uintptr_t)VBE_mode_info->framebuffer;
+	uint64_t line_height = text_size * FONT_HEIGHT;
+	uint8_t *framebuffer = (uint8_t *)(uintptr_t)VBE_mode_info->framebuffer;
 
-// Usar memcpy para copiar cada línea completa
-// desde la segunda línea de texto hasta el final hacia arriba
-for (uint64_t src_y = line_height; src_y < HEIGHT; src_y++) {
-	uint64_t dst_y = src_y - line_height;
+	// Usar memcpy para copiar cada línea completa
+	// desde la segunda línea de texto hasta el final hacia arriba
+	for (uint64_t src_y = line_height; src_y < HEIGHT; src_y++) {
+		uint64_t dst_y = src_y - line_height;
 
-	// Calcular offset de la línea fuente y destino
-	uint64_t src_offset = src_y * PITCH;
-	uint64_t dst_offset = dst_y * PITCH;
+		// Calcular offset de la línea fuente y destino
+		uint64_t src_offset = src_y * PITCH;
+		uint64_t dst_offset = dst_y * PITCH;
 
-	memcpy(framebuffer + dst_offset, framebuffer + src_offset,
-		PITCH);
-}
+		memcpy(framebuffer + dst_offset, framebuffer + src_offset,
+			PITCH);
+	}
 
-// Limpiar la última línea
-uint64_t last_line_start = HEIGHT - line_height;
-fill_rectangle(0, last_line_start, WIDTH,
-				HEIGHT, BKG_COLOR);
+	// Limpiar la última línea usando memset
+	uint64_t last_line_start = HEIGHT - line_height;
+	uint64_t last_line_offset = last_line_start * PITCH;
+	uint64_t bytes_to_clear = line_height * PITCH;
+	uint64_t color = BKG_COLOR | ((uint64_t)BKG_COLOR << 32);
+	memset64(framebuffer + last_line_offset, color, bytes_to_clear);
 }
 
 
 static void update_cursor() {
-if (!is_within_screen_bounds(cursor_x + FONT_WIDTH * text_size,
-							cursor_y + FONT_HEIGHT * text_size)) {
-	vd_new_line();
-}
+	if (!is_within_screen_bounds(cursor_x + FONT_WIDTH * text_size,
+								cursor_y + FONT_HEIGHT * text_size)) {
+		vd_new_line();
+	}
 }
 
 static void move_cursor_right() {
@@ -175,12 +168,11 @@ void vd_new_line() {
 	// Verificar si hay espacio para una línea más sin hacer scroll
 	if (cursor_y + step_y < HEIGHT) {
 		cursor_y += step_y;
-		fill_rectangle(cursor_x, cursor_y, WIDTH,
-					cursor_y + FONT_HEIGHT * text_size, BKG_COLOR);
+		// fill_rectangle(cursor_x, cursor_y, WIDTH,
+		// 			cursor_y + FONT_HEIGHT * text_size, BKG_COLOR);
 	} else {
 		scroll_up();
-		cursor_y =
-			HEIGHT - step_y; // Posicionar cursor en la última línea
+		cursor_y = HEIGHT - step_y; // Posicionar cursor en la última línea
 	}
 	draw_cursor();
 }
@@ -197,7 +189,7 @@ static void delete_char() {
 }
 
 void vd_putchar(uint8_t ch, uint32_t color) {
-	if (!text_mode || ch >= 128) {
+	if (!tty_show || ch >= 128) {
 		return;
 	}
 	switch (ch) {
@@ -210,7 +202,7 @@ void vd_putchar(uint8_t ch, uint32_t color) {
 			vd_new_line();
 			break;
 		default:
-			vd_draw_char(ch, cursor_x, cursor_y, color, text_size);
+			draw_bitmap(font[ch], cursor_x, cursor_y, color, text_size);
 			move_cursor_right();
 			draw_cursor();
 			break;
@@ -218,7 +210,7 @@ void vd_putchar(uint8_t ch, uint32_t color) {
 }
 
 void vd_print(const char *str, uint32_t color) {
-	if (!text_mode) {
+	if (!tty_show) {
 		return;
 	}
 	for (int i = 0; str[i] != 0; i++) {
@@ -228,21 +220,21 @@ void vd_print(const char *str, uint32_t color) {
 }
 
 void vd_increase_text_size() {
-	if (text_size < MAX_SIZE && text_mode) {
+	if (text_size < MAX_SIZE && tty_show) {
 		text_size++;
 	}
 	update_cursor();
 }
 
 void vd_decrease_text_size() {
-	if (text_size > 1 && text_mode) {
+	if (text_size > 1 && tty_show) {
 		text_size--;
 	}
 	update_cursor();
 }
 
-void vd_clear() {
-	if (!text_mode) {
+void vd_clear_tty() {
+	if (!tty_show) {
 		return;
 	}
 	uint64_t length = HEIGHT * WIDTH * BPP / 8;
@@ -252,139 +244,4 @@ void vd_clear() {
 	cursor_y = 0;
 }
 
-/*
-	MODO VIDEO
-*/
 
-void vd_draw_char(uint8_t ch, uint64_t x, uint64_t y, uint32_t color, uint64_t size) {
-	if (ch >= 128) {
-		return;
-	}
-
-	if (size == 0) {
-		size = 1; // aseguramos minimo size de 1
-	}
-
-	draw_bitmap(font[ch], x, y, color, size);
-}
-
-void vd_draw_string(const char *str, uint64_t x, uint64_t y, uint32_t color,
-					uint64_t size) {
-	if (size == 0) {
-		size = 1; // aseguramos minimo size de 1
-	}
-
-	for (int i = 0; str[i] != 0; i++) {
-		vd_draw_char(str[i], x + (FONT_WIDTH * size) * i, y, color, size);
-	}
-}
-
-void vd_draw_line(uint64_t x0, uint64_t y0, uint64_t x1, uint64_t y1,
-				uint32_t color) {
-// algoritmo de Bresenham
-int64_t dx = ABS((int64_t)x1 - (int64_t)x0);
-int64_t dy = ABS((int64_t)y1 - (int64_t)y0);
-
-int64_t step_x = (x0 < x1) ? 1 : -1;
-int64_t step_y = (y0 < y1) ? 1 : -1;
-
-int64_t error = dx - dy;
-int done = 0;
-
-while (!done) {
-	put_pixel(color, x0, y0);
-
-	if ((x0 == x1 && y0 == y1) || !is_within_screen_bounds(x0, y0)) {
-	done = 1;
-	} else {
-	int64_t error2 = 2 * error;
-
-	if (error2 > -dy) {
-		error -= dy;
-		x0 += step_x;
-	}
-
-	if (error2 < dx) {
-		error += dx;
-		y0 += step_y;
-	}
-	}
-}
-}
-
-void draw_rectangle(uint64_t x0, uint64_t y0, uint64_t x1, uint64_t y1,
-					uint32_t color) {
-// checkeo que (x0, y0) sean esquina superior izquierda
-int dx = x1 - x0;
-int dy = y1 - y0;
-if (dx < 0 || dy < 0) {
-	return;
-}
-
-vd_draw_line(x0, y0, x1, y0, color);
-vd_draw_line(x0, y0, x0, y1, color);
-vd_draw_line(x1, y1, x0, y1, color);
-vd_draw_line(x1, y1, x1, y0, color);
-}
-
-void fill_rectangle(uint64_t x0, uint64_t y0, uint64_t x1, uint64_t y1,
-					uint32_t color) {
-// checkeo que (x0, y0) sean esquina superior izquierda
-int dx = x1 - x0;
-int dy = y1 - y0;
-if (dx < 0 || dy < 0) {
-	return;
-}
-
-for (int i = 0; i < dx; i++) {
-	for (int j = 0; j < dy; j++) {
-	put_pixel(color, x0 + i, y0 + j);
-	}
-}
-}
-
-void draw_circle(uint64_t x_center, uint64_t y_center, uint64_t radius,
-				uint32_t color) {
-
-int64_t x = radius;
-int64_t y = 0;
-int64_t err = 0;
-
-while (x >= y) {
-	put_pixel(color, x_center + x, y_center + y);
-	put_pixel(color, x_center + y, y_center + x);
-	put_pixel(color, x_center - y, y_center + x);
-	put_pixel(color, x_center - x, y_center + y);
-	put_pixel(color, x_center - x, y_center - y);
-	put_pixel(color, x_center - y, y_center - x);
-	put_pixel(color, x_center + y, y_center - x);
-	put_pixel(color, x_center + x, y_center - y);
-
-	if (err <= 0) {
-	y += 1;
-	err += 2 * y + 1;
-	}
-	if (err > 0) {
-	x -= 1;
-	err -= 2 * x + 1;
-	}
-}
-}
-
-void fill_circle(uint64_t x_center, uint64_t y_center, uint64_t radius,
-				uint32_t color) {
-uint64_t x0 = (x_center >= radius) ? x_center - radius : 0;
-uint64_t y0 = (y_center >= radius) ? y_center - radius : 0;
-uint64_t x1 = x_center + radius;
-uint64_t y1 = y_center + radius;
-
-for (int x = x0; x <= x1; x++) {
-	for (int y = y0; y <= y1; y++) {
-	int dx = x - x_center;
-	int dy = y - y_center;
-	if (dx * dx + dy * dy <= radius * radius) { // si esta adentro del circulo
-		put_pixel(color, x, y);
-	}
-	}
-}
-}
