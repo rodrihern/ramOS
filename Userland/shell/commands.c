@@ -16,8 +16,6 @@ static uint8_t is_cmd_background(char *line);
 
 
 static builtin_command_t builtins[] = {
-	{"+", "increase font size", &incfont_cmd},
-	{"-", "decrease font size", &decfont_cmd},
 	{"clear", "clears the screen", &cls_cmd},
 	{"help", "provides information about available commands", &help_cmd},
 	{"username", "changes the shell username", &username_cmd},

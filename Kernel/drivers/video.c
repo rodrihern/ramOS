@@ -7,7 +7,7 @@
 #include <video.h>
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
-#define HISTORY_LEN 512
+#define HISTORY_LEN 4096
 
 #define WIDTH (VBE_mode_info->width)
 #define HEIGHT (VBE_mode_info->height)
@@ -124,13 +124,6 @@ static void scroll_up() {
 	memset64(framebuffer + last_line_offset, color, bytes_to_clear);
 }
 
-
-static void update_cursor() {
-	if (!is_within_screen_bounds(cursor_x + FONT_WIDTH * text_size,
-								cursor_y + FONT_HEIGHT * text_size)) {
-		vd_new_line();
-	}
-}
 
 static void move_cursor_right() {
 	uint64_t step_x = FONT_WIDTH * text_size;
@@ -424,7 +417,7 @@ void vd_set_text_size(int size) {
 		text_size = MAX_TEXT_SIZE;
 	} else {
 		text_size = size; 
-		update_cursor();
+		redraw_history();
 	}
 }
 

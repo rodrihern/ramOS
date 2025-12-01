@@ -34,7 +34,5 @@ void cls_cmd(int argc, char *argv[]);
 void help_cmd(int argc, char *argv[]);
 void username_cmd(int argc, char *argv[]);
 void mute_cmd(int argc, char *argv[]);
-void incfont_cmd(int argc, char *argv[]);
-void decfont_cmd(int argc, char *argv[]);
 
 #endif

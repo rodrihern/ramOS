@@ -4,6 +4,8 @@
 #include "../include/shell.h"
 
 #define UP_ARROW 1
+#define LEFT_ARROW 2
+#define RIGHT_ARROW 3
 #define DOWN_ARROW 4
 #define HISTORY_SIZE 10  // Número de comandos a guardar en el historial
 
@@ -118,7 +120,14 @@ void read_line(char *buf, uint64_t max)
 				buf[0] = '\0';
 				idx = 0;
 			}
-		} else if (idx < max) {
+		} else if (c == LEFT_ARROW) {
+			sys_tty_set_fontsize(sys_tty_get_fontsize() - 1);
+		} else if (c == RIGHT_ARROW) {
+			sys_tty_set_fontsize(sys_tty_get_fontsize() + 1);
+
+		}
+		
+		else if (idx < max) {
 			buf[idx++] = c;
 			putchar(c);      // escribo el caracter
 		}
