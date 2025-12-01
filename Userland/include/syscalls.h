@@ -63,7 +63,7 @@ typedef struct time_info {
 
 typedef struct video_info {
 	uint16_t width;
-	uint16_t heght;
+	uint16_t height;
 	uint16_t pitch;
 	uint8_t bpp;
 } video_info_t;

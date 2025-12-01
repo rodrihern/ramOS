@@ -45,5 +45,10 @@ float    inv_sqrt(float number);
 uint32_t get_uint();
 uint32_t get_uniform(uint32_t max);
 
+// FUNCIONES DE MEMORIA
+void *memset(void *destination, int32_t c, uint64_t length);
+void *memset64(void *destination, uint64_t pattern, uint64_t length);
+void *memcpy(void *destination, const void *source, uint64_t length);
+
 #endif
 

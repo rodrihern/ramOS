@@ -1,7 +1,4 @@
-// This is a personal academic project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
-
-#include <stdint.h>
+#include "usrlib.h"
 
 void *memset(void *destination, int32_t c, uint64_t length)
 {
@@ -75,74 +72,4 @@ void *memset64(void *destination, uint64_t pattern, uint64_t length)
 	}
 
 	return destination;
-}
-
-// Copia hasta n caracteres de src a dst
-char *strncpy(char *dst, const char *src, int n)
-{
-	char *ret = dst;
-	while (n > 0 && *src) {
-		*dst++ = *src++;
-		n--;
-	}
-	while (n > 0) {
-		*dst++ = '\0'; // Rellenamos con '\0' si src terminó antes
-		n--;
-	}
-	return ret;
-}
-
-int strcmp(const char *s1, const char *s2)
-{
-	while (*s1 && (*s1 == *s2)) {
-		s1++;
-		s2++;
-	}
-	return *(const unsigned char *)s1 - *(const unsigned char *)s2;
-}
-
-int strlen(const char *str)
-{
-	int res = 0;
-	while (*str++) {
-		res++;
-	}
-	return res;
-}
-
-uint64_t decimal_to_str(uint64_t value, char *buffer)
-{
-	char    *p = buffer;
-	char    *p1, *p2;
-	uint64_t digits = 0;
-
-	// Calculate characters for each digit
-	do {
-		uint32_t remainder = value % 10;
-		*p++               = remainder + '0';
-		digits++;
-	} while (value /= 10);
-
-	*p = 0;
-
-	p1 = buffer;
-	p2 = p - 1;
-	while (p1 < p2) {
-		char tmp = *p1;
-		*p1      = *p2;
-		*p2      = tmp;
-		p1++;
-		p2--;
-	}
-	return digits;
-}
-
-int strcat(char *dest, const char *src)
-{
-	int i = strlen(dest);
-	while (*src) {
-		dest[i++] = *src++;
-	}
-	dest[i] = '\0';
-	return i;
 }

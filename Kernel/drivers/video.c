@@ -40,7 +40,7 @@ static uint32_t bg_color = 0x000000;
 
 void get_video_info(video_info_t * buffer) {
 	buffer->width = WIDTH;
-	buffer->heght = HEIGHT;
+	buffer->height = HEIGHT;
 	buffer->pitch = PITCH;
 	buffer->bpp = BPP;
 	

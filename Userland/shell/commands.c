@@ -45,7 +45,8 @@ static external_program_t programs[] = {
 	{"test_prio", "runs a priority test", &test_prio},
 	{"test_processes", "runs an process test", &test_processes},
 	{"test_sync", "runs a sync test with or without semaphores", &test_sync},
-	{"test_pipes", "runs a named pipes test", &test_pipes}
+	{"test_pipes", "runs a named pipes test", &test_pipes},
+	{"test_video", "runs a video test", &test_video}
 };
 
 static int builtins_count = sizeof(builtins) / sizeof(builtins[0]);
@@ -158,6 +159,7 @@ static uint8_t try_external_program(char *name, int argc, char **argv, uint8_t b
 	sys_wait(pid);
 	sys_flush(STDIN); // limpiar buffer de entrada por si quedó algo
 	putchar('\n');
+	sys_tty_show();
 	return 1;
 }
 
@@ -242,6 +244,7 @@ static int execute_piped_commands(
 	sys_wait(pid_left);
 	sys_wait(pid_right);
 	sys_flush(STDIN); // limpiar buffer de entrada por si quedó algo
+	sys_tty_show();
 	putchar('\n');
 
 	// Destruir el pipe
