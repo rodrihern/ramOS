@@ -18,11 +18,11 @@ extern uint8_t snapshot_saved;
 extern uint8_t pressed_key;
 extern register_info_t * reg_array[];
 
-uint8_t caps_lock = 0;
+static uint8_t caps_lock = 0;
 
-uint16_t buffer_start = 0;
-uint16_t buffer_end = 0; 
-uint16_t buffer_current_size = 0; 
+static uint16_t buffer_start = 0;
+static uint16_t buffer_end = 0; 
+static uint16_t buffer_current_size = 0; 
 
 static uint8_t buffer[BUFFER_LENGTH];
 

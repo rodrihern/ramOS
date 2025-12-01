@@ -2,15 +2,15 @@
 
 ---- video
 
-chequear como esta hecho bien el redraw history y el borrar
+refactor tty para hacerla mas eficiente
 
 bg color y text color / themes en la shell
 
 pantalla de inicio
 
-hacer un frambuffer adt para las funciones de dibujo (incluyendo algunas de strings con fonts)
+hacer un frambuffer adt para las funciones de dibujo (incluyendo algunas de strings con fonts que pueda pasar el usuario)
 
-tengo que ver que pasa si quieren cosas de teclado y los crean en background
+tengo que ver que pasa si quieren cosas de teclado y los crean en background, los mato?
 
 jueguito con delta t
 

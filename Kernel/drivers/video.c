@@ -16,7 +16,7 @@
 #define FB ((uintptr_t)VBE_mode_info->framebuffer)
 
 typedef struct cell {
-	char ch;
+	char c;
 	uint32_t color;
 } cell_t;
 
@@ -24,9 +24,9 @@ typedef struct cell {
 static VBEInfoPtr VBE_mode_info = (VBEInfoPtr)0x0000000000005C00;
 
 
-cell_t tty_history[HISTORY_LEN];
-int history_begin = 0;
-int history_end = 0;
+static cell_t tty_buffer[HISTORY_LEN];
+static int buffer_begin = 0;
+static int buffer_end = 0;
 
 static int tty_show = 0;
 
@@ -196,10 +196,10 @@ static void fill_screen(uint32_t color) {
 }
 
 static int history_size() {
-	if (history_end >= history_begin) {
-		return history_end - history_begin;
+	if (buffer_end >= buffer_begin) {
+		return buffer_end - buffer_begin;
 	}
-	return HISTORY_LEN - history_begin + history_end;
+	return HISTORY_LEN - buffer_begin + buffer_end;
 }
 
 static int history_is_full() {
@@ -207,18 +207,18 @@ static int history_is_full() {
 }
 
 static int history_is_empty() {
-	return history_begin == history_end;
+	return buffer_begin == buffer_end;
 }
 
 static void add_to_histroy(char c, uint32_t color) {
 	if (history_is_full()) {
 		// Remove oldest character
-		history_begin = (history_begin + 1) % HISTORY_LEN;
+		buffer_begin = (buffer_begin + 1) % HISTORY_LEN;
 	}
 	
-	tty_history[history_end].ch = c;
-	tty_history[history_end].color = color;
-	history_end = (history_end + 1) % HISTORY_LEN;
+	tty_buffer[buffer_end].c = c;
+	tty_buffer[buffer_end].color = color;
+	buffer_end = (buffer_end + 1) % HISTORY_LEN;
 }
 
 static void delete_from_history() {
@@ -227,7 +227,7 @@ static void delete_from_history() {
 	}
 	
 	// Move end pointer back
-	history_end = (history_end - 1 + HISTORY_LEN) % HISTORY_LEN;
+	buffer_end = (buffer_end - 1 + HISTORY_LEN) % HISTORY_LEN;
 }
 
 static void redraw_history() {
@@ -246,9 +246,9 @@ static void redraw_history() {
 	uint16_t step_x = FONT_WIDTH * text_size;
 	uint16_t step_y = FONT_HEIGHT * text_size;
 	
-	int idx = history_begin;
-	while (idx != history_end) {
-		char c = tty_history[idx].ch;
+	int idx = buffer_begin;
+	while (idx != buffer_end) {
+		char c = tty_buffer[idx].c;
 		
 		if (c == '\n') {
 			temp_x = 0;
@@ -275,10 +275,10 @@ static void redraw_history() {
 	temp_x = 0;
 	temp_y = 0;
 	
-	idx = history_begin;
-	while (idx != history_end) {
-		char c = tty_history[idx].ch;
-		uint32_t color = tty_history[idx].color;
+	idx = buffer_begin;
+	while (idx != buffer_end) {
+		char c = tty_buffer[idx].c;
+		uint32_t color = tty_buffer[idx].color;
 		
 		if (c == '\n') {
 			current_line++;
@@ -321,8 +321,8 @@ static void delete_char() {
 	}
 	
 	// Check what character we're deleting
-	int last_idx = (history_end - 1 + HISTORY_LEN) % HISTORY_LEN;
-	char deleted_char = tty_history[last_idx].ch;
+	int last_idx = (buffer_end - 1 + HISTORY_LEN) % HISTORY_LEN;
+	char deleted_char = tty_buffer[last_idx].c;
 	
 	delete_from_history();
 	
@@ -393,8 +393,8 @@ void vd_show_tty() {
 }
 
 void vd_clear_tty() {
-	history_begin = 0;
-	history_end = 0;
+	buffer_begin = 0;
+	buffer_end = 0;
 
 	if (tty_show) {
 		cursor_x = 0;
