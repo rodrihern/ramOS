@@ -2,44 +2,21 @@
 
 ---- video
 
-ver que onda el cursor cuando hago ps
+chequear como esta hecho bien el redraw history y el borrar
+
+bg color y text color / themes en la shell
 
 pantalla de inicio
 
-rework driver de video y que solo el de fg pueda dibujar
-
-rework de tty para tener un buffer[max_rows * max_cols]
-
-ctrl+ y ctrl- para cambiar tamaño de la tty desde el keyboard
-
 hacer un frambuffer adt para las funciones de dibujo (incluyendo algunas de strings con fonts)
-
-
-syscalls:
-    rehacer la de sys_ticks de gede y para el jueguito
-
-    typedef region_t
-
-    habilitar y deshabilitar tty -> solo el de fg puede
-    con hacer un present se deshabilita solo la tty
-
-    cambiar background -> sys_tty_bgcolor
-
-    info de video
-
-    present
-
-    present_region
-
-    present_nregions
-
-----
 
 tengo que ver que pasa si quieren cosas de teclado y los crean en background
 
 jueguito con delta t
 
 piano
+
+mas canciones a spotify
 
 doom
 

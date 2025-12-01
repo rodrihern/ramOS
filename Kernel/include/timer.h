@@ -15,6 +15,7 @@ typedef struct time_info {
 
 void init_timer(void);
 uint64_t get_timer_ms(void);
+uint64_t get_timer_ticks();
 uint64_t timer_handler(uint64_t rsp);
 void get_time(time_info_t * buf);
 

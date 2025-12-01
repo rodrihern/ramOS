@@ -67,6 +67,10 @@ uint64_t get_timer_ms(void) {
 	return (tsc_read() - tsc_start) / tsc_frequency;
 }
 
+uint64_t get_timer_ticks() {
+	return ticks;
+}
+
 uint64_t timer_handler(uint64_t rsp) {
 	ticks++;
 

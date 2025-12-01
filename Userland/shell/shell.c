@@ -131,14 +131,12 @@ void incfont_cmd(int argc, char * argv[])
 {
 	int size = sys_tty_get_fontsize() + 1;
 	sys_tty_set_fontsize(size);
-	sys_tty_clear();
 }
 
 void decfont_cmd(int argc, char * argv[])
 {
 	uint8_t size = sys_tty_get_fontsize() - 1;
 	sys_tty_set_fontsize(size);
-	sys_tty_clear();
 }
 
 void cls_cmd(int argc, char *argv[]) {

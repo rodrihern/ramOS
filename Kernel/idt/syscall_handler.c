@@ -188,11 +188,11 @@ static void sys_tty_clear()
 }
 
 static void sys_tty_set_bgcolor(uint32_t color) {
-	// TODO: implement
+	vd_set_bg_color(color);
 }
 
 static void sys_tty_set_textcolor(uint32_t color) {
-	// TODO: implement
+	fd_colors[1] = color;
 }
 
 static int sys_tty_get_fontsize() {
@@ -257,8 +257,7 @@ static uint64_t sys_ms_elapsed()
 }
 
 static uint64_t sys_ticks_elapsed() {
-	// TODO: implement
-	return 0;
+	return get_timer_ticks();
 }
 
 static int sys_time_info(time_info_t *buffer) {

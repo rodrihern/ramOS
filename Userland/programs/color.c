@@ -26,7 +26,7 @@ int color_main(int argc, char * argv[]) {
         fd = satoi(argv[0]);
     }
 
-    if (fd < 2 || fd >= FDS_COUNT) {
+    if (fd < 1 || fd >= FDS_COUNT) {
         print_err("Invalid Argument\n");
         print_err(USE);
         return -1;
