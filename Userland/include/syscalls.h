@@ -136,7 +136,7 @@ extern void sys_tty_set_fontsize(int size);
 extern int sys_video_info(video_info_t *buffer);
 extern void sys_present(void *framebuffer);
 extern void sys_present_region(void *framebuffer, region_t *region);
-extern void sys_present_nregions(void *framebuffer, region_t *regions, uint64_t n);
+extern void sys_present_nregions(void *framebuffer, region_t *regions[], uint64_t n);
 
 // keyboard
 extern uint8_t sys_is_pressed(uint8_t scancode);
