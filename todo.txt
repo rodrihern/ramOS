@@ -2,21 +2,22 @@
 
 ---- video
 
+jueguito con delta t
+
+pantalla de inicio y mejores diseños para el juego
+
+doom
+
 refactor tty para hacerla mas eficiente
 
 bg color y text color / themes en la shell
 
-pantalla de inicio
-
 tengo que ver que pasa si quieren cosas de teclado y los crean en background, los mato?
-
-jueguito con delta t
 
 piano
 
 mas canciones a spotify
 
-doom
 
 --------
 
