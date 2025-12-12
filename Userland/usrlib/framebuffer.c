@@ -66,30 +66,30 @@ void fb_fill(framebuffer_t fb, uint32_t color) {
     memset64(fb->framebuffer, to_fill, fb_size);
 }
 
-void fb_draw_char(framebuffer_t fb, uint8_t ch, uint8_t font[][FONT_HEIGHT], uint16_t x, uint16_t y, uint32_t color, uint64_t size); {
+void fb_draw_char(framebuffer_t fb, uint8_t ch, uint8_t font[][FONT_HEIGHT], uint16_t x, uint16_t y, uint32_t color, uint64_t size) {
     // TODO: implement
 }
 
-void fb_draw_string(framebuffer_t fb, const char * str, uint8_t font[][FONT_HEIGHT], uint64_t x, uint64_t y, uint32_t color, uint64_t size); {
+void fb_draw_string(framebuffer_t fb, const char * str, uint8_t font[][FONT_HEIGHT], uint64_t x, uint64_t y, uint32_t color, uint64_t size) {
     // TODO: implement
 }
 
-void fb_drawLine(framebuffer_t fb, uint64_t x0, uint64_t y0, uint64_t x1, uint64_t y1, uint32_t color); {
+void fb_drawLine(framebuffer_t fb, uint64_t x0, uint64_t y0, uint64_t x1, uint64_t y1, uint32_t color) {
     // TODO: implement
 }
 
-void fb_draw_rectangle(framebuffer_t fb,uint64_t x0, uint64_t y0, uint64_t x1, uint64_t y1, uint32_t color); {
+void fb_draw_rectangle(framebuffer_t fb,uint64_t x0, uint64_t y0, uint64_t x1, uint64_t y1, uint32_t color) {
     // TODO: implement
 }
 
-void fb_fill_rectangle(framebuffer_t fb,uint64_t x0, uint64_t y0, uint64_t x1, uint64_t y1, uint32_t color); {
+void fb_fill_rectangle(framebuffer_t fb,uint64_t x0, uint64_t y0, uint64_t x1, uint64_t y1, uint32_t color) {
     // TODO: implement
 }
 
-void fb_draw_circle(framebuffer_t fb,uint64_t x_center, uint64_t y_center, uint64_t radius, uint32_t color); {
+void fb_draw_circle(framebuffer_t fb,uint64_t x_center, uint64_t y_center, uint64_t radius, uint32_t color) {
     // TODO: implement
 }
 
-void fb_fill_circle(framebuffer_t fb,uint64_t x_center, uint64_t y_center, uint64_t radius, uint32_t color); {
+void fb_fill_circle(framebuffer_t fb,uint64_t x_center, uint64_t y_center, uint64_t radius, uint32_t color) {
     // TODO: implement
 }
