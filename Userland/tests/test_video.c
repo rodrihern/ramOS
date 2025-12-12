@@ -1,12 +1,14 @@
 #include "usrlib.h"
+#include "framebuffer.h"
 
 int test_video(int argc, char * argv[]) {
     video_info_t info;
     sys_video_info(&info);
+
     int fb_size = info.height * info.pitch;
-    
-    
     uint32_t * framebuffer = sys_malloc(fb_size);
+
+
     uint64_t start = sys_ms_elapsed();
     int fps = 0;
     
