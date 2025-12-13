@@ -2,12 +2,16 @@
 #include "usrlib.h"
 
 #define abs(x) ((x) < 0 ? -(x) : (x))
+#ifndef FB_COLOR64
+#define FB_COLOR64(color) ((uint64_t)(uint32_t)(color) | ((uint64_t)(uint32_t)(color) << 32))
+#endif
 
 typedef struct framebuffer_cdt {
     uint16_t width;
     uint16_t height;
     uint16_t pitch;
     uint8_t bpp;
+    uint8_t bytes_per_pixel;
     void * framebuffer;
 } framebuffer_cdt;
 
@@ -17,6 +21,7 @@ framebuffer_t fb_init(uint16_t width, uint16_t height, uint16_t pitch, uint8_t b
     fb->height = height;
     fb->pitch = pitch;
     fb->bpp = bpp;
+    fb->bytes_per_pixel = bpp / 8;
     fb->framebuffer = sys_malloc(height * pitch);
 
     return fb;
@@ -47,7 +52,7 @@ void fb_putpixel(framebuffer_t fb, uint32_t color, uint16_t x, uint16_t y) {
 		return;
 	}
 	uint8_t *framebuffer = (uint8_t *)fb->framebuffer;
-	uint64_t offset = (x * (fb->bpp / 8)) + (y * fb->pitch);
+        uint64_t offset = (x * fb->bytes_per_pixel) + (y * fb->pitch);
 	
 	// if (BPP == 32) {
 	// 	uint32_t *pixel = (uint32_t *)(framebuffer + offset);
@@ -63,9 +68,24 @@ void fb_putpixel(framebuffer_t fb, uint32_t color, uint16_t x, uint16_t y) {
 }
 
 void fb_fill(framebuffer_t fb, uint32_t color) {
-    uint64_t to_fill = color | ((uint64_t) color << 32);
+    uint64_t to_fill = FB_COLOR64(color);
     int fb_size = fb->height * fb->pitch;
     memset64(fb->framebuffer, to_fill, fb_size);
+}
+
+// Fill a full-width band starting at y of given height using single memset
+void fb_fill_height(framebuffer_t fb, uint16_t y, uint16_t height, uint32_t color) {
+    if (height == 0 || y >= fb->height) {
+        return;
+    }
+    uint16_t ymax = y + height;
+    if (ymax > fb->height) {
+        ymax = fb->height;
+    }
+    uint64_t to_fill = FB_COLOR64(color);
+    uint8_t *start = (uint8_t *)fb->framebuffer + (uint64_t)y * fb->pitch;
+    uint64_t bytes = (uint64_t)(ymax - y) * fb->pitch;
+    memset64(start, to_fill, bytes);
 }
 
 static void draw_bitmap(framebuffer_t fb, uint8_t bitmap[FONT_HEIGHT], uint16_t x, uint16_t y, uint32_t color, uint64_t size) {
@@ -96,7 +116,19 @@ void fb_draw_string(framebuffer_t fb, const char * str, uint8_t font[][FONT_HEIG
     }
 }       
 
-void fb_draw_line(framebuffer_t fb, uint64_t x0, uint64_t y0, uint64_t x1, uint64_t y1, uint32_t color) {
+void fb_draw_line(framebuffer_t fb, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t color) {
+    if (y0 == y1) {
+        uint16_t xmin = (x0 < x1) ? x0 : x1;
+        uint16_t xmax = (x0 < x1) ? x1 : x0;
+        fb_draw_h_line(fb, xmin, y0, (uint16_t)(xmax - xmin + 1), color);
+        return;
+    }
+    if (x0 == x1) {
+        uint16_t ymin = (y0 < y1) ? y0 : y1;
+        uint16_t ymax = (y0 < y1) ? y1 : y0;
+        fb_draw_v_line(fb, x0, ymin, (uint16_t)(ymax - ymin + 1), color);
+        return;
+    }
     // algoritmo de Bresenham
     int64_t dx = abs((int64_t)x1 - (int64_t)x0);
     int64_t dy = abs((int64_t)y1 - (int64_t)y0);
@@ -129,36 +161,73 @@ void fb_draw_line(framebuffer_t fb, uint64_t x0, uint64_t y0, uint64_t x1, uint6
 
 }
 
-void fb_draw_rectangle(framebuffer_t fb,uint64_t x0, uint64_t y0, uint64_t x1, uint64_t y1, uint32_t color) {
-    // checkeo que (x0, y0) sean esquina superior izquierda
-	int dx = x1-x0;
-	int dy = y1-y0;
-	if (dx < 0 || dy < 0) {
-		return;
-	}
-	
-	fb_draw_line(fb, x0, y0, x1, y0, color);
-	fb_draw_line(fb, x0, y0, x0, y1, color);
-	fb_draw_line(fb, x1 ,y1, x0, y1, color);
-	fb_draw_line(fb, x1, y1, x1, y0, color);
+void fb_draw_h_line(framebuffer_t fb, uint16_t x, uint16_t y, uint16_t length, uint32_t color) {
+    if (length == 0) {
+        return;
+    }
+    uint16_t x_end = x + length - 1;
+    if (!is_in_bounds(fb, x, y) || !is_in_bounds(fb, x_end, y)) {
+        return;
+    }
+
+    uint64_t to_fill = FB_COLOR64(color);
+    uint64_t row_bytes = (uint64_t)length * fb->bytes_per_pixel;
+    void * destination = (uint8_t *)fb->framebuffer + (uint64_t)y * fb->pitch + (uint64_t)x * fb->bytes_per_pixel;
+    memset64(destination, to_fill, row_bytes);
 }
 
-void fb_fill_rectangle(framebuffer_t fb, uint64_t x0, uint64_t y0, uint64_t x1, uint64_t y1, uint32_t color) {
-    // checkeo que (x0, y0) sean esquina superior izquierda
-	int dx = x1-x0;
-	int dy = y1-y0;
-	if (dx < 0 || dy < 0) {
-		return;
-	}
-	
-	for (int i = 0; i < dx; i++) {
-		for (int j = 0; j < dy; j++) {
-			fb_putpixel(fb, color, x0+i, y0+j);
-		}
-	}
+void fb_draw_v_line(framebuffer_t fb, uint16_t x, uint16_t y, uint16_t length, uint32_t color) {
+    if (length == 0) {
+        return;
+    }
+    uint16_t y_end = y + length - 1;
+    if (!is_in_bounds(fb, x, y) || !is_in_bounds(fb, x, y_end)) {
+        return;
+    }
+
+    uint8_t *dst = (uint8_t *)fb->framebuffer + (uint64_t)y * fb->pitch + (uint64_t)x * fb->bytes_per_pixel;
+    for (uint16_t i = 0; i < length; i++) {
+        *(uint32_t *)(dst + (uint64_t)i * fb->pitch) = color;
+    }
 }
 
-void fb_draw_circle(framebuffer_t fb,uint64_t x_center, uint64_t y_center, uint64_t radius, uint32_t color) {
+void fb_draw_rectangle(framebuffer_t fb, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t color) {
+    // Normalize coordinates
+    uint16_t xmin = (x0 < x1) ? x0 : x1;
+    uint16_t xmax = (x0 < x1) ? x1 : x0;
+    uint16_t ymin = (y0 < y1) ? y0 : y1;
+    uint16_t ymax = (y0 < y1) ? y1 : y0;
+
+    if (!is_in_bounds(fb, xmin, ymin) || !is_in_bounds(fb, xmax, ymax)) {
+        return;
+    }
+
+    // Top and bottom edges
+    fb_draw_h_line(fb, xmin, ymin, (uint16_t)(xmax - xmin + 1), color);
+    fb_draw_h_line(fb, xmin, ymax, (uint16_t)(xmax - xmin + 1), color);
+    // Left and right edges
+    fb_draw_v_line(fb, xmin, ymin, (uint16_t)(ymax - ymin + 1), color);
+    fb_draw_v_line(fb, xmax, ymin, (uint16_t)(ymax - ymin + 1), color);
+}
+
+void fb_fill_rectangle(framebuffer_t fb, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t color) {
+    // Normalize coordinates
+    uint16_t xmin = (x0 < x1) ? x0 : x1;
+    uint16_t xmax = (x0 < x1) ? x1 : x0;
+    uint16_t ymin = (y0 < y1) ? y0 : y1;
+    uint16_t ymax = (y0 < y1) ? y1 : y0;
+
+    if (!is_in_bounds(fb, xmin, ymin) || !is_in_bounds(fb, xmax, ymax)) {
+        return;
+    }
+
+    uint16_t length = (uint16_t)(xmax - xmin + 1);
+    for (uint16_t y = ymin; y <= ymax; y++) {
+        fb_draw_h_line(fb, xmin, y, length, color);
+    }
+}
+
+void fb_draw_circle(framebuffer_t fb,uint16_t x_center, uint16_t y_center, uint16_t radius, uint32_t color) {
     int64_t x = radius;
     int64_t y = 0;
     int64_t err = 0;
@@ -184,7 +253,7 @@ void fb_draw_circle(framebuffer_t fb,uint64_t x_center, uint64_t y_center, uint6
     }
 }
 
-void fb_fill_circle(framebuffer_t fb,uint64_t x_center, uint64_t y_center, uint64_t radius, uint32_t color) {
+void fb_fill_circle(framebuffer_t fb,uint16_t x_center, uint16_t y_center, uint16_t radius, uint32_t color) {
     uint64_t x0 = (x_center >= radius) ? x_center - radius : 0;
     uint64_t y0 = (y_center >= radius) ? y_center - radius : 0;
     uint64_t x1 = x_center + radius;
