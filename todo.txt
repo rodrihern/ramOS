@@ -1,13 +1,15 @@
 
 ---- juego 
 
+agregar fps
+
+meterle delta t
+
 cambiar los .h
 
 arreglar las esperas activas
 
-meterle delta t
 
-agregar fps
 
 
 ---- video
