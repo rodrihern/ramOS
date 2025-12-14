@@ -1,22 +1,16 @@
 
 ---- juego 
 
+cambiar los .h
 
+arreglar las esperas activas
+
+meterle delta t
+
+agregar fps
 
 
 ---- video
-
-juego:
-    sacar funciones de dibujo de el struct
-
-    cambiar el .h
-
-    arreglar las esperas activas
-
-    sacar las esperas activas
-
-    meterle delta t
-
 
 pantalla de inicio y mejores diseños para el juego
 
