@@ -128,7 +128,6 @@ static void level_setup() {
         hole2.prev.y = hole2.pos.y;
     }
     
-    draw_background(BACKGROUND_COLOR_GOLF);
     draw_countdown_screen(6); // 6 es el tamanio del texto
     draw_scoreboard(two_players, score_p1, score_p2, touches);
 }

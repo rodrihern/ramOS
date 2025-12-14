@@ -266,18 +266,28 @@ void draw_final_score_screen(uint8_t two_players, uint16_t score_p1, uint16_t sc
 void draw_countdown_screen(uint64_t size) {
     uint64_t x = width/2 - 4 * size;
     uint64_t y = height/2 - 8 * size;
+    region_t region = {
+        .x = x,
+        .y = y,
+        .height = 16*size,
+        .width = 8*size
+    };
+    fb_fill(fb, BACKGROUND_COLOR_GOLF);
     fb_draw_string(fb, "3", font, x, y, size, 0xffffff);
     show_frame();
     sys_sleep(1000);
-    fb_fill_rectangle(fb, x, y, x + 8*size, y + 16*size, BACKGROUND_COLOR_GOLF);
+
+    fb_fill_rectangle(fb, x, y, x + 8*size - 1, y + 16*size - 1, BACKGROUND_COLOR_GOLF);
     fb_draw_string(fb, "2", font,  x, y, size, 0xffffff);
-    show_frame();
+    fb_present_region(fb, &region);
     sys_sleep(1000);
-    fb_fill_rectangle(fb, x, y, x + 8*size, y + 16*size, BACKGROUND_COLOR_GOLF);
+
+    fb_fill_rectangle(fb, x, y, x + 8*size - 1, y + 16*size - 1, BACKGROUND_COLOR_GOLF);
     fb_draw_string(fb, "1", font, x, y, size, 0xffffff);
-    show_frame();
+    fb_present_region(fb, &region);
     sys_sleep(1000);
-    fb_fill_rectangle(fb, x, y, x + 8*size, y + 16*size, BACKGROUND_COLOR_GOLF);
+
+    fb_fill_rectangle(fb, x, y, x + 8*size - 1, y + 16*size - 1, BACKGROUND_COLOR_GOLF);
     show_frame();
 }
 

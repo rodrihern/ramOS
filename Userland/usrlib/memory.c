@@ -50,9 +50,17 @@ void *memset64(void *destination, uint64_t pattern, uint64_t length)
 	uint8_t *d = (uint8_t *)destination;
 	uint64_t i = 0;
 
-	// Write bytes until destination is 8-byte aligned or until no bytes left
+	// Expand pattern into bytes (little-endian order)
+	uint8_t pat[8];
+	for (int k = 0; k < 8; k++) {
+		pat[k] = (uint8_t)((pattern >> (8 * k)) & 0xFF);
+	}
+
+	// Write leading bytes until destination is 8-byte aligned or until no bytes left,
+	// preserving the pattern sequence across the entire write.
 	while (i < length && ((uint64_t)(d + i) % sizeof(uint64_t) != 0)) {
-		d[i++] = (uint8_t)pattern; // Use LSB of pattern for tail bytes
+		d[i] = pat[i % 8];
+		i++;
 	}
 
 	// Now destination is aligned or no more bytes left
@@ -66,9 +74,10 @@ void *memset64(void *destination, uint64_t pattern, uint64_t length)
 
 	i += words * sizeof(uint64_t);
 
-	// Trailing bytes
+	// Trailing bytes: continue the pattern sequence
 	while (i < length) {
-		d[i++] = (uint8_t)pattern;
+		d[i] = pat[i % 8];
+		i++;
 	}
 
 	return destination;
