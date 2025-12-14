@@ -20,9 +20,9 @@ uint16_t get_height();
 
 void draw_background(uint32_t color);
 
-void draw_player(circle_t *p);
-
 void draw_circle(circle_t *c);
+
+void draw_player(circle_t *p);
 
 void draw_scoreboard(uint8_t two_players, uint16_t score1, uint16_t score2, uint64_t touches);
 

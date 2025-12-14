@@ -31,9 +31,13 @@ void draw_background(uint32_t color) {
 } 
 
 
+void draw_circle(circle_t *c) {
+    fb_fill_circle(fb, c->pos.x, c->pos.y, c->radius, c->color);
+}
+
 void draw_player(circle_t *p){
     // cuerpo
-    fb_fill_circle(fb, p->pos.x, p->pos.y, p->radius, p->color);
+    draw_circle(p);
 
     float dx = p->dir.x;
     float dy = p->dir.y;
@@ -85,9 +89,7 @@ void draw_player(circle_t *p){
 }
 
 
-void draw_circle(circle_t *c) {
 
-}
 
 
 
