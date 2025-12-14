@@ -1,6 +1,7 @@
 #include "golf.h"
 #include "graphics.h"
 #include "logic.h"
+#include "scancodes.h"
 
 // -------------------------------------------------------------------------
 // PROTOTIPOS DE LAS FUNCIONES
@@ -10,10 +11,10 @@ static void game_setup();
 static void level_setup();
 static void game_loop();
 static void init_positions(void);
-static void handle_input(Circle* player, const Controls *keys);
+static void handle_input(circle_t* player, const controls_t *keys);
 static void handle_collisions();
 static uint8_t is_ball_in_hole();
-static void redraw();
+static void redraw_frame();
 
 //--------------------------------------------------------------------------
 // INICIALIZACIÓN DE VARIABLES Y ESTRUCTURAS
@@ -27,59 +28,62 @@ static uint16_t score_p1 = 0;
 static uint16_t score_p2 = 0;
 static uint64_t touches = 0;
 
-static Circle player1;
-static Circle player2;
-static Circle ball;
-static Circle hole1;
-static Circle hole2; 
+static circle_t player1;
+static circle_t player2;
+static circle_t ball;
+static circle_t hole1;
+static circle_t hole2; 
 
-void golf_main() {
+int golf_main(int argc, char * argv[]) {
 
     game_setup();
     
     // Selección del número de jugadores
-    int num = wait_num_players();
+    int num = draw_menu_screen();
     if (num == 0) {
-        return;
+        return 1;
     }
     two_players = (num == 2);
 
     level_setup(); 
-    while (level < LEVELS && getchar_nonblock() != '\n') {
+    while (level < LEVELS && !sys_is_pressed(KEY_ENTER)) {
         game_loop();
     }
-    final_score_screen(two_players, score_p1, score_p2, touches);
+    draw_final_score_screen(two_players, score_p1, score_p2, touches);
+
+    return 0;
 }
 
 
 static void game_setup() {
-    init_graphics();
-    scr_w = get_width();
-    scr_h = get_height();
+    video_info_t video_info;
+    sys_video_info(&video_info);
+    init_graphics(video_info.width, video_info.height, video_info.pitch, video_info.bpp);
+    scr_w = video_info.width;
+    scr_h = video_info.height;
     
     player1.radius = PLAYER_RADIUS;
     player1.color = PLAYER1_COLOR;
-    player1.draw = draw_player;
+
     
     player2.radius = PLAYER_RADIUS;
     player2.color = PLAYER2_COLOR;
-    player2.draw = draw_player;
+
     
     ball.radius = BALL_RADIUS;
     ball.color = BALL_COLOR;
-    ball.draw = draw_moving_circle;
+
     
     hole1.speed = HOLE_SPEED;
     hole1.dir.x = INITIAL_DIR_X_ZERO;
     hole1.dir.y = INITIAL_DIR_Y_ZERO;
     hole1.color = HOLE_COLOR;
-    hole1.draw = draw_static_circle;
+
     
     hole2.speed = HOLE_SPEED;
     hole2.dir.x = INITIAL_DIR_X_ZERO;
     hole2.dir.y = INITIAL_DIR_Y_ZERO;
     hole2.color = HOLE_COLOR;
-    hole2.draw = draw_static_circle;
     
     level = 0;
     score_p1 = 0;
@@ -124,14 +128,14 @@ static void level_setup() {
         hole2.prev.y = hole2.pos.y;
     }
     
-    fill_rectangle(0, 0, scr_w, scr_h, BACKGROUND_COLOR_GOLF); // pinto toda la pantalla del color de fondo (verde)
-    countdown_screen(6); // 6 es el tamanio del texto
-    draw_scoreboard(two_players);
+    draw_background(BACKGROUND_COLOR_GOLF);
+    draw_countdown_screen(6); // 6 es el tamanio del texto
+    draw_scoreboard(two_players, score_p1, score_p2, touches);
 }
 
 
 static void game_loop() {
-    uint64_t ticks = sys_ticks();
+    uint64_t ticks = sys_ticks_elapsed();
     player1.prev.x = player1.pos.x;
     player1.prev.y = player1.pos.y;
 
@@ -176,16 +180,12 @@ static void game_loop() {
             ball.pos.y = hole1.pos.y;
         }
         
-        // redibujar la pelota dentro del hoyo
-        ball.draw(&ball); 
-        if (goal_info == 1) hole1.draw(&hole1); 
-        else if (goal_info == 2 && two_players) hole2.draw(&hole2); 
-        fill_circle(ball.pos.x, ball.pos.y, ball.radius, ball.color);
+        redraw_frame();
         
         // sonidito de victoria
-        sys_beep(800, 221); 
-        sys_beep(700, 221);
-        level_end_screen(point_winner_player_num);
+        play_note(800, 221); 
+        play_note(700, 221);
+        draw_level_end_screen(point_winner_player_num);
         level++;
         if (level < LEVELS) {
             level_setup(); 
@@ -193,17 +193,17 @@ static void game_loop() {
         return;
     }
 
-    redraw();
+    redraw_frame();
 
-    while (ticks == sys_ticks())
+    while (ticks == sys_ticks_elapsed())
         ; // unificamos el tiempo de un gameloop a como minimo un tick
 
 }
 
 
 
-static void handle_input(Circle* player, const Controls *key) {
-    if (get_key_status(key->forward) || level == 2) { // en el level == 2 va para adelante siempre
+static void handle_input(circle_t* player, const controls_t *key) {
+    if (sys_is_pressed(key->forward) || level == 2) { // en el level == 2 va para adelante siempre
         
         player->speed += PLAYER_ACCELERATION;
         if (player->speed > PLAYER_MAX_SPEED) {
@@ -216,10 +216,10 @@ static void handle_input(Circle* player, const Controls *key) {
     }
      
     // rotacion
-    if (get_key_status(key->right)) {
+    if (sys_is_pressed(key->right)) {
         rotate_player(player, -ANG);
     }
-    if (get_key_status(key->left)) {
+    if (sys_is_pressed(key->left)) {
         rotate_player(player, ANG);
     }
 }
@@ -257,8 +257,8 @@ void init_positions(){
 
 static void handle_collisions() {
     // determinar si cada jugador se está moviendo
-    uint8_t player1_moving = get_key_status(P1_KEYS.forward);
-    uint8_t player2_moving = two_players ? get_key_status(P2_KEYS.forward) : 0;
+    uint8_t player1_moving = sys_is_pressed(P1_KEYS.forward);
+    uint8_t player2_moving = two_players ? sys_is_pressed(P2_KEYS.forward) : 0;
     
     if (two_players && collide_circles(&player1, &player2)) {
         handle_player_collision(&player1, &player2, player1_moving, player2_moving);
@@ -304,13 +304,18 @@ uint8_t is_ball_in_hole() {
     return 0;
 }
 
-static void redraw() {
-    player1.draw(&player1);
-    hole1.draw(&hole1);
+static void redraw_frame() {
+    draw_background(BACKGROUND_COLOR_GOLF);
+    draw_scoreboard(two_players, score_p1, score_p2, touches);
+
+    draw_player(&player1);
+    draw_circle(&hole1);
+
     if (two_players) {
-        player2.draw(&player2);
-        hole2.draw(&hole2);
+        draw_player(&player2);
+        draw_circle(&hole2);
     }
-    ball.draw(&ball); 
-    update_scoreboard(two_players, score_p1, score_p2, touches);
+
+    draw_circle(&ball);
+    show_frame();
 }

@@ -2,6 +2,8 @@
 #ifndef PROGRAMS_H
 #define PROGRAMS_H
 
+int golf_main(int argc, char * argv[]);
+
 int ps_main(int argc, char *argv[]);
 int mem_main(int argc, char *argv[]);
 int pipes_main(int argc, char *argv[]);

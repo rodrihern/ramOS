@@ -23,6 +23,7 @@ static builtin_command_t builtins[] = {
 };
 
 static external_program_t programs[] = {
+	{"golf", "runs a golf game", &golf_main},
 	{"ps", "prints to STDOUT information about current processes", &ps_main},
 	{"mem", "prints to STDOUT memory usage information", &mem_main},
 	{"pipes", "prints to STDOUT information about open pipes", &pipes_main},

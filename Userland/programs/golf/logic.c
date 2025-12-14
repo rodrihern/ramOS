@@ -2,7 +2,7 @@
 #include "graphics.h"
 
 // Devuelve 1 si a y b chocaron
-int collide_circles(const Circle *a, const Circle *b){
+int collide_circles(const circle_t *a, const circle_t *b){
     int dx = a->pos.x - b->pos.x; 
     int dy = a->pos.y - b->pos.y; 
     int radSum = (int)a->radius + (int)b->radius; 
@@ -10,7 +10,7 @@ int collide_circles(const Circle *a, const Circle *b){
     return (dx*dx + dy*dy) <= (radSum * radSum); 
 }
 
-void push_ball(const Circle *pusher, Circle *ball) {
+void push_ball(const circle_t *pusher, circle_t *ball) {
     // vector normal (desde pusher hacia ball)
     float nx = (float)ball->pos.x - (float)pusher->pos.x;
     float ny = (float)ball->pos.y - (float)pusher->pos.y;
@@ -86,7 +86,7 @@ void push_ball(const Circle *pusher, Circle *ball) {
 }
 
 // mueve a mov para que no este mas overlapeado con el circulo fix
-void resolve_overlap(const Circle *fix, Circle *mov){
+void resolve_overlap(const circle_t *fix, circle_t *mov){
     float dx = (float)mov->pos.x - (float)fix->pos.x;
     float dy = (float)mov->pos.y - (float)fix->pos.y;
     float dist2 = dx*dx + dy*dy;
@@ -115,7 +115,7 @@ void resolve_overlap(const Circle *fix, Circle *mov){
     clamp_circle_in_screen(mov);
 }
 
-void update_ball_motion(Circle * ball, Circle * player1, Circle * player2, uint8_t two_players) {
+void update_ball_motion(circle_t * ball, circle_t * player1, circle_t * player2, uint8_t two_players) {
     if (ball->speed > 0.0){
         uint8_t hit = update_position(ball); // hit almacena si chocó con el borde de la pantalla y debe rebotar
         if (hit & (EDGE_LEFT | EDGE_RIGHT)) { // Si choco con los bordes de los costados
@@ -143,7 +143,7 @@ void update_ball_motion(Circle * ball, Circle * player1, Circle * player2, uint8
     clamp_circle_in_screen(ball);
 }
 
-uint8_t update_position(Circle *c){
+uint8_t update_position(circle_t *c){
 
     c->rx += c->speed * c->dir.x; 
     c->ry += c->speed * c->dir.y; 
@@ -162,7 +162,7 @@ uint8_t update_position(Circle *c){
 }
 
 
-void rotate_player(Circle* player, float angle) {
+void rotate_player(circle_t* player, float angle) {
     float nx = player->dir.x + angle * player->dir.y;
     float ny = player->dir.y - angle * player->dir.x;
     float inv = inv_sqrt(nx*nx + ny*ny);
@@ -171,7 +171,7 @@ void rotate_player(Circle* player, float angle) {
 }
 
 // simetrica para ambos jugadores
-void handle_player_collision(Circle *player1, Circle *player2, uint8_t player1_moving, uint8_t player2_moving) {
+void handle_player_collision(circle_t *player1, circle_t *player2, uint8_t player1_moving, uint8_t player2_moving) {
     
     // calcular el vector entre centros (desde player1 hacia player2)
     float dx = (float)player2->pos.x - (float)player1->pos.x;
@@ -225,7 +225,7 @@ void handle_player_collision(Circle *player1, Circle *player2, uint8_t player1_m
     
 }
 
-uint8_t is_inside(const Circle * a, const Circle * b) {
+uint8_t is_inside(const circle_t * a, const circle_t * b) {
     int dx = b->pos.x - a->pos.x;
     int dy = b->pos.y - a->pos.y;
 
@@ -278,7 +278,7 @@ uint8_t is_inside(const Circle * a, const Circle * b) {
     return (dist_sq <= r*r) ? 1 : 0;
 }
 
-uint8_t clamp_circle_in_screen(Circle *c){
+uint8_t clamp_circle_in_screen(circle_t *c){
     uint8_t hit = EDGE_NONE;
     int r = (int)c->radius; // para que ninguna parte del circulo atraviese el borde
     

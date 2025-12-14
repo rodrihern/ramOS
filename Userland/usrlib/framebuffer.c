@@ -88,11 +88,10 @@ void fb_fill_height(framebuffer_t fb, uint16_t y, uint16_t height, uint32_t colo
     memset64(start, to_fill, bytes);
 }
 
-static void draw_bitmap(framebuffer_t fb, uint8_t bitmap[FONT_HEIGHT], uint16_t x, uint16_t y, uint32_t color, uint64_t size) {
+static void draw_bitmap(framebuffer_t fb, uint8_t bitmap[FONT_HEIGHT], uint16_t x, uint16_t y, uint64_t size, uint32_t color) {
 	for (int i = 0; i < FONT_HEIGHT; i++) {
 		char line = bitmap[i];
 		for (int j = 0; j < FONT_WIDTH; j++) {
-		
 			// dibuja un cuadrado de size × size pixels por cada bit
 			for (uint64_t dy = 0; dy < size; dy++) {
 				for (uint64_t dx = 0; dx < size; dx++) {
@@ -106,13 +105,13 @@ static void draw_bitmap(framebuffer_t fb, uint8_t bitmap[FONT_HEIGHT], uint16_t 
 	}
 }
 
-void fb_draw_char(framebuffer_t fb, char c, uint8_t font[][FONT_HEIGHT], uint16_t x, uint16_t y, uint32_t color, uint64_t size) {
-    draw_bitmap(fb, font[(uint8_t)c], x, y, color, size);
+void fb_draw_char(framebuffer_t fb, char c, uint8_t font[][FONT_HEIGHT], uint16_t x, uint16_t y, uint64_t size, uint32_t color) {
+    draw_bitmap(fb, font[(uint8_t)c], x, y, size, color);
 }
 
-void fb_draw_string(framebuffer_t fb, const char * str, uint8_t font[][FONT_HEIGHT], uint64_t x, uint64_t y, uint32_t color, uint64_t size) {
+void fb_draw_string(framebuffer_t fb, const char * str, uint8_t font[][FONT_HEIGHT], uint64_t x, uint64_t y, uint64_t size, uint32_t color) {
     for (int i = 0; str[i] != 0; i++) {
-        fb_draw_char(fb, str[i], font, x + (FONT_WIDTH*size)*i, y, color, size);
+        fb_draw_char(fb, str[i], font, x + (FONT_WIDTH*size)*i, y, size, color);
     }
 }       
 

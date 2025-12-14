@@ -168,7 +168,7 @@ uint64_t printf_aux(const char     *fmt,
 static uint64_t print_hex(uint64_t value, uint8_t uppercase)
 {
 	char     buffer[HEX_BUFFER_SIZE]; // Suficiente para un entero de 64 bits
-	uint64_t len = num_to_str_base(value, buffer, 16);
+	uint64_t len = num_to_str(value, buffer, 16);
 	// Convertir a mayúsculas si es necesario
 	if (uppercase) {
 		for (uint64_t i = 0; i < len; i++) {
@@ -190,14 +190,14 @@ static uint64_t print_pointer(uint64_t ptr)
 static uint64_t print_oct(uint64_t value)
 {
 	char     buffer[OCTAL_BUFFER_SIZE]; // Suficiente para un entero de 64 bits en base 8
-	uint64_t len = num_to_str_base(value, buffer, 8);
+	uint64_t len = num_to_str(value, buffer, 8);
 	return sys_write(STDOUT, buffer, len);
 }
 
 static uint64_t print_bin(uint64_t value)
 {
 	char     buffer[BINARY_BUFFER_SIZE]; // Suficiente para un entero de 64 bits en base 2
-	uint64_t len = num_to_str_base(value, buffer, 2);
+	uint64_t len = num_to_str(value, buffer, 2);
 	return sys_write(STDOUT, buffer, len);
 }
 
@@ -311,7 +311,7 @@ uint64_t scanf_aux(const char *fmt, uint64_t regPtr[], uint64_t stkPtr[])
 static uint64_t print_udecimal(uint64_t value)
 {
 	char     buffer[DECIMAL_BUFFER_SIZE]; // Suficiente para un entero de 64 bits
-	uint64_t len = num_to_str_base(value, buffer, 10);
+	uint64_t len = num_to_str(value, buffer, 10);
 	return sys_write(STDOUT, buffer, len);
 }
 
@@ -331,7 +331,7 @@ static uint64_t print_decimal_width(int64_t value, int width)
 
 	// Calcular longitud del módulo
 	char tmp[DECIMAL_BUFFER_SIZE];
-	uint64_t len = num_to_str_base(mag, tmp, 10);
+	uint64_t len = num_to_str(mag, tmp, 10);
 
 	int pad = width - (int)len;
 	while (pad > 0) {

@@ -25,9 +25,9 @@ void fb_putpixel(framebuffer_t fb, uint32_t color, uint16_t x, uint16_t y);
 void fb_fill(framebuffer_t fb, uint32_t color);
 void fb_fill_height(framebuffer_t fb, uint16_t y, uint16_t height, uint32_t color);
 
-void fb_draw_char(framebuffer_t fb, char c, uint8_t font[][FONT_HEIGHT], uint16_t x, uint16_t y, uint32_t color, uint64_t size);
+void fb_draw_char(framebuffer_t fb, char c, uint8_t font[][FONT_HEIGHT], uint16_t x, uint16_t y, uint64_t size, uint32_t color);
 
-void fb_draw_string(framebuffer_t fb, const char * str, uint8_t font[][FONT_HEIGHT], uint64_t x, uint64_t y, uint32_t color, uint64_t size);
+void fb_draw_string(framebuffer_t fb, const char * str, uint8_t font[][FONT_HEIGHT], uint64_t x, uint64_t y, uint64_t size, uint32_t color);
 
 void fb_draw_line(framebuffer_t fb, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint32_t color);
 

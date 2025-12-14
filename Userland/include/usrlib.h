@@ -37,7 +37,7 @@ uint64_t        printf_aux(const char     *fmt,
 uint64_t strlen(const char *str);
 int      strcmp(char *s1, char *s2);
 char    *strcpy(char *dest, const char *src);
-uint64_t num_to_str_base(uint64_t value, char *buffer, uint32_t base);
+uint64_t num_to_str(uint64_t value, char *buffer, uint32_t base);
 int64_t  satoi(char *str);
 
 //FUNCIONES DE MATEMATICAS 

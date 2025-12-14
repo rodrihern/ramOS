@@ -1,8 +1,22 @@
 
+---- juego 
+
+
+
 
 ---- video
 
-jueguito con delta t
+juego:
+    sacar funciones de dibujo de el struct
+
+    cambiar el .h
+
+    arreglar las esperas activas
+
+    sacar las esperas activas
+
+    meterle delta t
+
 
 pantalla de inicio y mejores diseños para el juego
 

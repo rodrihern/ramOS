@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 #include "usrlib.h"
+#include "scancodes.h"
 
 // -------------------------------------------------------------------------
 // CONSTANTES DEL JUEGO
@@ -57,10 +58,10 @@ typedef struct {
     uint8_t left;
     uint8_t forward;
     uint8_t right;
-} Controls;
+} controls_t;
 
-static const Controls P1_KEYS = { 'a', 'w', 'd' };   // jugador 1
-static const Controls P2_KEYS = { 'j', 'i', 'l' };   // jugador 2
+static const controls_t P1_KEYS = { KEY_A, KEY_W, KEY_D };   // jugador 1
+static const controls_t P2_KEYS = { KEY_J, KEY_I, KEY_L  };   // jugador 2
 
 
 // -------------------------------------------------------------------------
@@ -71,27 +72,26 @@ static const Controls P2_KEYS = { 'j', 'i', 'l' };   // jugador 2
 typedef struct {
     int x;
     int y;
-} Position;
+} position_t;
 
 // Estructura para dirección (versor)
 typedef struct {
     double x;
     double y;
-} Direction;
+} direction_t;
 
 
 // Estructura para círculos genéricos
-typedef struct Circle {
-    Position prev; // cordenadas anteriores para redibujar
-    Position pos; // coordenadas del centro del círculo
+typedef struct circle {
+    position_t prev; // cordenadas anteriores para redibujar
+    position_t pos; // coordenadas del centro del círculo
     uint32_t radius;
     double speed;  // modulo de velocidad
-    Direction dir; // versor de direccion
+    direction_t dir; // versor de direccion
     uint32_t color;
-    void (*draw)(struct Circle*);  // Puntero a funcion de dibujo
     float rx; // acumulador de error fraccional del eje X
     float ry; // acumulador de error fraccional del eje Y
-} Circle;
+} circle_t;
 
 // Bit-mask de bordes tocados
 enum {
@@ -112,10 +112,5 @@ static const uint8_t HOLE_RADII[LEVELS] = {
 
 /* --------------------------------------------------------- */
 
-
-// -------------------------------------------------------------------------
-// PUNTO DE ENTRADA DEL JUEGO
-// -------------------------------------------------------------------------
-void golf_main();
 
 #endif
