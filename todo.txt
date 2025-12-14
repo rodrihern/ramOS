@@ -20,11 +20,10 @@ refactor tty para hacerla mas eficiente
 
 bg color y text color / themes en la shell
 
-tengo que ver que pasa si quieren cosas de teclado y los crean en background, los mato?
+mas canciones a spotify
 
 piano
 
-mas canciones a spotify
 
 
 --------
@@ -37,7 +36,9 @@ poner gdb
 
 ---- procesos
 
-hacer un dup(?)
+ver que onda con los fds
+
+refactorizar los named pipes para abrir lectura/escritura independientemente de si la puta que te pario amigo la concha de tu hermana
 
 refactorizar la inicializacion del proceso -> 
     hereda los BUILTIN_FD
