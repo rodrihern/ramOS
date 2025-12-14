@@ -20,11 +20,10 @@ refactor tty para hacerla mas eficiente
 
 bg color y text color / themes en la shell
 
-tengo que ver que pasa si quieren cosas de teclado y los crean en background, los mato?
+mas canciones a spotify
 
 piano
 
-mas canciones a spotify
 
 
 --------
