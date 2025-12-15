@@ -38,6 +38,8 @@ void draw_final_score_screen(uint8_t two_players, uint16_t score_p1, uint16_t sc
 
 void show_frame();
 
+void destroy_graphics();
+
 #define WAIT_SPACE()   while(getchar()!=' ') 
 
 #endif

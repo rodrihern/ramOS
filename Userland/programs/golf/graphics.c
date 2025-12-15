@@ -296,3 +296,7 @@ void draw_countdown_screen(uint64_t size) {
 void show_frame() {
     fb_present(fb);
 }
+
+void destroy_graphics() {
+    fb_destroy(fb);
+}

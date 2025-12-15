@@ -50,6 +50,7 @@ int golf_main(int argc, char * argv[]) {
         game_loop();
     }
     draw_final_score_screen(two_players, score_p1, score_p2, touches);
+    destroy_graphics();
 
     return 0;
 }
