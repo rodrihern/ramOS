@@ -30,6 +30,8 @@ typedef struct {
 #define PRESS_KEY_MESSAGE "Press any key to continue..."
 #define PRESS_KEY_MESSAGE_LENGTH 28
 
+#define INITIAL_SCREEN_TEXT_COLOR 0xff8000
+
 // funciones de la shell
 void read_line(char *buf, uint64_t max);
 void process_line(char *line);

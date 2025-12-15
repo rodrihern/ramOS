@@ -64,18 +64,18 @@ static void draw_initial_screen() {
 	sys_video_info(&vi);
 	framebuffer_t fb = fb_init(vi.width, vi.height, vi.pitch, vi.bpp);
 
-	int x = (vi.width - ICON_BLACK_WIDTH) / 2;
-	int y = vi.height/4 - ICON_BLACK_HEIGHT/2;
+	int x = (vi.width - RAMOS_LOGO_WIDTH) / 2;
+	int y = vi.height/4 - RAMOS_LOGO_HEIGHT/2;
 	
-	fb_draw_image(fb, ramos_logo, x, y, ICON_BLACK_WIDTH, ICON_BLACK_HEIGHT);
+	fb_draw_image(fb, ramos_logo, x, y, RAMOS_LOGO_WIDTH, RAMOS_LOGO_HEIGHT);
 
 	x = (vi.width - 3 * FONT_WIDTH * WELCOME_MESSAGE_LENGTH) / 2;
 	y = (vi.height - 3*FONT_HEIGHT) / 2;
-	fb_draw_string(fb, WELCOME_MESSAGE, font, x, y, 3, 0xff8000);
+	fb_draw_string(fb, WELCOME_MESSAGE, font, x, y, 3, INITIAL_SCREEN_TEXT_COLOR);
 
 	x = (vi.width - 3* FONT_WIDTH * PRESS_KEY_MESSAGE_LENGTH) / 2;
 	y = (vi.height * 3 / 4 - 3*FONT_HEIGHT / 2);
-	fb_draw_string(fb, PRESS_KEY_MESSAGE, font, x, y, 3, 0xff8000);
+	fb_draw_string(fb, PRESS_KEY_MESSAGE, font, x, y, 3, INITIAL_SCREEN_TEXT_COLOR);
 	
 	fb_present(fb);
 	fb_destroy(fb);
