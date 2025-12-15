@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
 #include "../include/shell.h"
-#include "treino.h"
+#include "ramos_logo.h"
 #include "font.h"
 #include "framebuffer.h"
 
@@ -67,7 +67,7 @@ static void draw_initial_screen() {
 	int x = (vi.width - ICON_BLACK_WIDTH) / 2;
 	int y = vi.height/4 - ICON_BLACK_HEIGHT/2;
 	
-	fb_draw_image(fb, icon_black, x, y, ICON_BLACK_WIDTH, ICON_BLACK_HEIGHT);
+	fb_draw_image(fb, ramos_logo, x, y, ICON_BLACK_WIDTH, ICON_BLACK_HEIGHT);
 
 	x = (vi.width - 3 * FONT_WIDTH * WELCOME_MESSAGE_LENGTH) / 2;
 	y = (vi.height - 3*FONT_HEIGHT) / 2;

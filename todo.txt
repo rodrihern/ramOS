@@ -1,9 +1,12 @@
 
 ---- juego 
 
+
 agregar fps
 
 meterle delta t
+
+mejores diseños?
 
 cambiar los .h
 
@@ -14,7 +17,7 @@ arreglar las esperas activas
 
 ---- video
 
-pantalla de inicio y mejores diseños para el juego
+agregar soporte para 24 bpp
 
 doom
 
