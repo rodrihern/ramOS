@@ -2,12 +2,17 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
 #include "../include/shell.h"
+#include "treino.h"
+#include "font.h"
+#include "framebuffer.h"
 
 #define UP_ARROW 1
 #define LEFT_ARROW 2
 #define RIGHT_ARROW 3
 #define DOWN_ARROW 4
 #define HISTORY_SIZE 10  // Número de comandos a guardar en el historial
+
+
 
 // Buffer para el comando actual
 static char current_input[INPUT_MAX];
@@ -23,9 +28,14 @@ static void print_initial_message();
 static void add_to_history(const char *cmd);
 static const char *get_history_up(void);
 static const char *get_history_down(void);
+static void draw_initial_screen();
+
 
 int main(void)
 {
+
+	draw_initial_screen();
+
 	sys_tty_show();
 
 	sys_flush(STDIN);
@@ -48,12 +58,37 @@ int main(void)
 }
 
 /*-- FUNCIONES AUXILIARES --*/
+
+static void draw_initial_screen() {
+	video_info_t vi;
+	sys_video_info(&vi);
+	framebuffer_t fb = fb_init(vi.width, vi.height, vi.pitch, vi.bpp);
+
+	int x = (vi.width - ICON_BLACK_WIDTH) / 2;
+	int y = vi.height/4 - ICON_BLACK_HEIGHT/2;
+	
+	fb_draw_image(fb, icon_black, x, y, ICON_BLACK_WIDTH, ICON_BLACK_HEIGHT);
+
+	x = (vi.width - 3 * FONT_WIDTH * WELCOME_MESSAGE_LENGTH) / 2;
+	y = (vi.height - 3*FONT_HEIGHT) / 2;
+	fb_draw_string(fb, WELCOME_MESSAGE, font, x, y, 3, 0xff8000);
+
+	x = (vi.width - 3* FONT_WIDTH * PRESS_KEY_MESSAGE_LENGTH) / 2;
+	y = (vi.height * 3 / 4 - 3*FONT_HEIGHT / 2);
+	fb_draw_string(fb, PRESS_KEY_MESSAGE, font, x, y, 3, 0xff8000);
+	
+	fb_present(fb);
+	fb_destroy(fb);
+	getchar();
+}
+
+
 static void print_initial_message()
 {
-	fprint(STDMAGENTA, "Type your username: ");
+	fprint(STDCYAN, "Type your username: ");
 	read_line(user_name, USERNAME_MAX_LENGTH - 1);
 	putchar('\n');
-	fprint(STDMAGENTA, HELP_MESSAGE);
+	fprint(STDCYAN, HELP_MESSAGE);
 	putchar('\n');
 }
 

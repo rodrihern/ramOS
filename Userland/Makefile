@@ -17,6 +17,7 @@ C_SOURCES := $(wildcard *.c)
 C_SOURCES += $(wildcard shell/*.c)
 C_SOURCES += $(wildcard usrlib/*.c)
 C_SOURCES += $(wildcard tests/*.c)
+C_SOURCES += $(wildcard utils/*.c)
 C_SOURCES += $(filter %.c,$(call rwildcard, programs/, *.c))
 C_SOURCES := $(sort $(C_SOURCES))
 

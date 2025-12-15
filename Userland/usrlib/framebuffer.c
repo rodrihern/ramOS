@@ -268,3 +268,16 @@ void fb_fill_circle(framebuffer_t fb,uint16_t x_center, uint16_t y_center, uint1
         }
     }
 }
+
+void fb_draw_image(framebuffer_t fb, const uint32_t *image_data, uint16_t x, uint16_t y, uint16_t width, uint16_t height) {
+    if (image_data == NULL) {
+        return;
+    }
+    
+    for (uint16_t row = 0; row < height; row++) {
+        for (uint16_t col = 0; col < width; col++) {
+            uint32_t pixel = image_data[col + row * width] >> 8; // bc of the format
+            fb_putpixel(fb, pixel, x + col, y + row);
+        }
+    }
+}

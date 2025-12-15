@@ -24,6 +24,12 @@ typedef struct {
 #define HELP_MESSAGE "--Write help to see available commands--\n"
 #define USERNAME_MAX_LENGTH 16
 
+#define WELCOME_MESSAGE "Welcome to ramOS"
+#define WELCOME_MESSAGE_LENGTH 16
+
+#define PRESS_KEY_MESSAGE "Press any key to continue..."
+#define PRESS_KEY_MESSAGE_LENGTH 28
+
 // funciones de la shell
 void read_line(char *buf, uint64_t max);
 void process_line(char *line);

@@ -42,4 +42,6 @@ void fb_draw_circle(framebuffer_t fb,uint16_t x_center, uint16_t y_center, uint1
 
 void fb_fill_circle(framebuffer_t fb,uint16_t x_center, uint16_t y_center, uint16_t radius, uint32_t color);
 
+void fb_draw_image(framebuffer_t fb, const uint32_t *image_data, uint16_t x, uint16_t y, uint16_t width, uint16_t height);
+
 #endif
