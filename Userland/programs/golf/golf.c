@@ -240,10 +240,10 @@ static void handle_input(circle_t* player, const controls_t *key, uint32_t delta
      
     // rotacion
     if (sys_is_pressed(key->right)) {
-        rotate_player(player, -ANG);
+        rotate_player(player, -ROTATION_SPEED * delta_time);
     }
     if (sys_is_pressed(key->left)) {
-        rotate_player(player, ANG);
+        rotate_player(player, ROTATION_SPEED * delta_time);
     }
 }
 

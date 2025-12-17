@@ -52,8 +52,8 @@
 #define PLAYER2_INITIAL_DIR_X 1.0
 #define PLAYER2_INITIAL_DIR_Y 0.0
 
-//Ángulo de giro
-#define ANG 0.0314f
+//Ángulo de giro (radians per millisecond)
+#define ROTATION_SPEED 0.003f
 #define INITIALIZER 0
 
 
