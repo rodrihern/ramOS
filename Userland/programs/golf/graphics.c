@@ -52,17 +52,20 @@ void draw_player(circle_t *p){
     float px = -ny;                      
     float py =  nx;
 
-    // flecha
+    // flecha mas gruesa y visible
     int arrowLength = p->radius * 2 / 3;    
-    int arrowHeadSize = p->radius / 4;      
+    int arrowHeadSize = p->radius / 3;  // bigger arrow head    
     int baseX = (int)(p->pos.x - nx * arrowLength / 2);
     int baseY = (int)(p->pos.y - ny * arrowLength / 2);
     int tipX = (int)(p->pos.x + nx * arrowLength / 2);
     int tipY = (int)(p->pos.y + ny * arrowLength / 2);
     
+    // draw thicker arrow line (3 parallel lines)
     fb_draw_line(fb, baseX, baseY, tipX, tipY, 0x000000);
+    fb_draw_line(fb, baseX + (int)px, baseY + (int)py, tipX + (int)px, tipY + (int)py, 0x000000);
+    fb_draw_line(fb, baseX - (int)px, baseY - (int)py, tipX - (int)px, tipY - (int)py, 0x000000);
 
-    // puntas de la flecha
+    // puntas de la flecha (mas grandes)
     int wing1X = (int)(tipX - nx * arrowHeadSize - px * arrowHeadSize / 2);
     int wing1Y = (int)(tipY - ny * arrowHeadSize - py * arrowHeadSize / 2);
     int wing2X = (int)(tipX - nx * arrowHeadSize + px * arrowHeadSize / 2);
@@ -70,11 +73,14 @@ void draw_player(circle_t *p){
     
     fb_draw_line(fb, tipX, tipY, wing1X, wing1Y, 0x000000);
     fb_draw_line(fb, tipX, tipY, wing2X, wing2Y, 0x000000);
+    // make arrow head thicker
+    fb_draw_line(fb, tipX + (int)px, tipY + (int)py, wing1X, wing1Y, 0x000000);
+    fb_draw_line(fb, tipX - (int)px, tipY - (int)py, wing2X, wing2Y, 0x000000);
 
-    // ojos
+    // ojos mas grandes (2x)
     int eyeDist   = p->radius / 2;
     int pupilOff  = p->radius / 4;
-    int eyeRad    = 3;
+    int eyeRad    = 4;  // doubled from 3 to 6
 
     int lx = (int)(p->pos.x +  px * eyeDist);
     int ly = (int)(p->pos.y +  py * eyeDist);

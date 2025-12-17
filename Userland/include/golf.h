@@ -15,11 +15,12 @@
 
 // #define SLOWDOWN_RATE 350000 // ralentizamos en un jugador para que el juego ande mejor
 // Colores
-#define BACKGROUND_COLOR_GOLF 0x228B22  // Color verde bosque
-#define PLAYER1_COLOR 0xc71de9        // Color magenta
-#define PLAYER2_COLOR 0xf18c18        // Color naranja          
-#define BALL_COLOR 0xdb1a1a                   
-#define HOLE_COLOR 0x000000          // Color negro para el hoyo
+#define BACKGROUND_COLOR_GOLF 0x13814e  // Rich dark green
+#define PLAYER1_COLOR 0x2196F3         // Bright blue - better visibility
+#define PLAYER2_COLOR 0xFFC107         // Amber/gold - good contrast          
+#define BALL_COLOR 0xFFFFFF            // White - like a real golf ball
+#define HOLE_COLOR 0x000000            // black
+#define PLAYER_OUTLINE_COLOR 0xFFFFFF  // White outline for players
 
 // Radios
 #define PLAYER_RADIUS 30

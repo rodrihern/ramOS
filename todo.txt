@@ -1,13 +1,10 @@
 
----- juego 
-
-mejores diseños?
-
-
 
 
 
 ---- video
+
+agregar endless_loop como proceso y que se pueda correr
 
 agregar soporte para 24 bpp
 

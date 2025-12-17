@@ -4,8 +4,8 @@
 #include "golf.h"
 
 
-#define MENU_BKG    0x041803  
-#define MENU_CONTENT 0xf4d35e 
+#define MENU_BKG    0x1A2332  // Deep navy blue
+#define MENU_CONTENT 0xF0E68C // Khaki/golden for warm contrast 
 #define SCOREBOARD_HEIGHT 32
 
 void init_graphics(uint16_t width, uint16_t height, uint16_t pitch, uint8_t bpp);
