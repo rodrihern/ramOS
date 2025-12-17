@@ -10,7 +10,7 @@ int collide_circles(const circle_t *a, const circle_t *b){
     return (dx*dx + dy*dy) <= (radSum * radSum); 
 }
 
-void push_ball(const circle_t *pusher, circle_t *ball) {
+void push_ball(const circle_t *pusher, circle_t * ball, uint32_t delta_time) {
     // vector normal (desde pusher hacia ball)
     float nx = (float)ball->pos.x - (float)pusher->pos.x;
     float ny = (float)ball->pos.y - (float)pusher->pos.y;
@@ -25,7 +25,7 @@ void push_ball(const circle_t *pusher, circle_t *ball) {
     nx *= invN;
     ny *= invN;                     
 
-    // velocidades en el sistema de coordenadas
+    // velocidades (no multiplicar por delta_time aquí, las velocidades son por ms)
     float v1x = pusher->dir.x * pusher->speed;  // velocidad del pusher
     float v1y = pusher->dir.y * pusher->speed;
     float v2x = ball->dir.x * ball->speed;      // velocidad de la pelota
@@ -55,9 +55,8 @@ void push_ball(const circle_t *pusher, circle_t *ball) {
         }
     } else if (velN != 0.0f) {
         // pusher en movimiento - colisión elástica estándar (funciona para acercándose Y alejándose)
-        float mass_ratio = 2.5;
-        float vb_x = v2x + mass_ratio * velN * nx;
-        float vb_y = v2y + mass_ratio * velN * ny;
+        float vb_x = v2x + MASS_RATIO * velN * nx;
+        float vb_y = v2y + MASS_RATIO * velN * ny;
 
         // calcular la nueva velocidad y dirección de la pelota
         float vb2 = vb_x*vb_x + vb_y*vb_y;
@@ -76,7 +75,7 @@ void push_ball(const circle_t *pusher, circle_t *ball) {
             // si no hay velocidad resultante, empujar en dirección normal
             ball->dir.x = nx;
             ball->dir.y = ny;
-            ball->speed = pusher->speed * mass_ratio;
+            ball->speed = pusher->speed * MASS_RATIO;  // No multiply by delta_time
             if (ball->speed > BALL_MAX_SPEED) {
                 ball->speed = BALL_MAX_SPEED;
             }
@@ -115,9 +114,9 @@ void resolve_overlap(const circle_t *fix, circle_t *mov){
     clamp_circle_in_screen(mov);
 }
 
-void update_ball_motion(circle_t * ball, circle_t * player1, circle_t * player2, uint8_t two_players) {
+void update_ball_motion(circle_t * ball, circle_t * player1, circle_t * player2, uint8_t two_players, uint32_t delta_time) {
     if (ball->speed > 0.0){
-        uint8_t hit = update_position(ball); // hit almacena si chocó con el borde de la pantalla y debe rebotar
+        uint8_t hit = update_position(ball, delta_time); // hit almacena si chocó con el borde de la pantalla y debe rebotar
         if (hit & (EDGE_LEFT | EDGE_RIGHT)) { // Si choco con los bordes de los costados
             ball->dir.x = -ball->dir.x; // Invierto la dirección en x
             ball->rx = 0.0f; // Reseteo el resto
@@ -127,14 +126,15 @@ void update_ball_motion(circle_t * ball, circle_t * player1, circle_t * player2,
             ball->ry = 0.0f; // Reseteo el resto
         }
 
-        // freno
-        if (ball->speed > BALL_FRICTION_DECELERATION) {
-            ball->speed -= BALL_FRICTION_DECELERATION;
+        // Apply friction (deceleration proportional to delta_time)
+        float friction_amount = BALL_FRICTION_DECELERATION * delta_time;
+        if (ball->speed > friction_amount) {
+            ball->speed -= friction_amount;
         } else if (ball->speed > BALL_MIN_SPEED_THRESHOLD) {
-            // velociad chica pero menor que el threshold
-            ball->speed -= ball->speed * 0.1; 
+            // Very low speed - gradual stop
+            ball->speed -= ball->speed * 0.05 * (delta_time / 16.0f);  // Normalized to ~60fps
         } else {
-            // si esta por abajo del threshold la detenemos
+            // Below threshold - stop completely
             ball->speed = 0.0;
         }
 
@@ -143,10 +143,10 @@ void update_ball_motion(circle_t * ball, circle_t * player1, circle_t * player2,
     clamp_circle_in_screen(ball);
 }
 
-uint8_t update_position(circle_t *c){
+uint8_t update_position(circle_t *c, uint32_t delta_time){
 
-    c->rx += c->speed * c->dir.x; 
-    c->ry += c->speed * c->dir.y; 
+    c->rx += c->speed * delta_time * c->dir.x; 
+    c->ry += c->speed * delta_time * c->dir.y; 
 
     int dx = (int)c->rx; 
     int dy = (int)c->ry;

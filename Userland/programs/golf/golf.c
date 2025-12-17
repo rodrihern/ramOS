@@ -10,8 +10,9 @@
 static void game_setup();
 static void level_setup();
 static void game_loop();
+
 static void init_positions(void);
-static void handle_input(circle_t* player, const controls_t *keys);
+static void handle_input(circle_t* player, const controls_t *keys, uint32_t delta_time);
 static void handle_collisions();
 static uint8_t is_ball_in_hole();
 static void redraw_frame();
@@ -28,11 +29,17 @@ static uint16_t score_p1 = 0;
 static uint16_t score_p2 = 0;
 static uint64_t touches = 0;
 
+static uint32_t fps = 0;
+static uint32_t current_fps = 0;
+static uint64_t timestamp_fps;
+static uint64_t prev_ms;
+
 static circle_t player1;
 static circle_t player2;
 static circle_t ball;
 static circle_t hole1;
-static circle_t hole2; 
+static circle_t hole2;
+
 
 int golf_main(int argc, char * argv[]) {
 
@@ -54,6 +61,7 @@ int golf_main(int argc, char * argv[]) {
 
     return 0;
 }
+
 
 
 static void game_setup() {
@@ -130,12 +138,26 @@ static void level_setup() {
     }
     
     draw_countdown_screen(6); // 6 es el tamanio del texto
-    draw_scoreboard(two_players, score_p1, score_p2, touches);
+    draw_scoreboard(two_players, score_p1, score_p2, touches, fps);
+    prev_ms = sys_ms_elapsed();
+    timestamp_fps = sys_ms_elapsed();
 }
 
 
 static void game_loop() {
-    uint64_t ticks = sys_ticks_elapsed();
+    uint64_t current_ms = sys_ms_elapsed();
+    uint32_t delta_time = current_ms - prev_ms; // pensar que suele ser de 10
+    prev_ms = current_ms;
+
+    uint64_t delta_fps = current_ms - timestamp_fps;
+    current_fps++;
+    if (delta_fps >= 1000) {
+        fps = current_fps;
+        current_fps = 0;
+        timestamp_fps = sys_ms_elapsed();
+    } 
+
+
     player1.prev.x = player1.pos.x;
     player1.prev.y = player1.pos.y;
 
@@ -148,13 +170,13 @@ static void game_loop() {
     ball.prev.x = ball.pos.x;
     ball.prev.y = ball.pos.y;
 
-    handle_input(&player1, &P1_KEYS); 
+    handle_input(&player1, &P1_KEYS, delta_time); 
     if(two_players)
-        handle_input(&player2, &P2_KEYS);
+        handle_input(&player2, &P2_KEYS, delta_time);
     
-    handle_collisions();
+    handle_collisions(delta_time);
     
-    update_ball_motion(&ball, &player1, &player2, two_players);
+    update_ball_motion(&ball, &player1, &player2, two_players, delta_time);
 
     uint8_t goal_info = is_ball_in_hole(); // 0 no gano nadie, sino devuelve 1 o 2 segun el ganador
     
@@ -195,22 +217,23 @@ static void game_loop() {
 
     redraw_frame();
 
-    while (ticks == sys_ticks_elapsed())
-        ; // unificamos el tiempo de un gameloop a como minimo un tick
+    // while (ticks == sys_ticks_elapsed())
+    //     ; // unificamos el tiempo de un gameloop a como minimo un tick
 
 }
 
 
+// HELPER FUNCTIONS
 
-static void handle_input(circle_t* player, const controls_t *key) {
+static void handle_input(circle_t* player, const controls_t *key, uint32_t delta_time) {
     if (sys_is_pressed(key->forward) || level == 2) { // en el level == 2 va para adelante siempre
         
-        player->speed += PLAYER_ACCELERATION;
+        player->speed += PLAYER_ACCELERATION * delta_time;
         if (player->speed > PLAYER_MAX_SPEED) {
             player->speed = PLAYER_MAX_SPEED;
         }
         
-        update_position(player); // Mueve el jugador
+        update_position(player, delta_time); // Mueve el jugador
     } else {
         player->speed = 0.0;
     }
@@ -255,7 +278,7 @@ void init_positions(){
 }
 
 
-static void handle_collisions() {
+static void handle_collisions(uint32_t delta_time) {
     // determinar si cada jugador se está moviendo
     uint8_t player1_moving = sys_is_pressed(P1_KEYS.forward);
     uint8_t player2_moving = two_players ? sys_is_pressed(P2_KEYS.forward) : 0;
@@ -278,14 +301,14 @@ static void handle_collisions() {
     
     if (collide_circles(&player1, &ball)) {
         touches++;
-        push_ball(&player1, &ball);
+        push_ball(&player1, &ball, delta_time);
         resolve_overlap(&player1, &ball);  // separa jugador de la pelota
         
     }
     
     if (two_players && collide_circles(&player2, &ball)) {
         touches++;
-        push_ball(&player2, &ball);
+        push_ball(&player2, &ball, delta_time);
         resolve_overlap(&player2, &ball);  // Separar jugador de pelota
     }
 
@@ -306,7 +329,7 @@ uint8_t is_ball_in_hole() {
 
 static void redraw_frame() {
     draw_background(BACKGROUND_COLOR_GOLF);
-    draw_scoreboard(two_players, score_p1, score_p2, touches);
+    draw_scoreboard(two_players, score_p1, score_p2, touches, fps);
 
     draw_player(&player1);
     draw_circle(&hole1);

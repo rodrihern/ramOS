@@ -24,7 +24,7 @@ void draw_circle(circle_t *c);
 
 void draw_player(circle_t *p);
 
-void draw_scoreboard(uint8_t two_players, uint16_t score1, uint16_t score2, uint64_t touches);
+void draw_scoreboard(uint8_t two_players, uint16_t score1, uint16_t score2, uint64_t touches, uint32_t fps);
 
 
 int draw_menu_screen(void); // TODO: cambiar por un menu con flechitas

@@ -97,26 +97,26 @@ void draw_player(circle_t *p){
 
 // SCOREBOARD
 
-void draw_scoreboard(uint8_t two_players, uint16_t score1, uint16_t score2, uint64_t touches) {
+void draw_scoreboard(uint8_t two_players, uint16_t score1, uint16_t score2, uint64_t touches, uint32_t fps) {
     fb_fill_height(fb, 0, SCOREBOARD_HEIGHT, MENU_BKG);
     
-    // Solo dibujar "Touches: "
+    // Touches a la izquierda
     fb_draw_string(fb, "Touches: ", font, 10, 0, 2, MENU_CONTENT);
-    // número de touches
     char touch_buffer[32];
     uint64_t touch_len = num_to_str(touches, touch_buffer, 10);
     touch_buffer[touch_len] = '\0';
     int touches_number_x = 10 + (9 * 8 * 2); // 9 chars de "Touches: "
     fb_draw_string(fb, touch_buffer, font, touches_number_x, 0, 2, MENU_CONTENT);
 
+    // Score en el medio
     if (two_players) {
         int text_width = 11 * 8 * 2; // 11 chars, 8 pixels por char, size 2
-        int score_x = width - text_width - 10; // 10 pixeles de margen
+        int score_x = (width - text_width) / 2; // centrado
         
         // Texto base
         fb_draw_string(fb, "P1   -   P2", font, score_x, 0, 2, MENU_CONTENT);
 
-        // dígitos del score (posiciones 3 y 7 en "P1 x - y P2")
+        // dígitos del score
         char score1_buffer[2];
         score1_buffer[0] = '0' + (score1 % 10);
         score1_buffer[1] = '\0';
@@ -131,6 +131,17 @@ void draw_scoreboard(uint8_t two_players, uint16_t score1, uint16_t score2, uint
         int score2_x = score_x + (7 * 8 * 2); // después de "P1 x - "
         fb_draw_string(fb, score2_buffer, font, score2_x, 0, 2, MENU_CONTENT);
     }
+    
+    // FPS a la derecha
+    char fps_buffer[32];
+    uint64_t fps_len = num_to_str(fps, fps_buffer, 10);
+    fps_buffer[fps_len] = '\0';
+    
+    int fps_text_width = (5 + fps_len) * 8 * 2; // "fps: " (5 chars) + dígitos
+    int fps_x = width - fps_text_width - 10; // 10 pixeles de margen
+    
+    fb_draw_string(fb, "fps: ", font, fps_x, 0, 2, MENU_CONTENT);
+    fb_draw_string(fb, fps_buffer, font, fps_x + (5 * 8 * 2), 0, 2, MENU_CONTENT);
 }
 
 

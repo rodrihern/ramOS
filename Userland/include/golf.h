@@ -29,13 +29,18 @@
 #define HOLE_RADIUS_L3 11
 
 // Velocidades
-#define PLAYER_SPEED 0.15
+#define PLAYER_SPEED 0.015
 #define BALL_INITIAL_SPEED 0.0
 #define HOLE_SPEED 0.0
 
-// aceleraciones
-#define PLAYER_ACCELERATION 0.15  
-#define PLAYER_MAX_SPEED 3
+// aceleraciones (pixels per millisecond squared)
+#define PLAYER_ACCELERATION 0.002  
+#define BALL_MAX_SPEED 1
+#define PLAYER_MAX_SPEED 0.35
+#define BALL_FRICTION_DECELERATION 0.0003  // Friction coefficient (pixels per millisecond squared)
+#define BALL_MIN_SPEED_THRESHOLD 0.001     // Minimum speed threshold before stopping completely
+
+#define MASS_RATIO 2.5
 
 // Direcciones iniciales
 #define PLAYER1_INITIAL_DIR_X -1.0
@@ -50,9 +55,8 @@
 //Ángulo de giro
 #define ANG 0.0314f
 #define INITIALIZER 0
-#define BALL_MAX_SPEED 10
-#define BALL_FRICTION_DECELERATION 0.035  // Cantidad de velocidad que se resta por frame (reducida para frenado más lento)
-#define BALL_MIN_SPEED_THRESHOLD 0.01     // Umbral mínimo antes de parar completamente (reducido)
+
+
 
 typedef struct {
     uint8_t left;

@@ -1,16 +1,8 @@
 
 ---- juego 
 
-
-agregar fps
-
-meterle delta t
-
 mejores diseños?
 
-cambiar los .h
-
-arreglar las esperas activas
 
 
 
