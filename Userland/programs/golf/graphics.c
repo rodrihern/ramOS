@@ -52,18 +52,13 @@ void draw_player(circle_t *p){
     float px = -ny;                      
     float py =  nx;
 
-    // flecha mas gruesa y visible
-    int arrowLength = p->radius * 2 / 3;    
-    int arrowHeadSize = p->radius / 3;  // bigger arrow head    
-    int baseX = (int)(p->pos.x - nx * arrowLength / 2);
-    int baseY = (int)(p->pos.y - ny * arrowLength / 2);
-    int tipX = (int)(p->pos.x + nx * arrowLength / 2);
-    int tipY = (int)(p->pos.y + ny * arrowLength / 2);
+    // flecha solo con punta (sin linea)
+    int arrowHeadSize = p->radius / 3;  // arrow head size
     
-    // draw thicker arrow line (3 parallel lines)
-    fb_draw_line(fb, baseX, baseY, tipX, tipY, 0x000000);
-    fb_draw_line(fb, baseX + (int)px, baseY + (int)py, tipX + (int)px, tipY + (int)py, 0x000000);
-    fb_draw_line(fb, baseX - (int)px, baseY - (int)py, tipX - (int)px, tipY - (int)py, 0x000000);
+    // how close to the edge, 1 is at the edge
+    float tipDistance = p->radius * 0.6f;
+    int tipX = (int)(p->pos.x + nx * tipDistance);
+    int tipY = (int)(p->pos.y + ny * tipDistance);
 
     // puntas de la flecha (mas grandes)
     int wing1X = (int)(tipX - nx * arrowHeadSize - px * arrowHeadSize / 2);
@@ -247,11 +242,14 @@ void draw_final_score_screen(uint8_t two_players, uint16_t score_p1, uint16_t sc
         
         int winner_y = content_start_y + 100;
         if (score_p1 > score_p2) {
-            fb_draw_string(fb, "Player 1 Wins!", font, width/2 - 168, winner_y, 3, 0x00FF00); // Gerde para el ganadorreen for winner
+            fb_draw_string(fb, "Player 1 Wins!", font, width/2 - 168, winner_y, 3, 0x00FF00); // verde para el ganador
+            print("Player 1 wins!\n");
         } else if (score_p2 > score_p1) {
             fb_draw_string(fb, "Player 2 Wins!", font, width/2 - 168, winner_y, 3, 0x00FF00); // Verde para el ganador
+            print("Player 2 wins!\n");
         } else {
             fb_draw_string(fb, "It's a Tie!", font, width/2 - 132, winner_y, 3, 0xFFFF00); // Amarillo para empate
+            print("It's a Tie!");
         }
         
         // toques
@@ -269,6 +267,7 @@ void draw_final_score_screen(uint8_t two_players, uint16_t score_p1, uint16_t sc
         build_score_string(touches_text, "Total Touches", (uint16_t)touches);
         int touches_text_width = strlen(touches_text) * 8 * 4;
         fb_draw_string(fb, touches_text, font, width/2 - touches_text_width/2, content_start_y, 4, MENU_CONTENT);
+        printf("Total touches: %d\n", touches);
         
         instruction_y = content_start_y + 80;
     }

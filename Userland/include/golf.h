@@ -38,10 +38,10 @@
 #define PLAYER_ACCELERATION 0.002  
 #define BALL_MAX_SPEED 1
 #define PLAYER_MAX_SPEED 0.35
-#define BALL_FRICTION_DECELERATION 0.00035  // Friction coefficient (pixels per millisecond squared)
+#define BALL_FRICTION_DECELERATION 0.0004  // Friction coefficient (pixels per millisecond squared)
 #define BALL_MIN_SPEED_THRESHOLD 0.001     // Minimum speed threshold before stopping completely
 
-#define MASS_RATIO 2.5
+#define MASS_RATIO 2.25
 
 // Direcciones iniciales
 #define PLAYER1_INITIAL_DIR_X -1.0
