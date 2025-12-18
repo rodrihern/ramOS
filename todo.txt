@@ -2,23 +2,19 @@
 
 
 
----- video
-
-agregar endless_loop como proceso y que se pueda correr
-
-ver que onda por que el makefile incremental le chupan un huevo los cambios en el .h
-
-agregar soporte para 24 bpp
+---- proximos pasos
 
 doom
 
-refactor tty para hacerla mas eficiente
+agregar soporte para 24 bpp
 
 bg color y text color / themes en la shell
 
 mas canciones a spotify
 
 piano
+
+refactor tty para hacerla mas eficiente
 
 
 
@@ -34,7 +30,8 @@ poner gdb
 
 ver que onda con los fds
 
-refactorizar los named pipes para abrir lectura/escritura independientemente de si la puta que te pario amigo la concha de tu hermana
+refactorizar los named pipes para abrir lectura/escritura independientemente de si llego a 0 writers no?
+porque onda puede pasar que lo abra primero el reader, cierre el extremo de lectura y despues el otro no lo pueda abrir no? o poner que solo se pueda abrir con diciendo como lo queres abrir
 
 refactorizar la inicializacion del proceso -> 
     hereda los BUILTIN_FD

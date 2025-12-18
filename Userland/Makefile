@@ -2,6 +2,7 @@ include Makefile.inc
 
 # Activar advertencias de compilación
 GCCFLAGS += -Wall
+GCCFLAGS += -MMD -MP
 
 MODULE=0000-sampleCodeModule.bin
 SAMPLE_DATA=0001-sampleDataModule.bin
@@ -60,5 +61,7 @@ clean:
 
 sampleDataModule:
 	printf "This is sample data." >> $(SAMPLE_DATA) && dd if=/dev/zero bs=1 count=1 >> $(SAMPLE_DATA)
+
+-include $(C_OBJECTS:.o=.d)
 
 .PHONY: all clean sampleDataModule rebuild

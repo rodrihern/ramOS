@@ -2,6 +2,7 @@ include Makefile.inc
 
 # Activar advertencias de compilación
 GCCFLAGS += -Wall
+GCCFLAGS += -MMD -MP
 
 KERNEL=kernel.bin
 
@@ -56,5 +57,7 @@ $(foreach src,$(ASM_SOURCES) $(LOADERSRC),$(eval $(call make-asm-rule,$(src))))
 
 clean:
 	rm -rf $(OBJDIR) *.bin
+
+-include $(C_OBJECTS:.o=.d)
 
 .PHONY: all clean
