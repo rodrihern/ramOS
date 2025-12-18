@@ -15,7 +15,7 @@
 
 // #define SLOWDOWN_RATE 350000 // ralentizamos en un jugador para que el juego ande mejor
 // Colores
-#define BACKGROUND_COLOR_GOLF 0x13814e  // Rich dark green
+#define BACKGROUND_COLOR_GOLF 0x135f3c  // Rich dark green
 #define PLAYER1_COLOR 0x2196F3         // Bright blue - better visibility
 #define PLAYER2_COLOR 0xFFC107         // Amber/gold - good contrast          
 #define BALL_COLOR 0xFFFFFF            // White - like a real golf ball
@@ -38,7 +38,7 @@
 #define PLAYER_ACCELERATION 0.002  
 #define BALL_MAX_SPEED 1
 #define PLAYER_MAX_SPEED 0.35
-#define BALL_FRICTION_DECELERATION 0.0003  // Friction coefficient (pixels per millisecond squared)
+#define BALL_FRICTION_DECELERATION 0.00035  // Friction coefficient (pixels per millisecond squared)
 #define BALL_MIN_SPEED_THRESHOLD 0.001     // Minimum speed threshold before stopping completely
 
 #define MASS_RATIO 2.5
@@ -54,7 +54,7 @@
 #define PLAYER2_INITIAL_DIR_Y 0.0
 
 //Ángulo de giro (radians per millisecond)
-#define ROTATION_SPEED 0.003f
+#define ROTATION_SPEED 0.0035
 #define INITIALIZER 0
 
 

@@ -80,7 +80,7 @@ void draw_player(circle_t *p){
     // ojos mas grandes (2x)
     int eyeDist   = p->radius / 2;
     int pupilOff  = p->radius / 4;
-    int eyeRad    = 4;  // doubled from 3 to 6
+    int eyeRad    = 4; 
 
     int lx = (int)(p->pos.x +  px * eyeDist);
     int ly = (int)(p->pos.y +  py * eyeDist);

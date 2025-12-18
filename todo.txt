@@ -6,6 +6,8 @@
 
 agregar endless_loop como proceso y que se pueda correr
 
+ver que onda por que el makefile incremental le chupan un huevo los cambios en el .h
+
 agregar soporte para 24 bpp
 
 doom
