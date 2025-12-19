@@ -24,6 +24,9 @@ static builtin_command_t builtins[] = {
 
 static external_program_t programs[] = {
 	{"golf", "runs a golf game", &golf_main},
+	{"piano", "runs a piano to play with", &piano_main},
+	{"song", "plays a song", &song_main},
+	{"calc", "a naive calculator that performs simple math operations with ints", &calc_main},
 	{"ps", "prints to STDOUT information about current processes", &ps_main},
 	{"mem", "prints to STDOUT memory usage information", &mem_main},
 	{"pipes", "prints to STDOUT information about open pipes", &pipes_main},
@@ -34,8 +37,6 @@ static external_program_t programs[] = {
 	{"color", "reads from STDIN and prints it to a color fd", &color_main},
 	{"filter", "filters out vowels from input until '-' is encountered", &filter_main},
 	{"wc", "counts the number of lines, words and characters from STDIN", &wc_main},
-	{"spotify", "plays a song", &spotify_main},
-	{"calc", "a naive calculator that performs simple math operations with ints", &calc_main},
 	{"kill", "kills a process given its pid", &kill_main},
 	{"block", "blocks a process given its pid", &block_main},
 	{"unblock", "unblocks a blocked process given its pid", &unblock_main},

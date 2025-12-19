@@ -4,15 +4,8 @@
 
 ---- proximos pasos
 
-doom
-
-agregar soporte para 24 bpp
-
 bg color y text color / themes en la shell
 
-mas canciones a spotify
-
-piano
 
 refactor tty para hacerla mas eficiente
 
