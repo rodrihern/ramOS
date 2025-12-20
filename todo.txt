@@ -1,22 +1,9 @@
 
 
-
-
----- proximos pasos
-
-bg color y text color / themes en la shell 
-
-
-
---------
-
 correr un formatter mejor
 
 poner gdb
 
--------
-
----- procesos
 
 ver que onda con los fds
 
@@ -39,7 +26,6 @@ limpiar el scheduler
 
 ver cleanup resources (leaks en bg)
 
-----
 
 
 
