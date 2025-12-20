@@ -4,7 +4,7 @@
 
 ---- proximos pasos
 
-bg color y text color / themes en la shell
+bg color y text color / themes en la shell 
 
 
 

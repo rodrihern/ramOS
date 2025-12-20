@@ -3,12 +3,14 @@
 
 void tetris_song();
 void mario_song();
+void boca_song();
 
 typedef void (* song_t)();
 
 song_t songs[] = {
     &tetris_song,
-    &mario_song
+    &mario_song,
+    &boca_song
 };
 
 int songs_count = sizeof(songs) / sizeof(song_t);
@@ -26,6 +28,7 @@ int spotify_main(int argc, char * argv[]) {
         print("Select a song:\n");
         print("0: Tetris Song\n");
         print("1: Mario Song\n");
+        print("2: Boca Song\n");
 
         char c;
         do {
@@ -69,4 +72,34 @@ void mario_song() {
     print("Playing mario song");
 
     beep(659, 125); beep(659, 125); sys_sleep(125); beep(659, 125); sys_sleep(167); beep(523, 125); beep(659, 125); sys_sleep(125); beep(784, 125); sys_sleep(375); beep(392, 125); sys_sleep(375); beep(523, 125); sys_sleep(250); beep(392, 125); sys_sleep(250); beep(330, 125); sys_sleep(250); beep(440, 125); sys_sleep(125); beep(494, 125); sys_sleep(125); beep(466, 125); sys_sleep(42); beep(440, 125); sys_sleep(125); beep(392, 125); sys_sleep(125); beep(659, 125); sys_sleep(125); beep(784, 125); sys_sleep(125); beep(880, 125); sys_sleep(125); beep(698, 125); beep(784, 125); sys_sleep(125); beep(659, 125); sys_sleep(125); beep(523, 125); sys_sleep(125); beep(587, 125); beep(494, 125); sys_sleep(125); beep(523, 125); sys_sleep(250); beep(392, 125); sys_sleep(250); beep(330, 125); sys_sleep(250); beep(440, 125); sys_sleep(125); beep(494, 125); sys_sleep(125); beep(466, 125); sys_sleep(42); beep(440, 125); sys_sleep(125); beep(392, 125); sys_sleep(125); beep(659, 125); sys_sleep(125); beep(784, 125); sys_sleep(125); beep(880, 125); sys_sleep(125); beep(698, 125); beep(784, 125); sys_sleep(125); beep(659, 125); sys_sleep(125); beep(523, 125); sys_sleep(125); beep(587, 125); beep(494, 125); sys_sleep(375); beep(784, 125); beep(740, 125); beep(698, 125); sys_sleep(42); beep(622, 125); sys_sleep(125); beep(659, 125); sys_sleep(167); beep(415, 125); beep(440, 125); beep(523, 125); sys_sleep(125); beep(440, 125); beep(523, 125); beep(587, 125); sys_sleep(250); beep(784, 125); beep(740, 125); beep(698, 125); sys_sleep(42); beep(622, 125); sys_sleep(125); beep(659, 125); sys_sleep(167); beep(698, 125); sys_sleep(125); beep(698, 125); beep(698, 125); sys_sleep(625); beep(784, 125); beep(740, 125); beep(698, 125); sys_sleep(42); beep(622, 125); sys_sleep(125); beep(659, 125); sys_sleep(167); beep(415, 125); beep(440, 125); beep(523, 125); sys_sleep(125); beep(440, 125); beep(523, 125); beep(587, 125); sys_sleep(250); beep(622, 125); sys_sleep(250); beep(587, 125); sys_sleep(250); beep(523, 125); sys_sleep(1125); beep(784, 125); beep(740, 125); beep(698, 125); sys_sleep(42); beep(622, 125); sys_sleep(125); beep(659, 125); sys_sleep(167); beep(415, 125); beep(440, 125); beep(523, 125); sys_sleep(125); beep(440, 125); beep(523, 125); beep(587, 125); sys_sleep(250); beep(784, 125); beep(740, 125); beep(698, 125); sys_sleep(42); beep(622, 125); sys_sleep(125); beep(659, 125); sys_sleep(167); beep(698, 125); sys_sleep(125); beep(698, 125); beep(698, 125); sys_sleep(625); beep(784, 125); beep(740, 125); beep(698, 125); sys_sleep(42); beep(622, 125); sys_sleep(125); beep(659, 125); sys_sleep(167); beep(415, 125); beep(440, 125); beep(523, 125); sys_sleep(125); beep(440, 125); beep(523, 125); beep(587, 125); sys_sleep(250); beep(622, 125); sys_sleep(250); beep(587, 125); sys_sleep(250); beep(523, 125);
+}
+
+void boca_song() {
+    print("Playing boca song");
+    beep(SOL, 231);
+    beep(LA, 256);
+    beep(SI, 120);
+    beep(DO5, 158);
+    sys_sleep(74);
+    beep(DO5, 140);
+    sys_sleep(168);
+    beep(DO5, 166);
+    sys_sleep(137);
+    beep(DO5, 110);
+    sys_sleep(72);
+    beep(DO5, 98);
+    sys_sleep(93);
+    beep(DO5, 95);
+    sys_sleep(79);
+    beep(DO5, 88);
+    sys_sleep(135);
+    beep(DO5, 130);
+    sys_sleep(109);
+    beep(DO5, 130);
+    sys_sleep(209);
+    beep(DO5, 133);
+    beep(SI, 147);
+    beep(LA, 160);
+    beep(DO5, 394);
+    beep(LA, 845);
 }

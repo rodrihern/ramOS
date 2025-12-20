@@ -205,8 +205,8 @@ static void game_loop() {
         redraw_frame();
         
         // sonidito de victoria
-        play_note(800, 221); 
-        play_note(700, 221);
+        beep(800, 221); 
+        beep(700, 221);
         draw_level_end_screen(point_winner_player_num);
         level++;
         if (level < LEVELS) {
