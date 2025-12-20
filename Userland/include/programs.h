@@ -5,7 +5,7 @@
 
 int golf_main(int argc, char * argv[]);
 int piano_main(int argc, char *argv[]);
-int song_main(int argc, char * argv[]);
+int spotify_main(int argc, char * argv[]);
 int calc_main(int argc, char * argv[]);
 
 

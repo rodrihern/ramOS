@@ -7,9 +7,6 @@
 bg color y text color / themes en la shell
 
 
-refactor tty para hacerla mas eficiente
-
-
 
 --------
 

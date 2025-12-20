@@ -20,7 +20,7 @@
 extern void generate_invalid_opcode();
 
 // FUNCIONES DE I/O 
-void play_note(uint32_t freq_hz, uint64_t duration_ms);
+void beep(uint32_t freq_hz, uint64_t duration_ms);
 uint64_t        print(char *str);
 uint64_t        print_err(char *str);
 uint64_t        putchar(char c);

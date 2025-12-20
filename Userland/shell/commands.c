@@ -25,7 +25,7 @@ static builtin_command_t builtins[] = {
 static external_program_t programs[] = {
 	{"golf", "runs a golf game", &golf_main},
 	{"piano", "runs a piano to play with", &piano_main},
-	{"song", "plays a song", &song_main},
+	{"spotify", "alows you to play different songs", &spotify_main},
 	{"calc", "a naive calculator that performs simple math operations with ints", &calc_main},
 	{"ps", "prints to STDOUT information about current processes", &ps_main},
 	{"mem", "prints to STDOUT memory usage information", &mem_main},

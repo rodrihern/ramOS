@@ -13,7 +13,7 @@ static uint64_t print_float(double num);
 
 
 
-void play_note(uint32_t freq_hz, uint64_t duration_ms) {
+void beep(uint32_t freq_hz, uint64_t duration_ms) {
 	sys_speaker_start(freq_hz);
 	sys_sleep(duration_ms);
 	sys_speaker_stop();
