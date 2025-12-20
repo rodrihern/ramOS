@@ -18,6 +18,12 @@ typedef struct {
 	process_entry_t entry;
 } external_program_t;
 
+typedef struct theme {
+	uint32_t bg_color;
+	uint32_t text_color;
+	uint8_t prompt_fd;
+} theme_t;
+
 #define INPUT_MAX 128
 #define PROMPT "> "
 #define ERROR_MSG "Use command \'help\' to see available commands\n"
@@ -41,6 +47,7 @@ void set_username(const char *new_name);
 void cls_cmd(int argc, char *argv[]);
 void help_cmd(int argc, char *argv[]);
 void username_cmd(int argc, char *argv[]);
+void theme_cmd(int argc, char *argv[]);
 void mute_cmd(int argc, char *argv[]);
 
 #endif

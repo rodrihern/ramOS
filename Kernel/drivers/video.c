@@ -5,6 +5,7 @@
 #include "lib.h"
 #include <font.h>
 #include <video.h>
+#include "fds.h"
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 #define HISTORY_LEN 4096
@@ -166,11 +167,11 @@ static void draw_bitmap(uint8_t bitmap[FONT_HEIGHT], uint16_t x, uint16_t y, uin
 }
 
 static void draw_cursor() {
-	draw_bitmap(cursor, cursor_x, cursor_y, 0xFFFFFF, text_size);
+	draw_bitmap(cursor, cursor_x, cursor_y, fd_colors[1], text_size);
 }
 
 static void delete_cursor() {
-	draw_bitmap(font[0], cursor_x, cursor_y, 0x000000, text_size);
+	draw_bitmap(font[0], cursor_x, cursor_y, bg_color, text_size);
 }
 
 static void vd_new_line() {

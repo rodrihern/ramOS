@@ -19,6 +19,7 @@ static builtin_command_t builtins[] = {
 	{"clear", "clears the screen", &cls_cmd},
 	{"help", "provides information about available commands", &help_cmd},
 	{"username", "changes the shell username", &username_cmd},
+	{"theme", "changes the shell theme", &theme_cmd},
 	{"mute", "stops the speaker", &mute_cmd},
 };
 

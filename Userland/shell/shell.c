@@ -17,6 +17,19 @@
 // Buffer para el comando actual
 static char current_input[INPUT_MAX];
 static char user_name[INPUT_MAX];
+static int prompt_fd = STDCYAN;
+
+static theme_t themes[] = {
+	// Dark Themes
+	{.bg_color = 0x000000, .text_color = 0xFFFFFF, .prompt_fd = STDCYAN},     // 0: Default Dark
+	{.bg_color = 0x282c34, .text_color = 0xd1d5db, .prompt_fd = STDMAGENTA},  // 1: Atom One Dark
+	{.bg_color = 0x1A2332, .text_color = 0xFFFFFF, .prompt_fd = STDYELLOW},   // 3: Deep Blue
+	{.bg_color = 0x135f3c, .text_color = 0xFFFFFF, .prompt_fd = STDGREEN},    // 4: Forest Green
+	// Light Themes
+	{.bg_color = 0xFFFFFF, .text_color = 0x000000, .prompt_fd = STDBLUE},     // 5: Default Light
+	{.bg_color = 0xf8f8f2, .text_color = 0x282a36, .prompt_fd = STDBLUE},     // 7: Atom one Light
+};
+static const int theme_count = sizeof(themes) / sizeof(theme_t);
 
 // Historial circular de comandos
 static char history[HISTORY_SIZE][INPUT_MAX];
@@ -24,6 +37,7 @@ static int history_write_idx = 0;  // Dónde escribir el próximo comando
 static int history_count = 0;       // Cuántos comandos tenemos (max HISTORY_SIZE)
 static int history_nav_idx = -1;    // Posición actual al navegar (-1 = no navegando)
 
+static void setup();
 static void print_initial_message();
 static void add_to_history(const char *cmd);
 static const char *get_history_up(void);
@@ -31,19 +45,15 @@ static const char *get_history_down(void);
 static void draw_initial_screen();
 
 
+
+
 int main(void)
 {
 
-	draw_initial_screen();
-
-	sys_tty_show();
-
-	sys_flush(STDIN);
-
-	print_initial_message();
+	setup();
 
 	while (1) {
-		fprint(STDCYAN, user_name);
+		fprint(prompt_fd, user_name);
 		print(PROMPT);
 		read_line(current_input, INPUT_MAX - 1);
 		putchar('\n');
@@ -58,6 +68,17 @@ int main(void)
 }
 
 /*-- FUNCIONES AUXILIARES --*/
+
+static void setup() {
+	draw_initial_screen();
+
+	sys_tty_show();
+
+	sys_flush(STDIN);
+
+	print_initial_message();
+}
+
 
 static void draw_initial_screen() {
 	video_info_t vi;
@@ -85,10 +106,10 @@ static void draw_initial_screen() {
 
 static void print_initial_message()
 {
-	fprint(STDCYAN, "Type your username: ");
+	fprint(prompt_fd, "Type your username: ");
 	read_line(user_name, USERNAME_MAX_LENGTH - 1);
 	putchar('\n');
-	fprint(STDCYAN, HELP_MESSAGE);
+	fprint(prompt_fd, HELP_MESSAGE);
 	putchar('\n');
 }
 
@@ -171,6 +192,8 @@ void read_line(char *buf, uint64_t max)
 	buf[idx] = 0;
 }
 
+/*-- BUILTIN COMMANDS --*/
+
 void incfont_cmd(int argc, char * argv[])
 {
 	int size = sys_tty_get_fontsize() + 1;
@@ -212,12 +235,38 @@ void username_cmd(int argc, char *argv[])
 	putchar('\n');
 }
 
+void theme_cmd(int argc, char * argv[]) {
+
+
+	if (argc == 0) {
+		print_err("Missing argument\n");
+		printf("Use: theme <theme_number>\nwhere theme number between 0 and %d\n", theme_count-1);
+		return;
+	}
+
+	int theme_idx = satoi(argv[0]);
+	if (theme_idx < 0 || theme_idx >= theme_count) {
+		print_err("Invalid argument\n");
+		printf("Use: theme <theme_number>\nwhere theme number between 0 and %d\n", theme_count-1);
+		return;
+	}
+
+
+	sys_tty_set_bgcolor(themes[theme_idx].bg_color);
+	sys_tty_set_textcolor(themes[theme_idx].text_color);
+	prompt_fd = themes[theme_idx].prompt_fd;
+
+	cls_cmd(0, NULL);
+}
+
 void mute_cmd(int argc, char *argv[]) {
 	sys_speaker_stop();
 	print("Speaker stopped\n");
 }
 
-// Funciones del historial
+
+/*-- HISTORY HANDLING --*/
+
 static void add_to_history(const char *cmd)
 {
 	// No agregar comandos vacíos o duplicados del último
