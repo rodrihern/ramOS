@@ -26,7 +26,7 @@ static theme_t themes[] = {
 	{.bg_color = 0x1A2332, .text_color = 0xFFFFFF, .prompt_fd = STDYELLOW},   // 3: Deep Blue
 	{.bg_color = 0x135f3c, .text_color = 0xFFFFFF, .prompt_fd = STDGREEN},    // 4: Forest Green
 	// Light Themes
-	{.bg_color = 0xFFFFFF, .text_color = 0x000000, .prompt_fd = STDBLUE},     // 5: Default Light
+	{.bg_color = 0xFFFFFF, .text_color = 0x000000, .prompt_fd = STDMAGENTA},     // 5: Default Light
 	{.bg_color = 0xf8f8f2, .text_color = 0x282a36, .prompt_fd = STDBLUE},     // 7: Atom one Light
 };
 static const int theme_count = sizeof(themes) / sizeof(theme_t);
