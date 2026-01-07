@@ -110,7 +110,7 @@ enum {
 #define LEVELS          3
 
 static const uint8_t HOLE_RADII[LEVELS] = {
-        HOLE_RADIUS,       
+        HOLE_RADIUS,
         HOLE_RADIUS_L2,    
         HOLE_RADIUS_L3     
 };
